@@ -1,0 +1,1 @@
+const copyrightElement = document.getElementById("copyright");
