@@ -18,6 +18,7 @@ const initialState: PlayerState = {
   duration: 0,
   isShuffling: false,
   isRepeating: false,
+  isRepeatingOne: false, // Initialize as false
   queue: musicLibrary, // Use the full library here
   visualizerActive: true,
   equalizerActive: true,
@@ -37,6 +38,7 @@ type MusicAction =
   | { type: "SET_DURATION"; payload: number }
   | { type: "TOGGLE_SHUFFLE" }
   | { type: "TOGGLE_REPEAT" }
+  | { type: "TOGGLE_REPEAT_ONE" } // Add this new action
   | { type: "SET_QUEUE"; payload: Track[] }
   | { type: "NEXT_TRACK" }
   | { type: "PREV_TRACK" }
@@ -93,6 +95,16 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
       return {
         ...state,
         isRepeating: !state.isRepeating,
+        // Turn off single repeat when normal repeat is enabled
+        isRepeatingOne: state.isRepeating ? state.isRepeatingOne : false,
+        lastUserAction: Date.now(),
+      };
+    case "TOGGLE_REPEAT_ONE":
+      return {
+        ...state,
+        isRepeatingOne: !state.isRepeatingOne,
+        // Turn off normal repeat when single repeat is enabled
+        isRepeating: state.isRepeatingOne ? state.isRepeating : false,
         lastUserAction: Date.now(),
       };
     case "SET_QUEUE":

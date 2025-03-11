@@ -24,6 +24,7 @@ import Visualizer from "../Visualizer/Visualizer";
 import Equalizer from "../Visualizer/Equalizer";
 import StartButton from "./StartButton";
 import { PlayerState, Track, SidebarMode } from "../../types/music";
+import { DEFAULT_COVER, getSafeCoverArt } from "../../utils/imageUtils";
 
 const Container = styled.div`
   position: relative;
@@ -1001,8 +1002,8 @@ const PlayerSidebar = React.forwardRef<
           <>
             <AlbumArt>
               <Cover
-                src={state.currentTrack.coverArt}
-                alt={state.currentTrack.title}
+                src={getSafeCoverArt(state.currentTrack?.coverArt)}
+                alt={state.currentTrack?.title || "Album Cover"}
               />
               <AlbumArtRipple />
               {state.equalizerActive && <Equalizer />}
@@ -1224,6 +1225,13 @@ const MusicPlayer: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
 
+  // Add this with your other state variables in the MusicPlayer component
+  const [visualIntensity, setVisualIntensity] = useState(0);
+
+  const handleIntensityChange = (intensity: number) => {
+    setVisualIntensity(intensity);
+  };
+
   // Handle sidebar behavior based on the selected mode
   useEffect(() => {
     // No need to handle sidebar if audio isn't enabled yet
@@ -1360,6 +1368,25 @@ const MusicPlayer: React.FC = () => {
 
     dispatch({ type: "SET_SIDEBAR_MODE", payload: nextMode });
   };
+
+  // Add this effect after your other useEffects in the MusicPlayer component:
+  useEffect(() => {
+    const handleImageError = (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      if (img.tagName === "IMG" && !img.src.includes("default_cover.jpeg")) {
+        console.log(`Image failed to load: ${img.src}, using default cover`);
+        img.src = DEFAULT_COVER;
+      }
+    };
+
+    // Add the event listener
+    document.addEventListener("error", handleImageError, true);
+
+    // Clean up
+    return () => {
+      document.removeEventListener("error", handleImageError, true);
+    };
+  }, []);
 
   return (
     <Container>
@@ -1586,6 +1613,24 @@ const SidebarModeButton = styled(motion.button)<{
   @media (max-height: 500px) {
     bottom: 20px;
   }
+`;
+
+// Add this styled component with your other styled components
+const CoverOverlay = styled.div<{ $isPlaying: boolean; $intensity: number }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(76, 175, 80, ${(props) => props.$intensity * 0.3}) 0%,
+    transparent 70%
+  );
+  opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
+  transition: opacity 0.3s ease, background 0.3s ease;
+  mix-blend-mode: overlay;
 `;
 
 export default MusicPlayer;
