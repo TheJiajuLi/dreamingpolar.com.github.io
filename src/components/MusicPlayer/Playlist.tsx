@@ -17,10 +17,27 @@ const PlaylistContainer = styled.div`
   position: relative;
 `;
 
-const Title = styled.h2`
+// Updated title container to accommodate the equalizer
+const TitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 20px;
+`;
+
+const Title = styled.h2`
+  color: white;
   font-size: 1.5rem;
-  color: ${(props) => props.theme.text};
+  font-weight: 600;
+  margin: 0;
+`;
+
+// Small inline equalizer to show next to the title
+const TitleEqualizer = styled.img`
+  height: 20px;
+  opacity: 0.8;
+  display: inline-block;
+  vertical-align: middle;
 `;
 
 const CategoryFilter = styled.div`
@@ -205,7 +222,15 @@ const Playlist: React.FC = () => {
 
   return (
     <PlaylistContainer>
-      <Title>Music Explorer</Title>
+      <TitleContainer>
+        <Title>Music Explorer</Title>
+        {state.isPlaying && state.equalizerActive && (
+          <TitleEqualizer
+            src="/assets/covers/equalizer_small.gif"
+            alt="Now Playing"
+          />
+        )}
+      </TitleContainer>
 
       <SearchBar
         type="text"
