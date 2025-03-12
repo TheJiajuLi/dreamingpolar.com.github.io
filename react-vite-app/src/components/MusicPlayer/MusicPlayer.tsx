@@ -631,7 +631,7 @@ const TrackAlbum = styled.p`
 `;
 
 // Make controls more touch-friendly on small screens
-const Controls = styled.div.attrs({
+const ControlsContainer = styled.div.attrs({
   className: "dp-controls",
 })`
   display: flex;
@@ -709,6 +709,7 @@ const ControlButton = styled.button.attrs({
   }
 `;
 
+// Replace your current PlayPauseButton with this enhanced version
 const PlayPauseButton = styled(ControlButton).attrs({
   className: "dp-play-btn",
 })`
@@ -721,7 +722,10 @@ const PlayPauseButton = styled(ControlButton).attrs({
   position: relative;
   overflow: hidden;
   z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.3s ease, box-shadow 0.3s ease;
 
+  /* Glowing background effect */
   &::before {
     content: "";
     position: absolute;
@@ -734,16 +738,100 @@ const PlayPauseButton = styled(ControlButton).attrs({
     opacity: 0.4;
     z-index: -1;
     animation: pulse 2s infinite ease-out;
+    transition: all 0.3s ease;
+  }
+
+  /* Inner progress ring */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: rotate 1.5s linear infinite;
+  }
+
+  /* Show progress ring when playing */
+  &.playing::after {
+    opacity: 0.7;
+  }
+
+  /* Base states styling */
+  &.playing {
+    background: ${(props) => props.theme.primaryDark || "#388e3c"};
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+  }
+
+  &.paused {
+    background: ${(props) => props.theme.primary};
+  }
+
+  /* Icon container for smooth transitions */
+  .icon-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Icon transitions */
+  .play-icon,
+  .pause-icon {
+    position: absolute;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform, opacity;
+  }
+
+  /* When playing, hide play icon and show pause icon */
+  &.playing .play-icon {
+    opacity: 0;
+    transform: scale(0.5) rotate(-90deg);
+  }
+
+  &.playing .pause-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* When paused, hide pause icon and show play icon */
+  &.paused .play-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &.paused .pause-icon {
+    opacity: 0;
+    transform: scale(0.5) rotate(90deg);
   }
 
   &:hover {
-    background: ${(props) => props.theme.primaryHover};
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(76, 175, 80, 0.8);
 
     &::before {
       animation: pulse 1s infinite ease-out;
+      opacity: 0.6;
     }
+
+    &.playing {
+      background: ${(props) => props.theme.primaryDark || "#2e7d32"};
+    }
+
+    &.paused {
+      background: ${(props) => props.theme.primaryHover || "#43a047"};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 
   @keyframes pulse {
@@ -761,12 +849,45 @@ const PlayPauseButton = styled(ControlButton).attrs({
     }
   }
 
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   @media (max-height: 700px) {
     width: 46px;
     height: 46px;
     font-size: 1.2rem;
   }
 `;
+
+// Updated Controls component with the enhanced play button
+const Controls = ({ isPlaying, onPlayPause, onPrev, onNext }) => (
+  <ControlsContainer>
+    <ControlButton onClick={onPrev}>
+      <FaBackward />
+    </ControlButton>
+
+    <PlayPauseButton
+      onClick={onPlayPause}
+      className={isPlaying ? "playing" : "paused"}
+      aria-label={isPlaying ? "Pause" : "Play"}
+    >
+      <div className="icon-container">
+        <FaPlay className="play-icon" />
+        <FaPause className="pause-icon" />
+      </div>
+    </PlayPauseButton>
+
+    <ControlButton onClick={onNext}>
+      <FaForward />
+    </ControlButton>
+  </ControlsContainer>
+);
 
 const ProgressContainer = styled.div`
   width: 100%;
@@ -1094,19 +1215,12 @@ const PlayerSidebar = React.forwardRef<
               <TrackAlbum>{state.currentTrack.album}</TrackAlbum>
             </TrackInfo>
 
-            <Controls>
-              <ControlButton onClick={prevTrack}>
-                <FaBackward />
-              </ControlButton>
-
-              <PlayPauseButton onClick={togglePlay}>
-                {state.isPlaying ? <FaPause /> : <FaPlay />}
-              </PlayPauseButton>
-
-              <ControlButton onClick={nextTrack}>
-                <FaForward />
-              </ControlButton>
-            </Controls>
+            <Controls
+              isPlaying={state.isPlaying}
+              onPlayPause={togglePlay}
+              onPrev={prevTrack}
+              onNext={nextTrack}
+            />
 
             <ProgressContainer>
               <ProgressBar ref={progressBarRef} onClick={setProgress}>
