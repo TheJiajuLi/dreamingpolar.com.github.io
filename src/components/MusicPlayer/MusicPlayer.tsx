@@ -1202,7 +1202,18 @@ const PlayerSidebar = React.forwardRef<
                 alt={state.currentTrack?.title || "Album Cover"}
               />
               <AlbumArtRipple />
-              {state.equalizerActive && <Equalizer />}
+              <CoverOverlay
+                $isPlaying={state.isPlaying}
+                $intensity={visualIntensity}
+              />
+              {state.equalizerActive && state.isPlaying && (
+                <Equalizer
+                  isPlaying={state.isPlaying}
+                  dominantColor={state.currentTrack?.color}
+                  audioRef={audioRef}
+                  onIntensityChange={handleIntensityChange}
+                />
+              )}
             </AlbumArt>
 
             <TrackInfo>
@@ -1440,14 +1451,14 @@ const MusicPlayer: React.FC = () => {
         }
 
         // Close sidebar when mouse leaves the sidebar area completely
-        if (isSidebarOpen) {
+        if (isSidebarOpen && sidebarRef.current) {
           // Calculate sidebar boundaries
           const sidebarWidth = 280; // Match your sidebar width
           const sidebarLeft = screenWidth - sidebarWidth;
 
           // Check if mouse is outside the sidebar area
-          if (e.clientX < sidebarLeft) {
-            // Close immediately when cursor leaves sidebar area
+          if (e.clientX < sidebarLeft - 20) {
+            // Add a small buffer zone
             setSidebarOpen(false);
           }
         }
@@ -1691,53 +1702,74 @@ const MusicPlayer: React.FC = () => {
               // First set the audio as enabled
               setAudioEnabled(true);
 
-              // Create and initialize a silent audio context
-              const AudioContext =
-                window.AudioContext || (window as any).webkitAudioContext;
-              if (AudioContext) {
-                const audioContext = new AudioContext();
+              try {
+                // Use the standard AudioContext with fallback
+                const AudioContext =
+                  window.AudioContext || (window as any).webkitAudioContext;
 
-                // Create a silent oscillator
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                if (AudioContext) {
+                  const audioContext = new AudioContext();
 
-                // Make it silent
-                gainNode.gain.value = 0.001;
+                  // If context is suspended (common in Safari/iOS), attempt to resume it
+                  if (audioContext.state === "suspended") {
+                    audioContext.resume().catch((e) => {
+                      console.warn("Failed to resume audio context:", e);
+                    });
+                  }
 
-                // Connect and start for a brief moment
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.start(0);
-                oscillator.stop(0.001);
+                  // Create a silent oscillator to unlock audio
+                  const oscillator = audioContext.createOscillator();
+                  const gainNode = audioContext.createGain();
+
+                  // Make it silent
+                  gainNode.gain.value = 0.001;
+
+                  // Connect and start for a brief moment
+                  oscillator.connect(gainNode);
+                  gainNode.connect(audioContext.destination);
+                  oscillator.start(0);
+                  setTimeout(() => oscillator.stop(), 1);
+                }
+              } catch (e) {
+                console.error("Error initializing audio context:", e);
               }
 
-              // Also attempt to play a short silent audio file
+              // Also use the Audio element approach for wider compatibility
               const unlockAudio = new Audio();
+              // Use a valid base64-encoded empty MP3 (1 frame of silence)
               unlockAudio.src =
-                "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-              unlockAudio.volume = 0.01;
-              const playPromise = unlockAudio.play();
-
-              if (playPromise !== undefined) {
-                playPromise.catch((e) => {
-                  console.log("Audio context setup failed:", e);
-                  // If even this fails, we need explicit user interaction
-                  document.body.addEventListener(
-                    "click",
-                    function initAudioOnFirstClick() {
-                      // Try again when the user clicks
-                      unlockAudio
-                        .play()
-                        .catch((e) => console.log("Audio still failed:", e));
-                      document.body.removeEventListener(
-                        "click",
-                        initAudioOnFirstClick
-                      );
-                    },
-                    { once: true }
+                "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//sQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+              unlockAudio.volume = 0.001;
+              unlockAudio
+                .play()
+                .then(() => {
+                  console.log("Audio context unlocked successfully");
+                  unlockAudio.pause();
+                  unlockAudio.currentTime = 0;
+                })
+                .catch((e) => {
+                  console.warn(
+                    "Audio unlock failed, will retry on user interaction:",
+                    e
                   );
+
+                  // Set up a one-time click handler to try again on first user interaction
+                  const unlockOnClick = () => {
+                    unlockAudio
+                      .play()
+                      .then(() =>
+                        console.log("Audio unlocked on user interaction")
+                      )
+                      .catch((e) =>
+                        console.warn("Still failed to unlock audio:", e)
+                      );
+                    document.removeEventListener("click", unlockOnClick);
+                  };
+
+                  document.addEventListener("click", unlockOnClick, {
+                    once: true,
+                  });
                 });
-              }
             }}
           />
         )}
@@ -1961,6 +1993,7 @@ const CoverOverlay = styled.div<{ $isPlaying: boolean; $intensity: number }>`
   opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
   transition: opacity 0.3s ease, background 0.3s ease;
   mix-blend-mode: overlay;
+  z-index: 3;
 `;
 
 export default MusicPlayer;
