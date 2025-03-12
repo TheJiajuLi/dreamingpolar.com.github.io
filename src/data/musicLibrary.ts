@@ -346,7 +346,7 @@ export const musicLibrary: Track[] = [
   {
     id: "pop-2",
     title: "Candy",
-    artist: "Rosalía",
+    artist: "Naoko Gushima",
     album: "Motomami",
     genre: "pop",
     coverArt: albumCovers.miss_g, // Use artist-specific cover
@@ -357,7 +357,7 @@ export const musicLibrary: Track[] = [
   {
     id: "pop-3",
     title: "Missing You",
-    artist: "Heart Beats",
+    artist: "Naoko Gushima",
     album: "Love Stories",
     genre: "pop",
     coverArt: albumCovers.urban_blues,
@@ -381,7 +381,7 @@ export const musicLibrary: Track[] = [
   {
     id: "electronic-3",
     title: "Monochrome",
-    artist: "Binary System",
+    artist: "Naoko Gushima",
     album: "Color Code",
     genre: "electronic",
     coverArt: albumCovers.urban_blues,
