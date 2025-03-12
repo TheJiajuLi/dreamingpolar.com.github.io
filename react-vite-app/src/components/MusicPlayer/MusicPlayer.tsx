@@ -1140,21 +1140,18 @@ const PlayerSidebar = React.forwardRef<
       >
         {state.sidebarMode === "auto" && (
           <>
-            <span className="mode-letter">A</span>
             <FaEye />
             <span className="mode-name">Auto-hide</span>
           </>
         )}
         {state.sidebarMode === "always" && (
           <>
-            <span className="mode-letter">S</span>
             <FaLock />
             <span className="mode-name">Stay visible</span>
           </>
         )}
         {state.sidebarMode === "manual" && (
           <>
-            <span className="mode-letter">M</span>
             <FaLockOpen />
             <span className="mode-name">Manual control</span>
           </>
@@ -1162,7 +1159,6 @@ const PlayerSidebar = React.forwardRef<
         {/* Add a default case to handle unexpected values */}
         {!["auto", "always", "manual"].includes(state.sidebarMode) && (
           <>
-            <span className="mode-letter">A</span>
             <FaEye />
             <span className="mode-name">Auto-hide</span>
           </>
@@ -1386,11 +1382,11 @@ const SidebarModeIndicator = styled.div<{ $mode: SidebarMode }>`
     height: 12px;
   }
 
-  span {
+  span.mode-name {
     display: none;
   }
 
-  &:hover span {
+  &:hover span.mode-name {
     display: inline;
   }
 
@@ -1454,8 +1450,7 @@ const MusicPlayer: React.FC = () => {
             // Close immediately when cursor leaves sidebar area
             setSidebarOpen(false);
           }
-        }
-      };
+        }      };
 
       // Function to handle clicks outside for both desktop and mobile
       const handleClickOutside = (e: MouseEvent) => {
@@ -1464,8 +1459,7 @@ const MusicPlayer: React.FC = () => {
           if (!sidebarRef.current.contains(e.target as Node)) {
             setSidebarOpen(false);
           }
-        }
-      };
+        }      };
 
       // Function to handle touch events for mobile
       const handleTouchMove = (e: TouchEvent) => {
