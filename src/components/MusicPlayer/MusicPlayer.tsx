@@ -1450,7 +1450,8 @@ const MusicPlayer: React.FC = () => {
             // Close immediately when cursor leaves sidebar area
             setSidebarOpen(false);
           }
-        }      };
+        }
+      };
 
       // Function to handle clicks outside for both desktop and mobile
       const handleClickOutside = (e: MouseEvent) => {
@@ -1459,7 +1460,8 @@ const MusicPlayer: React.FC = () => {
           if (!sidebarRef.current.contains(e.target as Node)) {
             setSidebarOpen(false);
           }
-        }      };
+        }
+      };
 
       // Function to handle touch events for mobile
       const handleTouchMove = (e: TouchEvent) => {
@@ -1575,6 +1577,109 @@ const MusicPlayer: React.FC = () => {
     };
   }, []);
 
+  // Add this function to enable audio
+  const enableAudio = () => {
+    // Try to unlock audio context if available
+    if (window.AudioContext || window.webkitAudioContext) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const context = new AudioContext();
+        if (context.state === "suspended") {
+          context.resume();
+        }
+      } catch (e) {
+        console.error("Failed to initialize audio context", e);
+      }
+    }
+
+    // Try to play and immediately pause the audio to enable future autoplay
+    if (audioRef.current) {
+      // Store original volume
+      const originalVolume = audioRef.current.volume;
+
+      // Temporarily set volume to 0 to avoid sound during the test play
+      audioRef.current.volume = 0;
+
+      // Try to play
+      const playPromise = audioRef.current.play();
+
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Play worked, so pause it again
+            audioRef.current!.pause();
+
+            // Restore volume
+            audioRef.current!.volume = originalVolume;
+
+            // Mark audio as enabled
+            setAudioEnabled(true);
+            console.log("Audio enabled successfully");
+          })
+          .catch((error) => {
+            console.error("Audio play failed:", error);
+          });
+      } else {
+        // For older browsers without promise support, assume it worked
+        audioRef.current.pause();
+        setAudioEnabled(true);
+      }
+    }
+  };
+
+  // Update your play/pause functionality
+  useEffect(() => {
+    if (!audioRef.current || !audioEnabled) return;
+
+    if (state.isPlaying) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.error("Play failed:", error);
+          dispatch({ type: "PAUSE" });
+        });
+      }
+    } else {
+      audioRef.current.pause();
+    }
+  }, [state.isPlaying, audioEnabled, dispatch]);
+
+  // Function to safely play audio
+  const safePlayAudio = () => {
+    if (!audioRef.current || !audioEnabled) return;
+
+    const playPromise = audioRef.current.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.error("Play failed:", error);
+        // If play fails, show the start button again
+        setAudioEnabled(false);
+        dispatch({ type: "PAUSE" });
+      });
+    }
+  };
+
+  // Listen for audio errors
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const handleAudioError = (e: Event) => {
+      console.error("Audio error:", e);
+      dispatch({ type: "PAUSE" });
+      // Optionally reset audioEnabled if you want the user to click again
+      // setAudioEnabled(false);
+    };
+
+    audioRef.current.addEventListener("error", handleAudioError);
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener("error", handleAudioError);
+      }
+    };
+  }, [dispatch]);
+
   return (
     <Container>
       <EnergyParticles />
@@ -1656,7 +1761,7 @@ const MusicPlayer: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Playlist />
+          <Playlist audioEnabled={audioEnabled} />
         </motion.div>
       </MainContent>
 

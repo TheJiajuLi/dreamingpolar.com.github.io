@@ -2,72 +2,61 @@ import React from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import { useMusicContext } from "../../context/MusicContext";
-import TitleEqualizer from "./TitleEqualizer";
 
-const EqualizerImage = styled(motion.img)`
-  height: 20px;
-  width: auto;
-  vertical-align: middle;
-`;
-
+// Container for the animated equalizer bars
 const EqualizerContainer = styled(motion.div)`
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-`;
-
-// Fallback animation in case GIF doesn't load
-const FallbackAnimation = styled.div`
   display: inline-flex;
   align-items: flex-end;
   height: 20px;
   gap: 2px;
+  margin-left: 10px;
+  vertical-align: middle;
 `;
 
-const Bar = styled(motion.div)`
-  width: 2px;
-  background: white;
+// Individual bars with dynamic color
+const Bar = styled(motion.div)<{ $color?: string }>`
+  width: 3px;
+  background-color: ${(props) =>
+    props.$color || props.theme.primary || "#4CAF50"};
   border-radius: 1px;
 `;
 
 const TitleEqualizer: React.FC = () => {
   const { state } = useMusicContext();
-  
-  if (!state.isPlaying || !state.equalizerActive) {
-    return null;
-  }
-  
+
+  // Get color from current track if available
+  const color = state.currentTrack?.color || "#4CAF50";
+
   return (
     <EqualizerContainer
-      initial={{ opacity: 0, width: 0 }}
-      animate={{ opacity: 1, width: "auto" }}
-      exit={{ opacity: 0, width: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
     >
-      <EqualizerImage
-        src="/assets/covers/equalizer_small.gif"
-        alt="Now Playing"
-        onError={(e) => {
-          // If GIF fails to load, show fallback
-          e.currentTarget.style.display = "none";
-          document.getElementById("fallback-equalizer")?.style.setProperty("display", "inline-flex");
-        }}
-      />
-      <FallbackAnimation id="fallback-equalizer" style={{ display: "none" }}>
-        {[0, 1, 2, 3].map((i) => (
-          <Bar
-            key={i}
-            initial={{ height: 5 }}
-            animate={{ height: [5, 15, 10, 18, 5] }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              repeatType: "reverse",
-              delay: i * 0.1,
-            }}
-          />
-        ))}
-      </FallbackAnimation>
+      {/* Multiple bars with different animations */}
+      {[0, 1, 2, 3].map((i) => (
+        <Bar
+          key={i}
+          $color={color}
+          initial={{ height: 5 }}
+          animate={{
+            height: [
+              4 + Math.random() * 3,
+              10 + Math.random() * 6,
+              6 + Math.random() * 4,
+              12 + Math.random() * 4,
+              4 + Math.random() * 3,
+            ],
+          }}
+          transition={{
+            duration: 1.3,
+            repeat: Infinity,
+            repeatType: "reverse",
+            delay: i * 0.12,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
     </EqualizerContainer>
   );
 };
@@ -84,7 +73,6 @@ const Title = styled.h1`
 const Playlist: React.FC = () => {
   return (
     <TitleContainer>
-      <Title>Music Explorer</Title>
       <TitleEqualizer />
     </TitleContainer>
   );
