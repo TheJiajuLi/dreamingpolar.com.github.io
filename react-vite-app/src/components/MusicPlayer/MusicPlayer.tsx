@@ -92,7 +92,9 @@ const Container = styled.div`
   }
 `;
 
-const MainContent = styled.div`
+const MainContent = styled.div.attrs({
+  className: "dp-player-content",
+})`
   flex: 1;
   position: relative;
   padding: 20px;
@@ -246,7 +248,9 @@ const ANIMATION_TIMING = {
 };
 
 // Update the PlayerSidebarContainer to use framer-motion consistently
-const PlayerSidebarContainer = styled(motion.div)`
+const PlayerSidebarContainer = styled(motion.div).attrs({
+  className: "dp-player-container",
+})`
   position: fixed;
   top: 0;
   height: 100vh;
@@ -540,7 +544,9 @@ const AlbumArtRipple = styled.div`
 
 // Update the AlbumArt component to include the ripple
 // Update AlbumArt to be more responsive
-const AlbumArt = styled.div`
+const AlbumArt = styled.div.attrs({
+  className: "dp-album-art",
+})`
   position: relative;
   width: 220px;
   height: 220px;
@@ -576,7 +582,9 @@ const AlbumArt = styled.div`
 `;
 
 // Update the Cover component
-const Cover = styled.img`
+const Cover = styled.img.attrs({
+  className: "dp-album-cover",
+})`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -587,7 +595,9 @@ const Cover = styled.img`
   }
 `;
 
-const TrackInfo = styled.div`
+const TrackInfo = styled.div.attrs({
+  className: "dp-track-info",
+})`
   text-align: center;
   margin-top: 20px;
   z-index: 1;
@@ -621,7 +631,9 @@ const TrackAlbum = styled.p`
 `;
 
 // Make controls more touch-friendly on small screens
-const Controls = styled.div`
+const Controls = styled.div.attrs({
+  className: "dp-controls",
+})`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -670,7 +682,9 @@ const Controls = styled.div`
 `;
 
 // Make control buttons larger on small screens for better touch targets
-const ControlButton = styled.button`
+const ControlButton = styled.button.attrs({
+  className: "dp-control-btn",
+})`
   background: transparent;
   border: none;
   color: ${(props) => props.theme.text};
@@ -695,7 +709,9 @@ const ControlButton = styled.button`
   }
 `;
 
-const PlayPauseButton = styled(ControlButton)`
+const PlayPauseButton = styled(ControlButton).attrs({
+  className: "dp-play-btn",
+})`
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -914,9 +930,39 @@ const PlayerSidebar = React.forwardRef<
 
   const togglePlay = () => {
     if (state.isPlaying) {
+      // Pause is always allowed
       dispatch({ type: "PAUSE" });
+      audioRef.current?.pause();
     } else {
+      // Set the state to playing first
       dispatch({ type: "PLAY" });
+
+      if (audioRef.current) {
+        // Store the play promise to handle autoplay restrictions properly
+        const playPromise = audioRef.current.play();
+
+        // Modern browsers return a promise from play()
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Playback started successfully
+              console.log("Playback started successfully");
+            })
+            .catch((error) => {
+              // Auto-play was prevented
+              console.warn("Playback was prevented:", error);
+
+              // Revert to paused state
+              dispatch({ type: "PAUSE" });
+
+              // If this is the first user interaction, display a message
+              if (!audioEnabled) {
+                setAudioEnabled(false);
+                alert("Please click anywhere to enable audio playback");
+              }
+            });
+        }
+      }
     }
   };
 
@@ -932,6 +978,20 @@ const PlayerSidebar = React.forwardRef<
     const value = parseFloat(e.target.value);
     dispatch({ type: "SET_VOLUME", payload: value });
   };
+
+  useEffect(() => {
+    if (state.isPlaying && audioRef.current) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Failed to start playback:", error);
+          dispatch({ type: "PAUSE" });
+        });
+      }
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, [state.currentTrack, state.isPlaying, dispatch]);
 
   return (
     <PlayerSidebarContainer
@@ -993,6 +1053,25 @@ const PlayerSidebar = React.forwardRef<
         src={state.currentTrack?.audioSrc}
         onTimeUpdate={updateProgress}
         onEnded={nextTrack}
+        onError={(e) => {
+          console.error("Audio error:", e);
+          // Handle the error appropriately
+          if (state.isPlaying) {
+            dispatch({ type: "PAUSE" });
+            setTimeout(() => {
+              nextTrack(); // Try playing the next track instead
+            }, 500);
+          }
+        }}
+        onCanPlayThrough={() => {
+          // Automatically attempt to play when the track is ready
+          if (state.isPlaying && audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.warn("Auto-play was prevented:", error);
+              dispatch({ type: "PAUSE" });
+            });
+          }
+        }}
       />
 
       <AlbumSection $bgColor={bgColor}>
@@ -1396,17 +1475,55 @@ const MusicPlayer: React.FC = () => {
         {!audioEnabled && (
           <StartButton
             onStart={() => {
+              // First set the audio as enabled
               setAudioEnabled(true);
-              // Make a deliberate user interaction for audio context
+
+              // Create and initialize a silent audio context
+              const AudioContext =
+                window.AudioContext || (window as any).webkitAudioContext;
+              if (AudioContext) {
+                const audioContext = new AudioContext();
+
+                // Create a silent oscillator
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                // Make it silent
+                gainNode.gain.value = 0.001;
+
+                // Connect and start for a brief moment
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.start(0);
+                oscillator.stop(0.001);
+              }
+
+              // Also attempt to play a short silent audio file
               const unlockAudio = new Audio();
               unlockAudio.src =
                 "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-              unlockAudio.volume = 0.1; // Very quiet
+              unlockAudio.volume = 0.01;
               const playPromise = unlockAudio.play();
+
               if (playPromise !== undefined) {
-                playPromise.catch((e) =>
-                  console.log("Audio context setup:", e)
-                );
+                playPromise.catch((e) => {
+                  console.log("Audio context setup failed:", e);
+                  // If even this fails, we need explicit user interaction
+                  document.body.addEventListener(
+                    "click",
+                    function initAudioOnFirstClick() {
+                      // Try again when the user clicks
+                      unlockAudio
+                        .play()
+                        .catch((e) => console.log("Audio still failed:", e));
+                      document.body.removeEventListener(
+                        "click",
+                        initAudioOnFirstClick
+                      );
+                    },
+                    { once: true }
+                  );
+                });
               }
             }}
           />

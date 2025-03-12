@@ -1,17 +1,17 @@
 { 
-  "homepage": "https://github.com/TheJiajuLi/dreamingpolar.com.github.io.git",
+  "name": "dreaming-polar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "homepage": "https://www.dreamingpolar.com",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-"name": "music-player",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "dependencies": {
     "color-thief-react": "^2.1.0",
     "colorthief": "^2.6.0",

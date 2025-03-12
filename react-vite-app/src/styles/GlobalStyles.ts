@@ -55,4 +55,48 @@ export const GlobalStyles = createGlobalStyle<{ theme: Theme }>`
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
   }
+  
+  /* Dreaming Polar Semantic Classes */
+  .dp-player-container {
+    /* Additional styling that complements your styled components */
+  }
+  
+  .dp-album-cover {
+    /* Additional styling */
+  }
+  
+  .dp-control-btn {
+    /* Additional styling */
+  }
+  
+  .dp-equalizer-container {
+    /* Additional styling */
+  }
+  
+  /* Accessibility improvements */
+  .dp-player-container:focus-within {
+    outline: 2px solid rgba(76, 175, 80, 0.5);
+  }
+  
+  .dp-control-btn:focus {
+    outline: 2px solid rgba(76, 175, 80, 0.5);
+  }
+  
+  /* Animation classes */
+  .pulse {
+    animation: pulse 2s infinite ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  
+  /* Responsive classes */
+  @media (max-width: 768px) {
+    .dp-player-container {
+      /* Mobile-specific adjustments */
+    }
+  }
 `;

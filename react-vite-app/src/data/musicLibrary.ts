@@ -1,15 +1,39 @@
 import { Track } from "../types/music";
 
-// Define cover art by genre
+// Fix the paths to assets - remove "public" prefix as Vite serves from /
 const coverArt = {
-  classical: "/assets/covers/classical.jpg",
-  rock: "/assets/covers/rock.jpg",
-  pop: "/assets/covers/pop.jpg",
-  electronic: "/assets/covers/electronic.jpg",
-  jazz: "/assets/covers/jazz.jpg",
-  ambient: "/assets/covers/forest.jpg",
-  soundtrack: "/assets/covers/soundtrack.jpg",
-  hiphop: "/assets/covers/hiphop.jpg"
+  classical: "/assets/covers/classical_cover.jpg",
+  rock: "/assets/covers/rock_cover.jpeg",
+  pop: "/assets/covers/pop_cover.jpeg",
+  electronic: "/assets/covers/electronic_cover.jpeg",
+  jazz: "/assets/covers/jazz_cover.jpeg",
+  ambient: "/assets/covers/ambient_cover.jpeg",
+  soundtrack: "/assets/covers/galaxy_2.gif",
+  hiphop: "/assets/covers/hiphop_cover.jpg"
+};
+
+// Add specific album covers for important artists/albums
+const artistCovers = {
+  chopin: "/assets/covers/chopin.jpeg",
+  chopin_etudes: "/assets/covers/chopin_etudes.jpeg",
+  bach: "/assets/covers/bach.jpeg",
+  queen: "/assets/covers/rock_cover.jpg",
+  bonJovi: "/assets/covers/bon_jovi.jpeg",
+  rema: "/assets/covers/rema.jpg",
+  rosalia: "/assets/covers/rosalia.jpg",
+  eminem: "/assets/covers/eminem.jpg",
+  liebestraume: "/assets/covers/liebestraume.jpg",
+  rema_calm_down: "/assets/covers/rema_calm_down.jpeg",
+  memory_reboot: "/assets/covers/memory_reboot.jpeg"
+};
+
+const trackCovers = {
+  Stan: "/assets/covers/stan.jpeg"
+};
+
+const albumCovers = {
+  urban_blues: "/assets/covers/urban_blues.jpeg",
+  miss_g: "/assets/covers/miss_g.jpeg"
 };
 
 // Define colors by genre
@@ -32,29 +56,19 @@ export const musicLibrary: Track[] = [
     artist: "Johann Sebastian Bach",
     album: "Orchestral Suites",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.bach, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/air_on_g_string.mp3",
     duration: 180, // Updated from 285
     color: genreColors.classical
   },
-  {
-    id: "classical-2",
-    title: "Classical Morning",
-    artist: "String Orchestra",
-    album: "Morning Classics",
-    genre: "classical",
-    coverArt: coverArt.classical,
-    audioSrc: "/assets/musics/single_tracks/classical_morning.mp3",
-    duration: 192, // Updated from 275
-    color: genreColors.classical
-  },
+
   {
     id: "classical-3",
     title: "Etude Op. 10 No. 4",
     artist: "Frédéric Chopin",
     album: "Etudes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin_etudes,
     audioSrc: "/assets/musics/single_tracks/etudes_no_4.mp3",
     duration: 120, // Updated from 240
     color: genreColors.classical
@@ -65,7 +79,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Etudes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin_etudes,
     audioSrc: "/assets/musics/single_tracks/etudes_no_23.mp3",
     duration: 260,
     color: genreColors.classical
@@ -76,7 +90,7 @@ export const musicLibrary: Track[] = [
     artist: "Franz Liszt",
     album: "Piano Dreams",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.liebestraume,
     audioSrc: "/assets/musics/single_tracks/liebestraume_no_3.mp3",
     duration: 295,
     color: genreColors.classical
@@ -89,7 +103,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_1.mp3",
     duration: 310,
     color: genreColors.classical
@@ -100,7 +114,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_2.mp3",
     duration: 270,
     color: genreColors.classical
@@ -111,7 +125,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_3.mp3",
     duration: 330,
     color: genreColors.classical
@@ -122,7 +136,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_4.mp3",
     duration: 305,
     color: genreColors.classical
@@ -133,7 +147,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_5.mp3",
     duration: 315,
     color: genreColors.classical
@@ -144,7 +158,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_6.mp3",
     duration: 290,
     color: genreColors.classical
@@ -155,7 +169,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_7.mp3",
     duration: 340,
     color: genreColors.classical
@@ -166,7 +180,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_8.mp3",
     duration: 320,
     color: genreColors.classical
@@ -177,7 +191,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_9.mp3",
     duration: 280,
     color: genreColors.classical
@@ -188,7 +202,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_10.mp3",
     duration: 300,
     color: genreColors.classical
@@ -199,7 +213,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_11.mp3",
     duration: 325,
     color: genreColors.classical
@@ -210,7 +224,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 2",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_12.mp3",
     duration: 310,
     color: genreColors.classical
@@ -221,7 +235,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_13.mp3",
     duration: 350,
     color: genreColors.classical
@@ -232,7 +246,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_14.mp3",
     duration: 335,
     color: genreColors.classical
@@ -243,7 +257,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_15.mp3",
     duration: 295,
     color: genreColors.classical
@@ -254,7 +268,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_17.mp3",
     duration: 330,
     color: genreColors.classical
@@ -265,7 +279,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_18.mp3",
     duration: 360,
     color: genreColors.classical
@@ -276,7 +290,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_19.mp3",
     duration: 340,
     color: genreColors.classical
@@ -287,7 +301,7 @@ export const musicLibrary: Track[] = [
     artist: "Frédéric Chopin",
     album: "Complete Nocturnes Vol. 3",
     genre: "classical",
-    coverArt: coverArt.classical,
+    coverArt: artistCovers.chopin, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/nocturne_20.mp3",
     duration: 315,
     color: genreColors.classical
@@ -300,7 +314,7 @@ export const musicLibrary: Track[] = [
     artist: "Queen",
     album: "A Night at the Opera",
     genre: "rock",
-    coverArt: coverArt.rock,
+    coverArt: coverArt.rock, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/bohemian_rhapsody.mp3",
     duration: 355,
     color: genreColors.rock
@@ -311,20 +325,9 @@ export const musicLibrary: Track[] = [
     artist: "Bon Jovi",
     album: "Crush",
     genre: "rock",
-    coverArt: coverArt.rock,
+    coverArt: artistCovers.bonJovi, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/its_my_life.mp3",
     duration: 224,
-    color: genreColors.rock
-  },
-  {
-    id: "rock-3",
-    title: "Rock Anthem",
-    artist: "Stone Giants",
-    album: "Electric Legends",
-    genre: "rock",
-    coverArt: coverArt.rock,
-    audioSrc: "/assets/musics/single_tracks/rock_anthem.mp3",
-    duration: 263,
     color: genreColors.rock
   },
   
@@ -335,7 +338,7 @@ export const musicLibrary: Track[] = [
     artist: "Rema",
     album: "Rave & Roses",
     genre: "pop",
-    coverArt: coverArt.pop,
+    coverArt: artistCovers.rema_calm_down, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/calm_down.mp3",
     duration: 234,
     color: genreColors.pop
@@ -346,7 +349,7 @@ export const musicLibrary: Track[] = [
     artist: "Rosalía",
     album: "Motomami",
     genre: "pop",
-    coverArt: coverArt.pop,
+    coverArt: albumCovers.miss_g, // Use artist-specific cover
     audioSrc: "/assets/musics/single_tracks/candy.mp3",
     duration: 185,
     color: genreColors.pop
@@ -357,7 +360,7 @@ export const musicLibrary: Track[] = [
     artist: "Heart Beats",
     album: "Love Stories",
     genre: "pop",
-    coverArt: coverArt.pop,
+    coverArt: albumCovers.urban_blues,
     audioSrc: "/assets/musics/single_tracks/missing_you.mp3",
     duration: 210,
     color: genreColors.pop
@@ -365,23 +368,12 @@ export const musicLibrary: Track[] = [
   
   // Electronic Music
   {
-    id: "electronic-1",
-    title: "Electronic Pulse",
-    artist: "Electric Wave",
-    album: "Digital Age",
-    genre: "electronic",
-    coverArt: coverArt.electronic,
-    audioSrc: "/assets/musics/single_tracks/electronic_pulse.mp3",
-    duration: 195,
-    color: genreColors.electronic
-  },
-  {
     id: "electronic-2",
     title: "Memory Reboot",
     artist: "Cyber Dreams",
     album: "Neural Network",
     genre: "electronic",
-    coverArt: coverArt.electronic,
+    coverArt: artistCovers.memory_reboot,
     audioSrc: "/assets/musics/single_tracks/memory_reboot.mp3",
     duration: 240,
     color: genreColors.electronic
@@ -392,50 +384,17 @@ export const musicLibrary: Track[] = [
     artist: "Binary System",
     album: "Color Code",
     genre: "electronic",
-    coverArt: coverArt.electronic,
+    coverArt: albumCovers.urban_blues,
     audioSrc: "/assets/musics/single_tracks/monochrome.mp3",
     duration: 218,
     color: genreColors.electronic
   },
   
   // Jazz Music
-  {
-    id: "jazz-1",
-    title: "Jazz Café",
-    artist: "Smooth Quartet",
-    album: "Late Night Sessions",
-    genre: "jazz",
-    coverArt: coverArt.jazz,
-    audioSrc: "/assets/musics/single_tracks/jazz_cafe.mp3",
-    duration: 320,
-    color: genreColors.jazz
-  },
-  
+
   // Ambient Music
-  {
-    id: "ambient-1",
-    title: "Forest Dreams",
-    artist: "Nature Sounds",
-    album: "Peaceful Forest",
-    genre: "ambient",
-    coverArt: coverArt.ambient,
-    audioSrc: "/assets/musics/single_tracks/forest_dreams.mp3",
-    duration: 240,
-    color: genreColors.ambient
-  },
   
   // Soundtrack
-  {
-    id: "soundtrack-1",
-    title: "Legend Mode Theme",
-    artist: "Epic Orchestra",
-    album: "Game Soundtracks",
-    genre: "soundtrack",
-    coverArt: coverArt.soundtrack,
-    audioSrc: "/assets/musics/single_tracks/legend_mode_theme_song.mp3",
-    duration: 228,
-    color: genreColors.soundtrack
-  },
   
   // Hip-hop
   {
@@ -444,7 +403,7 @@ export const musicLibrary: Track[] = [
     artist: "Eminem",
     album: "The Marshall Mathers LP",
     genre: "hiphop",
-    coverArt: coverArt.hiphop,
+    coverArt: trackCovers.Stan,
     audioSrc: "/assets/musics/single_tracks/stan_instrumental.mp3",
     duration: 340,
     color: genreColors.hiphop
@@ -455,7 +414,7 @@ export const musicLibrary: Track[] = [
     artist: "Eminem",
     album: "The Marshall Mathers LP",
     genre: "hiphop",
-    coverArt: coverArt.hiphop,
+    coverArt: trackCovers.Stan,
     audioSrc: "/assets/musics/single_tracks/stan_midi.mp3",
     duration: 330,
     color: genreColors.hiphop
