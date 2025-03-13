@@ -17,6 +17,7 @@ import {
   FaEyeSlash,
   FaLock,
   FaLockOpen,
+  FaVolumeDown,
 } from "react-icons/fa";
 import { MdEqualizer } from "react-icons/md";
 import Playlist from "./Playlist";
@@ -36,6 +37,7 @@ const Container = styled.div.attrs({
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
+  user-select: none; // Add this line to prevent text selection throughout the app
 
   &::before {
     content: "";
@@ -263,7 +265,8 @@ const PlayerSidebarContainer = styled(motion.div).attrs<{ $isOpen?: boolean }>(
   top: 0;
   height: 100vh;
   width: 280px;
-  max-width: 75vw;
+  max-width: ${(props) =>
+    props.$isOpen ? "85vw" : "75vw"}; // Increase max width when open
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
   display: flex;
   flex-direction: column;
@@ -632,6 +635,7 @@ const TrackTitle = styled.h2.attrs({
   font-size: 1.4rem;
   font-weight: 700;
   margin: 0 0 6px 0;
+  user-select: none; // Prevent text selection
 
   @media (max-height: 700px) {
     font-size: 1.2rem;
@@ -645,6 +649,7 @@ const TrackArtist = styled.p.attrs({
   font-size: 1.1rem;
   color: ${(props) => props.theme.textSecondary};
   margin: 0 0 5px 0;
+  user-select: none; // Prevent text selection
 `;
 
 const TrackAlbum = styled.p.attrs({
@@ -653,6 +658,7 @@ const TrackAlbum = styled.p.attrs({
   font-size: 0.9rem;
   color: ${(props) => props.theme.textSecondary};
   opacity: 0.8;
+  user-select: none; // Prevent text selection
 `;
 
 // Make controls more touch-friendly on small screens
@@ -1611,7 +1617,7 @@ const PlayerSidebar = React.forwardRef<
     };
   }, [isDragging]);
 
-  // Add this function to the PlayerSidebar component
+  // Add this function in the PlayerSidebar component
   const cycleSidebarMode = () => {
     const currentMode = isValidSidebarMode(state.sidebarMode)
       ? state.sidebarMode
@@ -1623,6 +1629,35 @@ const PlayerSidebar = React.forwardRef<
     const nextMode = modes[nextIndex];
 
     dispatch({ type: "SET_SIDEBAR_MODE", payload: nextMode });
+  };
+
+  // Add this to your component
+  const toggleMute = () => {
+    if (state.volume === 0) {
+      // Restore previous volume or default to 0.7
+      const prevVolume = localStorage.getItem("prevVolume") || "0.7";
+      dispatch({ type: "SET_VOLUME", payload: parseFloat(prevVolume) });
+    } else {
+      // Store current volume before muting
+      localStorage.setItem("prevVolume", state.volume.toString());
+      dispatch({ type: "SET_VOLUME", payload: 0 });
+    }
+
+    // If using audio ref directly
+    if (audioRef.current) {
+      audioRef.current.volume = state.volume;
+    }
+  };
+
+  // Updated volume control implementation in the PlayerSidebar component
+  const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
+  const volumeLevel = Math.round(state.volume * 100);
+
+  // Add this to your component
+  const getVolumeIcon = () => {
+    if (state.volume === 0) return <FaVolumeMute />;
+    if (state.volume < 0.3) return <FaVolumeDown />; // Import FaVolumeDown from react-icons/fa
+    return <FaVolumeUp />;
   };
 
   return (
@@ -1638,41 +1673,6 @@ const PlayerSidebar = React.forwardRef<
       }}
     >
       <SidebarGlow />
-
-      {/* Add SidebarModeControl button */}
-      <SidebarModeControl
-        onClick={cycleSidebarMode}
-        $mode={
-          isValidSidebarMode(state.sidebarMode) ? state.sidebarMode : "auto"
-        }
-        aria-label="Change sidebar mode"
-        title={
-          state.sidebarMode === "auto"
-            ? "Auto-hide mode: Sidebar appears when mouse is near edge"
-            : state.sidebarMode === "always"
-            ? "Always visible mode: Sidebar stays open"
-            : "Manual control mode: You control when sidebar opens"
-        }
-      >
-        {state.sidebarMode === "auto" && (
-          <>
-            <FaEye />
-            <span>Auto-hide</span>
-          </>
-        )}
-        {state.sidebarMode === "always" && (
-          <>
-            <FaLock />
-            <span>Always visible</span>
-          </>
-        )}
-        {state.sidebarMode === "manual" && (
-          <>
-            <FaLockOpen />
-            <span>Manual control</span>
-          </>
-        )}
-      </SidebarModeControl>
 
       <CloseButton onClick={toggleOpen} aria-label="Close music player">
         <FaTimes />
@@ -1729,18 +1729,7 @@ const PlayerSidebar = React.forwardRef<
                 alt={state.currentTrack?.title || "Album Cover"}
               />
               <AlbumArtRipple />
-              <CoverOverlay
-                $isPlaying={state.isPlaying}
-                $intensity={visualIntensity}
-              />
-              {state.equalizerActive && state.isPlaying && (
-                <Equalizer
-                  isPlaying={state.isPlaying}
-                  dominantColor={state.currentTrack?.color}
-                  audioRef={audioRef}
-                  onIntensityChange={handleIntensityChange}
-                />
-              )}
+              {state.equalizerActive && <Equalizer />}
             </AlbumArt>
 
             <TrackInfo>
@@ -1808,74 +1797,120 @@ const PlayerSidebar = React.forwardRef<
       </AlbumSection>
 
       <ExtraControls>
-        <VolumeControl>
-          {state.volume === 0 ? <FaVolumeMute /> : <FaVolumeUp />}
-          <VolumeSlider value={state.volume} onChange={handleVolumeChange} />
-        </VolumeControl>
+        {/* Playback Controls Group */}
+        <ControlGroup>
+          <VolumeControl>
+            <VolumeButton
+              onClick={toggleMute}
+              title={state.volume === 0 ? "Unmute" : "Mute"}
+              aria-label={state.volume === 0 ? "Unmute" : "Mute"}
+              className={state.volume === 0 ? "muted" : ""}
+            >
+              {getVolumeIcon()}
+            </VolumeButton>
 
+            <VolumeSliderContainer
+              onMouseEnter={() => setShowVolumeTooltip(true)}
+              onMouseLeave={() => setShowVolumeTooltip(false)}
+            >
+              <VolumeFill $level={state.volume} />
+              <VolumeSlider
+                value={state.volume}
+                onChange={handleVolumeChange}
+              />
+              <VolumeLevelIndicator
+                $level={state.volume}
+                $visible={showVolumeTooltip}
+              >
+                {volumeLevel}%
+              </VolumeLevelIndicator>
+            </VolumeSliderContainer>
+          </VolumeControl>
+
+          <div>
+            {/* Sidebar mode control remains the same */}
+            <ControlButton
+              onClick={cycleSidebarMode}
+              style={{
+                color: (() => {
+                  switch (state.sidebarMode) {
+                    case "auto":
+                      return "rgba(76, 175, 80, 1)";
+                    case "always":
+                      return "rgba(33, 150, 243, 1)";
+                    case "manual":
+                      return "rgba(255, 152, 0, 1)";
+                    default:
+                      return "rgba(76, 175, 80, 1)";
+                  }
+                })(),
+              }}
+              title={`Sidebar: ${state.sidebarMode} mode`}
+            >
+              {state.sidebarMode === "auto" && <FaEye />}
+              {state.sidebarMode === "always" && <FaLock />}
+              {state.sidebarMode === "manual" && <FaLockOpen />}
+            </ControlButton>
+          </div>
+        </ControlGroup>
+
+        {/* Feature Toggles in a Grid Layout */}
         <ToggleButtons>
+          {/* Playback Options */}
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_SHUFFLE" })}
             style={{ color: state.isShuffling ? "#388e3c" : "" }}
+            title="Toggle shuffle mode"
           >
             <FaRandom />
           </ControlButton>
 
-          {/* Add the mode toggle button here */}
-          <ControlButton
-            onClick={cycleSidebarMode}
-            style={{
-              color: (() => {
-                switch (state.sidebarMode) {
-                  case "auto":
-                    return "rgba(76, 175, 80, 1)";
-                  case "always":
-                    return "rgba(33, 150, 243, 1)";
-                  case "manual":
-                    return "rgba(255, 152, 0, 1)";
-                  default:
-                    return "rgba(76, 175, 80, 1)";
-                }
-              })(),
-            }}
-            title={(() => {
-              switch (state.sidebarMode) {
-                case "auto":
-                  return "Auto-hide mode";
-                case "always":
-                  return "Always visible mode";
-                case "manual":
-                  return "Manual control mode";
-                default:
-                  return "Auto-hide mode";
-              }
-            })()}
-          >
-            {state.sidebarMode === "auto" && <FaEye />}
-            {state.sidebarMode === "always" && <FaLock />}
-            {state.sidebarMode === "manual" && <FaLockOpen />}
-          </ControlButton>
-
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_REPEAT" })}
-            style={{ color: state.isRepeating ? "#388e3c" : "" }}
+            style={{
+              color: state.isRepeating ? "#388e3c" : "",
+              position: "relative",
+            }}
+            title="Toggle repeat mode"
           >
             <FaRedo />
+            {state.isRepeating && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.7 }}
+                style={{
+                  position: "absolute",
+                  top: "-3px",
+                  right: "-3px",
+                  width: "6px",
+                  height: "6px",
+                  background: "#388e3c",
+                  borderRadius: "50%",
+                  boxShadow: "0 0 4px rgba(76, 175, 80, 0.8)",
+                }}
+              />
+            )}
+          </ControlButton>
+
+          {/* Visualization Options */}
+          <ControlButton
+            onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
+            style={{ color: state.visualizerActive ? "#388e3c" : "" }}
+            title="Toggle visualizer"
+          >
+            <FaBars />
           </ControlButton>
 
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_EQUALIZER" })}
             style={{ color: state.equalizerActive ? "#388e3c" : "" }}
+            title="Toggle equalizer"
           >
             <MdEqualizer />
           </ControlButton>
 
-          <ControlButton
-            onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
-            style={{ color: state.visualizerActive ? "#388e3c" : "" }}
-          >
-            <FaBars />
-          </ControlButton>
+          {/* Add an empty cell for balance in the grid */}
+          <div></div>
         </ToggleButtons>
       </ExtraControls>
     </PlayerSidebarContainer>
@@ -1927,14 +1962,14 @@ const CloseButton = styled.button.attrs({
   className: "mp-sidebar-close",
 })`
   position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 36px;
-  height: 36px;
+  top: ${(props) => (props.theme.isMobile ? "10px" : "15px")};
+  right: ${(props) => (props.theme.isMobile ? "10px" : "15px")};
+  width: ${(props) => (props.theme.isMobile ? "40px" : "36px")};
+  height: ${(props) => (props.theme.isMobile ? "40px" : "36px")};
   border: none;
   background: rgba(0, 0, 0, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  font-size: 1.5rem;
+  font-size: ${(props) => (props.theme.isMobile ? "1.7rem" : "1.5rem")};
   cursor: pointer;
   z-index: 10;
   border-radius: 50%;
@@ -2371,8 +2406,6 @@ const isValidSidebarMode = (mode: any): mode is SidebarMode => {
 const MusicPlayer: React.FC = () => {
   const { state, dispatch } = useMusicContext();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  // Initialize audioEnabled to true instead of false
-  const [audioEnabled, setAudioEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -2450,9 +2483,6 @@ const MusicPlayer: React.FC = () => {
 
   // Handle sidebar behavior based on the selected mode
   useEffect(() => {
-    // No need to handle sidebar if audio isn't enabled yet
-    if (!audioEnabled) return;
-
     // Logic for automatic mode
     if (state.sidebarMode === "auto") {
       // Function to handle mouse movements
@@ -2467,14 +2497,14 @@ const MusicPlayer: React.FC = () => {
         }
 
         // Close sidebar when mouse leaves the sidebar area completely
-        if (isSidebarOpen && sidebarRef.current) {
+        if (isSidebarOpen) {
           // Calculate sidebar boundaries
           const sidebarWidth = 280; // Match your sidebar width
           const sidebarLeft = screenWidth - sidebarWidth;
 
           // Check if mouse is outside the sidebar area
-          if (e.clientX < sidebarLeft - 20) {
-            // Add a small buffer zone
+          if (e.clientX < sidebarLeft) {
+            // Close immediately when cursor leaves sidebar area
             setSidebarOpen(false);
           }
         }
@@ -2523,7 +2553,7 @@ const MusicPlayer: React.FC = () => {
     }
 
     // Manual mode doesn't need any auto-behavior
-  }, [state.sidebarMode, isSidebarOpen, audioEnabled, dispatch, sidebarRef]);
+  }, [state.sidebarMode, isSidebarOpen, dispatch, sidebarRef]);
 
   // Handle track changes
   const updateProgress = (audio: React.RefObject<HTMLAudioElement>) => {
@@ -2604,89 +2634,6 @@ const MusicPlayer: React.FC = () => {
     <Container>
       <EnergyParticles />
 
-<<<<<<< Updated upstream
-      <AnimatePresence>
-        {!audioEnabled && (
-          <StartButton
-            onStart={() => {
-              // First set the audio as enabled
-              setAudioEnabled(true);
-
-              try {
-                // Use the standard AudioContext with fallback
-                const AudioContext =
-                  window.AudioContext || (window as any).webkitAudioContext;
-
-                if (AudioContext) {
-                  const audioContext = new AudioContext();
-
-                  // If context is suspended (common in Safari/iOS), attempt to resume it
-                  if (audioContext.state === "suspended") {
-                    audioContext.resume().catch((e) => {
-                      console.warn("Failed to resume audio context:", e);
-                    });
-                  }
-
-                  // Create a silent oscillator to unlock audio
-                  const oscillator = audioContext.createOscillator();
-                  const gainNode = audioContext.createGain();
-
-                  // Make it silent
-                  gainNode.gain.value = 0.001;
-
-                  // Connect and start for a brief moment
-                  oscillator.connect(gainNode);
-                  gainNode.connect(audioContext.destination);
-                  oscillator.start(0);
-                  setTimeout(() => oscillator.stop(), 1);
-                }
-              } catch (e) {
-                console.error("Error initializing audio context:", e);
-              }
-
-              // Also use the Audio element approach for wider compatibility
-              const unlockAudio = new Audio();
-              // Use a valid base64-encoded empty MP3 (1 frame of silence)
-              unlockAudio.src =
-                "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//sQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-              unlockAudio.volume = 0.001;
-              unlockAudio
-                .play()
-                .then(() => {
-                  console.log("Audio context unlocked successfully");
-                  unlockAudio.pause();
-                  unlockAudio.currentTime = 0;
-                })
-                .catch((e) => {
-                  console.warn(
-                    "Audio unlock failed, will retry on user interaction:",
-                    e
-                  );
-
-                  // Set up a one-time click handler to try again on first user interaction
-                  const unlockOnClick = () => {
-                    unlockAudio
-                      .play()
-                      .then(() =>
-                        console.log("Audio unlocked on user interaction")
-                      )
-                      .catch((e) =>
-                        console.warn("Still failed to unlock audio:", e)
-                      );
-                    document.removeEventListener("click", unlockOnClick);
-                  };
-
-                  document.addEventListener("click", unlockOnClick, {
-                    once: true,
-                  });
-                });
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-=======
->>>>>>> Stashed changes
       <audio
         ref={audioRef}
         src={state.currentTrack?.audioSrc}
@@ -2711,7 +2658,7 @@ const MusicPlayer: React.FC = () => {
 
       {/* Visual indicator when sidebar is closed */}
       <AnimatePresence>
-        {!isSidebarOpen && audioEnabled && (
+        {!isSidebarOpen && (
           <SidebarIndicator
             ref={indicatorRef}
             onClick={toggleSidebar}
@@ -2739,101 +2686,6 @@ const MusicPlayer: React.FC = () => {
 
 // Add this new styled component
 // Update SidebarModeButton for better positioning on different screen sizes
-const SidebarModeButton = styled(motion.button).attrs<{
-  $mode: string;
-  $isOpen: boolean;
-}>((props) => ({
-  className: "mp-sidebar-mode-toggle",
-}))`
-  position: fixed;
-  bottom: 80px;
-  right: ${(props) => (props.$isOpen ? "290px" : "20px")};
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
-  border: 2px solid
-    ${(props) => {
-      switch (props.$mode) {
-        case "auto":
-          return "rgba(76, 175, 80, 0.7)";
-        case "always":
-          return "rgba(33, 150, 243, 0.7)";
-        case "manual":
-          return "rgba(255, 152, 0, 0.7)";
-        default:
-          return "rgba(76, 175, 80, 0.7)";
-      }
-    }};
-  color: ${(props) => {
-    switch (props.$mode) {
-      case "auto":
-        return "rgba(76, 175, 80, 1)";
-      case "always":
-        return "rgba(33, 150, 243, 1)";
-      case "manual":
-        return "rgba(255, 152, 0, 1)";
-      default:
-        return "rgba(76, 175, 80, 1)";
-    }
-  }};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  z-index: 990;
-  font-weight: bold;
-  transition: none; /* Remove default transitions, we'll use framer-motion */
-
-  svg {
-    width: 18px;
-    height: 18px;
-    transform-origin: center;
-  }
-
-  @media (max-width: 600px) {
-    bottom: 30px;
-    width: 36px;
-    height: 36px;
-  }
-
-  @media (max-width: 380px) {
-    bottom: 25px;
-    right: ${(props) => (props.$mode === "always" ? "auto" : "20px")};
-    left: ${(props) => (props.$mode === "always" ? "20px" : "auto")};
-    width: 36px;
-    height: 36px;
-  }
-
-  @media (max-height: 500px) {
-    bottom: 20px;
-  }
-`;
-
-// Add this styled component with your other styled components
-const CoverOverlay = styled.div.attrs<{
-  $isPlaying: boolean;
-  $intensity: number;
-}>((props) => ({
-  className: "mp-cover-glow-effect",
-}))`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at center,
-    rgba(76, 175, 80, ${(props) => props.$intensity * 0.3}) 0%,
-    transparent 70%
-  );
-  opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
-  transition: opacity 0.3s ease, background 0.3s ease;
-  mix-blend-mode: overlay;
-  z-index: 3;
-`;
 
 // Add these styled component definitions before the PlayerSidebar component
 
@@ -2842,38 +2694,135 @@ const ExtraControls = styled.div.attrs({
   className: "mp-secondary-controls",
 })`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 30px;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px 15px;
   background: rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 1;
   user-select: none;
 
   @media (max-height: 700px) {
-    padding: 15px 20px;
-  }
-
-  @media (max-height: 600px) {
-    padding: 10px 15px;
+    padding: 15px 10px;
+    gap: 10px;
   }
 `;
 
-// Volume control container with slider
+// Enhanced VolumeControl with animations and creative interaction
 const VolumeControl = styled.div.attrs({
   className: "mp-volume-control",
 })`
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: ${(props) => props.theme.textSecondary};
+  transition: all 0.3s ease;
+  padding: 6px 2px;
+  border-radius: 20px;
 
-  svg {
-    font-size: 16px;
+  &:hover {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Add the ripple effect container */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 18px; /* Center on volume icon */
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(76, 175, 80, 0.2) 0%,
+      rgba(76, 175, 80, 0) 70%
+    );
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s ease;
+  }
+
+  &:active::after {
+    width: 80px;
+    height: 80px;
+    opacity: 1;
+    transition: all 0.3s ease-out;
   }
 `;
 
-// Custom volume slider with improved touch target
+// Improved VolumeButton with visual feedback based on volume level
+const VolumeButton = styled.button.attrs({
+  className: "mp-volume-button",
+  type: "button",
+})`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 2;
+
+  /* Pulsing effect for muted state */
+  &.muted::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 82, 82, 0.1);
+    animation: pulseMuted 2s infinite ease-in-out;
+  }
+
+  @keyframes pulseMuted {
+    0%,
+    100% {
+      transform: scale(0.95);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.6;
+    }
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+    color: #4caf50;
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 26px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  }
+`;
+
+// Modern volume slider with interactive fill and glow effects
+const VolumeSliderContainer = styled.div`
+  position: relative;
+  width: 80px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+`;
+
 const VolumeSlider = styled.input.attrs({
   className: "mp-volume-slider",
   type: "range",
@@ -2882,36 +2831,133 @@ const VolumeSlider = styled.input.attrs({
   step: "0.01",
 })`
   -webkit-appearance: none;
-  width: 80px;
+  width: 100%;
   height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
   outline: none;
-  opacity: 0.8;
-  transition: opacity 0.2s;
+  opacity: 0.9;
+  transition: all 0.2s;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
 
+  /* Improved track with gradient */
+  &::-webkit-slider-runnable-track {
+    height: 4px;
+    cursor: pointer;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+    border-radius: 4px;
+  }
+
+  &::-moz-range-track {
+    height: 4px;
+    cursor: pointer;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+    border-radius: 4px;
+  }
+
+  /* Enhanced thumb design */
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: ${(props) => props.theme.primary};
+    background: #4caf50;
     cursor: pointer;
+    margin-top: -5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    border: 2px solid rgba(255, 255, 255, 0.8);
   }
 
   &::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: ${(props) => props.theme.primary};
+    background: #4caf50;
     cursor: pointer;
-    border: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    border: 2px solid rgba(255, 255, 255, 0.8);
   }
 
-  &:hover {
-    opacity: 1;
+  /* Hover and focus states */
+  &:hover::-webkit-slider-thumb,
+  &:focus::-webkit-slider-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+  }
+
+  &:hover::-moz-range-thumb,
+  &:focus::-moz-range-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+  }
+
+  &:hover,
+  &:focus {
+    height: 6px;
+  }
+`;
+
+// Create a dynamic fill effect that updates with volume level
+const VolumeFill = styled.div.attrs<{ $level: number }>((props) => ({
+  style: {
+    width: `${props.$level * 100}%`,
+  },
+}))`
+  position: absolute;
+  height: 4px;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+  transition: width 0.1s ease;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+`;
+
+// Optional volume level indicator that appears when hovering
+const VolumeLevelIndicator = styled.div.attrs<{
+  $level: number;
+  $visible: boolean;
+}>((props) => ({
+  style: {
+    opacity: props.$visible ? 1 : 0,
+    transform: `translateY(${props.$visible ? "0" : "10px"})`,
+  },
+}))`
+  position: absolute;
+  bottom: -22px;
+  left: ${(props) => props.$level * 100}%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 5;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.7);
   }
 `;
 
@@ -2919,9 +2965,14 @@ const VolumeSlider = styled.input.attrs({
 const ToggleButtons = styled.div.attrs({
   className: "mp-feature-toggles",
 })`
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+
+  @media (max-width: 320px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
 // Create an enhanced SidebarModeControl component for inside the sidebar
@@ -3034,6 +3085,236 @@ const SidebarModeControl = styled.button.attrs<{ $mode?: SidebarMode }>(
       opacity: 0;
       transform: scale(1.5);
     }
+  }
+`;
+
+// Add this after the ToggleButtons component definition
+const ControlGroup = styled.div.attrs({
+  className: "mp-control-group",
+})`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 0 2px;
+
+  /* Add subtle hover effect for better visual feedback */
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);rgrgba(255, 255, 255, 0.02);ba(76, 175, 80, 0.7)    border-radius: 4px;
+  }
+
+  /* Add styling for volume section */
+  & > div:first-child {
+    flex-grow: 1;
+    max-width: 70%;
+  }
+
+  /* Add styling for mode button section */
+  & > div:last-child {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  @media (max-width: 320px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    & > div:first-child {
+      max-width: 100%;
+    }
+  }
+`;
+
+// Replace the conflicting styled components at the end of MusicPlayer.tsx with these renamed versions
+
+// Optimize the MusicExplorer component for mobile devices
+const MobileExplorerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: ${(props) => props.theme.background};
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 1200px;
+  margin: 0 auto;
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    padding: 15px 10px;
+    border-radius: 0;
+    box-shadow: none;
+    max-height: calc(100vh - 140px); /* Account for player height */
+    overflow-y: auto;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 8px;
+  }
+`;
+
+// Optimize the track list for mobile
+const MobileTrackGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 360px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+// Make search and filter controls more mobile-friendly
+const MobileFilterControls = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+`;
+
+// Optimize the search input
+const MobileSearchInput = styled.input`
+  padding: 10px 15px;
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: 20px;
+  font-size: 16px;
+  flex: 1;
+  min-width: 200px;
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
+    min-width: 0;
+    width: 100%;
+  }
+`;
+
+// Make track cards more touch-friendly
+const MobileTrackCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: ${(props) => props.theme.surfaceVariant};
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 6px;
+
+    /* Larger touch target on mobile */
+    &:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+  }
+`;
+
+// Make the album art responsive
+const MobileCoverImage = styled.img`
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+
+  @media (max-width: 480px) {
+    height: auto; /* Let height be determined by width and aspect ratio */
+  }
+`;
+
+// Optimize track info for smaller screens
+const MobileTrackDetails = styled.div`
+  padding: 12px;
+
+  @media (max-width: 480px) {
+    padding: 8px 10px;
+  }
+`;
+
+const MobileTrackName = styled.h3`
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: ${(props) => props.theme.textPrimary};
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+const MobileArtistName = styled.p`
+  margin: 0;
+  font-size: 14px;
+  color: ${(props) => props.theme.textSecondary};
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+// Add responsive styles to filtering options
+const MobileFilterDropdown = styled.select`
+  padding: 10px 15px;
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: 20px;
+  background-color: ${(props) => props.theme.surface};
+  color: ${(props) => props.theme.textPrimary};
+  font-size: 16px;
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
+    flex-grow: 1;
+    width: 100%;
+  }
+`;
+
+// Add this to your JSX to show a disclaimer for small screens
+const MobileOrientation = styled.p`
+  display: none;
+
+  @media (max-width: 480px) {
+    display: block;
+    font-size: 12px;
+    color: ${(props) => props.theme.textSecondary};
+    text-align: center;
+    margin: 10px 0;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
   }
 `;
 

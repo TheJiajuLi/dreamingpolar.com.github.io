@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import styled, { keyframes, css } from "styled-components";
+import React, { useRef, useEffect, useState, useMemo } from "react";
+import styled, { keyframes } from "styled-components";
 import { useMusicContext } from "../../context/MusicContext";
 
 interface EqualizerProps {
@@ -40,10 +40,19 @@ const Canvas = styled.canvas.attrs({
   /* existing styles */
 `;
 
-// Fix the animation issue with the css helper
-const GlowOverlay = styled.div.attrs({
+// Optimize GlowOverlay with attrs for dynamically changing properties
+const GlowOverlay = styled.div.attrs<{
+  $intensity: number;
+  $color: string;
+  $isPlaying: boolean;
+}>((props) => ({
   className: "dp-equalizer-glow",
-})<{ $intensity: number; $color: string; $isPlaying: boolean }>`
+  style: {
+    opacity: props.$isPlaying ? 0.8 : 0.2,
+    animationDuration: `${3 - props.$intensity * 1.5}s`,
+    background: `linear-gradient(90deg, transparent, ${props.$color}20, transparent)`,
+  },
+}))`
   position: absolute;
   top: 0;
   left: 0;
@@ -51,27 +60,22 @@ const GlowOverlay = styled.div.attrs({
   height: 100%;
   pointer-events: none;
   z-index: 2;
-  opacity: ${(props) => (props.$isPlaying ? 0.8 : 0.2)};
-
-  /* Use the css helper for the pulse animation */
-  animation: ${(props) =>
-    css`
-      ${pulseAnimation} ${3 - props.$intensity * 1.5}s infinite ease-in-out
-    `};
-
-  background: linear-gradient(
-    90deg,
-    transparent,
-    ${(props) => props.$color}20,
-    transparent
-  );
+  animation-name: ${pulseAnimation};
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
   background-size: 200% 200%;
+  will-change: opacity, background;
 `;
 
-// Add a separate element for the second animation
-const FlowEffect = styled.div.attrs({
-  className: "dp-equalizer-flow",
-})<{ $intensity: number; $color: string }>`
+// Optimize FlowEffect with attrs
+const FlowEffect = styled.div.attrs<{ $intensity: number; $color: string }>(
+  (props) => ({
+    className: "dp-equalizer-flow",
+    style: {
+      animationDuration: `${8 - props.$intensity * 4}s`,
+    },
+  })
+)`
   position: absolute;
   top: 0;
   left: 0;
@@ -79,20 +83,24 @@ const FlowEffect = styled.div.attrs({
   height: 100%;
   background: inherit;
   background-size: 200% 200%;
-  /* Use the css helper for the flow animation */
-  animation: ${(props) =>
-    css`
-      ${flowAnimation} ${8 - props.$intensity * 4}s infinite linear
-    `};
+  animation-name: ${flowAnimation};
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
   mix-blend-mode: overlay;
+  will-change: transform;
 `;
 
-const Bar = styled.div<{ $height: number; $color: string }>`
+// Optimize Bar component with attrs for dynamic styles
+const Bar = styled.div.attrs<{ $height: number; $color: string }>((props) => ({
+  style: {
+    height: `${props.$height}%`,
+    backgroundColor: props.$color,
+  },
+}))`
   width: 4px;
-  height: ${(props) => props.$height}%;
-  background-color: ${(props) => props.$color};
   border-radius: 2px;
   transition: height 0.1s ease;
+  will-change: height;
 `;
 
 const Equalizer: React.FC<EqualizerProps> = ({
@@ -105,39 +113,76 @@ const Equalizer: React.FC<EqualizerProps> = ({
   const [bars, setBars] = useState<number[]>(Array(12).fill(10));
   const animationRef = useRef<number>(0);
   const [intensity, setIntensity] = useState(0);
+  const prevTime = useRef(0);
 
+  // Optimize color calculation
+  const color = useMemo(
+    () => dominantColor || state.currentTrack?.color || "#388e3c",
+    [dominantColor, state.currentTrack?.color]
+  );
+
+  // Calculate overall intensity from bars
   useEffect(() => {
-    if (!state.isPlaying || !state.equalizerActive) {
-      setBars(Array(12).fill(10));
-      return;
-    }
+    const newIntensity =
+      bars.reduce((sum, height) => sum + height, 0) / (bars.length * 100);
+    setIntensity(newIntensity);
+  }, [bars]);
 
-    const updateBars = () => {
-      setBars((prev) =>
-        prev.map((height) => {
-          // Add some randomness but maintain continuity
-          const targetHeight = 20 + Math.random() * 60;
-          return height + (targetHeight - height) * 0.3;
-        })
-      );
-
-      animationRef.current = requestAnimationFrame(updateBars);
-    };
-
-    updateBars();
-
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [state.isPlaying, state.equalizerActive]);
-
+  // Notify parent of intensity changes
   useEffect(() => {
     if (onIntensityChange) {
       onIntensityChange(intensity);
     }
   }, [intensity, onIntensityChange]);
 
-  const color = dominantColor || state.currentTrack?.color || "#388e3c";
+  // Optimize animation timing
+  useEffect(() => {
+    if (!state.isPlaying || !state.equalizerActive) {
+      setBars(Array(12).fill(10));
+      return () => cancelAnimationFrame(animationRef.current);
+    }
+
+    const updateBars = (timestamp: number) => {
+      // Throttle updates to reduce renders (update at ~30fps instead of 60fps)
+      if (timestamp - prevTime.current < 33) {
+        animationRef.current = requestAnimationFrame(updateBars);
+        return;
+      }
+      prevTime.current = timestamp;
+
+      setBars((prev) => {
+        // Check if we need to update bars based on significant changes
+        const newBars = prev.map((height) => {
+          const targetHeight = 20 + Math.random() * 60;
+          return height + (targetHeight - height) * 0.3;
+        });
+
+        // Only update if there's a meaningful change
+        const hasSignificantChange = newBars.some(
+          (bar, i) => Math.abs(bar - prev[i]) > 2
+        );
+
+        return hasSignificantChange ? newBars : prev;
+      });
+
+      animationRef.current = requestAnimationFrame(updateBars);
+    };
+
+    animationRef.current = requestAnimationFrame(updateBars);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, [state.isPlaying, state.equalizerActive]);
+
+  // Memoize the bars to prevent unnecessary re-renders
+  const barElements = useMemo(
+    () =>
+      bars.map((height, i) => (
+        <Bar key={i} $height={state.isPlaying ? height : 5} $color={color} />
+      )),
+    [bars, state.isPlaying, color]
+  );
 
   return (
     <EqualizerContainer $isActive={isPlaying} $color={dominantColor}>
@@ -149,11 +194,9 @@ const Equalizer: React.FC<EqualizerProps> = ({
       >
         <FlowEffect $intensity={intensity} $color={dominantColor} />
       </GlowOverlay>
-      {bars.map((height, i) => (
-        <Bar key={i} $height={state.isPlaying ? height : 5} $color={color} />
-      ))}
+      {barElements}
     </EqualizerContainer>
   );
 };
 
-export default Equalizer;
+export default React.memo(Equalizer);

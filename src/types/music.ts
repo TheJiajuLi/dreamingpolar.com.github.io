@@ -22,7 +22,6 @@ export interface PlayerState {
   duration: number;
   isShuffling: boolean;
   isRepeating: boolean;
-  isRepeatingOne: boolean;
   queue: Track[];
   visualizerActive: boolean;
   equalizerActive: boolean;
@@ -31,5 +30,4 @@ export interface PlayerState {
   error: string | null;
   lastUserAction: number;
   lastSidebarInteraction: number;
-  favorites: string[]; // Add this field
 }
