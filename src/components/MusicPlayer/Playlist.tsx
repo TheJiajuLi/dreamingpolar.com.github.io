@@ -5,7 +5,6 @@ import { FaPlay, FaPause } from "react-icons/fa";
 import { Track } from "../../types/music";
 import { motion } from "framer-motion";
 import { useColorExtractor } from "../../hooks/useColorExtractor";
-import TitleEqualizer from "./TitleEqualizer"; // Add this import
 
 const PlaylistContainer = styled.div`
   width: 100%;
@@ -18,19 +17,10 @@ const PlaylistContainer = styled.div`
   position: relative;
 `;
 
-// Updated title container to accommodate the equalizer
-const TitleContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-`;
-
 const Title = styled.h2`
-  color: white;
+  margin-bottom: 20px;
   font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
+  color: ${(props) => props.theme.text};
 `;
 
 const CategoryFilter = styled.div`
@@ -137,8 +127,7 @@ const PlayButton = styled.button<{ $active?: boolean }>`
   justify-content: center;
   background: ${(props) =>
     props.$active ? props.theme.primary : "rgba(255, 255, 255, 0.1)"};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonText : props.theme.text};
+  color: ${(props) => (props.$active ? props.theme.buttonText : props.theme.text)};
   margin-left: 10px;
   transition: all 0.2s ease;
 
@@ -216,10 +205,7 @@ const Playlist: React.FC = () => {
 
   return (
     <PlaylistContainer>
-      <TitleContainer>
-        <Title>Music Explorer</Title>
-        {state.isPlaying && state.equalizerActive && <TitleEqualizer />}
-      </TitleContainer>
+      <Title>Music Explorer</Title>
 
       <SearchBar
         type="text"

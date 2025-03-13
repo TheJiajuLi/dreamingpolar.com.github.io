@@ -56,21 +56,6 @@ const SidebarContent = styled(motion.div)`
   overflow-y: auto;
 `;
 
-const AlbumArt = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-`;
-
-const Cover = styled.img`
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-`;
-
 const PlayerSidebar: React.FC<SidebarProps> = ({ isOpen, toggleOpen }) => {
   const { state } = useMusicContext();
 
@@ -91,14 +76,6 @@ const PlayerSidebar: React.FC<SidebarProps> = ({ isOpen, toggleOpen }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <AlbumArt>
-            <Cover
-              src={getSafeCoverArt(state.currentTrack?.coverArt)}
-              alt={state.currentTrack?.title || "Album Cover"}
-            />
-            {/* Remove or comment out the Equalizer component here */}
-            {/* {state.equalizerActive && <Equalizer />} */}
-          </AlbumArt>
           <TrackInfo track={state.currentTrack} />
           <PlayerControls />
         </SidebarContent>
