@@ -1,9 +1,9 @@
 {
   "name": "dreaming-polar",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.1.0",
   "type": "module",
-  "homepage": "https://TheJiajuLi.github.io/dreamingpolar.com.github.io",
+  "homepage": "https://github.com/TheJiajuLi/dreamingpolar.com.github.io.git",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
