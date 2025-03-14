@@ -1676,7 +1676,7 @@ const PlayerSidebar = React.forwardRef<
   // Add this to your component
 
   // Updated volume control implementation in the PlayerSidebar component
-  
+
   // Add this to your component
 
   return (
@@ -2353,75 +2353,42 @@ const MusicPlayer: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
 
-  // Add this with your other state variables in the MusicPlayer component
-  const [visualIntensity, setVisualIntensity] = useState(0);
-
-  const handleIntensityChange = (intensity: number) => {
-    setVisualIntensity(intensity);
-  };
-
   // Add this useEffect to automatically initialize audio
   useEffect(() => {
-    // Create and initialize a silent audio context to unlock audio
-    const initializeAudio = () => {
+    // Create audio context only after user interaction
+    const initializeAudioOnUserAction = () => {
       try {
+        // Only initialize once
+        window.removeEventListener("click", initializeAudioOnUserAction);
+        window.removeEventListener("touchstart", initializeAudioOnUserAction);
+
         // Initialize audio context
-        const AudioContext =
-          window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContext) {
-          const audioContext = new AudioContext();
+        if (window.AudioContext || window.webkitAudioContext) {
+          const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
+          const audioContext = new AudioContextClass();
 
-          // Create a silent oscillator
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
+          // Resume audio context if needed
+          if (audioContext.state === "suspended") {
+            audioContext.resume();
+          }
 
-          // Make it silent
-          gainNode.gain.value = 0.001;
-
-          // Connect and start for a brief moment
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          oscillator.start(0);
-          oscillator.stop(0.001);
+          console.log("Audio context initialized through user interaction");
         }
-
-        // Also attempt to play a short silent audio file
-        const unlockAudio = new Audio();
-        unlockAudio.src =
-          "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        unlockAudio.volume = 0.01;
-        const playPromise = unlockAudio.play();
-
-        if (playPromise !== undefined) {
-          playPromise.catch((e) => {
-            console.log("Auto audio initialization failed:", e);
-            // Set up a one-time click handler if auto-play fails
-            const handleFirstInteraction = () => {
-              unlockAudio
-                .play()
-                .catch((e) => console.log("Manual audio init failed:", e));
-              document.removeEventListener("click", handleFirstInteraction);
-              document.removeEventListener(
-                "touchstart",
-                handleFirstInteraction
-              );
-            };
-
-            document.addEventListener("click", handleFirstInteraction, {
-              once: true,
-            });
-            document.addEventListener("touchstart", handleFirstInteraction, {
-              once: true,
-            });
-          });
-        }
-      } catch (error) {
-        console.warn("Audio initialization error:", error);
+      } catch (err) {
+        console.log("Audio initialization error:", err);
       }
     };
 
-    // Run initialization immediately
-    initializeAudio();
+    // Add event listeners for user interaction
+    window.addEventListener("click", initializeAudioOnUserAction);
+    window.addEventListener("touchstart", initializeAudioOnUserAction);
+
+    // Cleanup listeners on component unmount
+    return () => {
+      window.removeEventListener("click", initializeAudioOnUserAction);
+      window.removeEventListener("touchstart", initializeAudioOnUserAction);
+    };
   }, []);
 
   // Handle sidebar behavior based on the selected mode
@@ -2666,32 +2633,6 @@ const ToggleButtons = styled.div.attrs({
     }
   }
 `;
-
-// Create an enhanced SidebarModeControl component for inside the sidebar
-
-// Add this after the ToggleButtons component definition
-
-// Replace the conflicting styled components at the end of MusicPlayer.tsx with these renamed versions
-
-// Optimize the MusicExplorer component for mobile devices
-
-// Optimize the track list for mobile
-
-// Make search and filter controls more mobile-friendly
-
-// Optimize the search input
-
-// Make track cards more touch-friendly
-
-// Make the album art responsive
-
-// Optimize track info for smaller screens
-
-// Add responsive styles to filtering options
-
-// Add this to your JSX to show a disclaimer for small screens
-
-// Create a specialized button for the equalizer that shows an animated gif when active
 const EqualizerButton = styled(ControlButton).attrs({
   className: "mp-control-button mp-equalizer-button",
 })`

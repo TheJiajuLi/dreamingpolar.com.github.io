@@ -55,7 +55,7 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
       return {
         ...state,
         currentTrack: action.payload,
-        isPlaying: true,
+        isPlaying: false, // Explicitly set to false when changing tracks
         progress: 0,
         error: null,
         isBuffering: true,

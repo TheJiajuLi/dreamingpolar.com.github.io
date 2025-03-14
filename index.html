@@ -1,20 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Update favicon link to use your logo -->
-    <link rel="icon" href="/assets/covers/logo.jpeg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Dreaming Polar - An immersive music experience with beautiful visualizations" />
-    <meta name="keywords" content="music player, music visualizer, react, web application" />
-    <meta property="og:title" content="Dreaming Polar" />
-    <meta property="og:description" content="An immersive music experience" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="icon" type="image/jpeg" href="/assets/logos/logos/logo_8_mini.jpeg" />
+    <link rel="apple-touch-icon" href="/assets/logos/logo_8_mini.jpeg" />
+    
+    <!-- Primary Meta Tags -->
+    <title>DreamingPolar</title>
+    <meta name="title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta name="description" content="Experience music like never before with Dreaming Polar's beautiful visualizations and immersive audio experience." />
+    <meta name="keywords" content="music player, music visualizer, react, web application, audio visualization, immersive music, dreaming polar" />
+    <meta name="author" content="Dreaming Polar" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.dreamingpolar.com/" />
-    <!-- Add OpenGraph image for social media link previews -->
-    <meta property="og:image" content="https://www.dreamingpolar.com/assets/covers/logo.jpeg" />
-    <title>Dreaming Polar</title>
+    <meta property="og:title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta property="og:description" content="An immersive music experience with stunning visualizations" />
+    <meta property="og:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://www.dreamingpolar.com/" />
+    <meta property="twitter:title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta property="twitter:description" content="An immersive music experience with stunning visualizations" />
+    <meta property="twitter:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    
+    <!-- Preload Critical Assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    
+    <!-- Theme Color for Mobile Browsers -->
+    <meta name="theme-color" content="#000000" />
+    
+    <!-- Security -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';">
   </head>
   <body>
+    <noscript>You need to enable JavaScript to run this application.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
