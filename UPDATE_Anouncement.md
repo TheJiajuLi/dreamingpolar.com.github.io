@@ -45,3 +45,7 @@ Fixed component naming conflicts (renamed with "Mobile" prefix)
 Improved code organization and consistency
 Enhanced error handling for audio playback issues
 These updates significantly improved usability across devices while maintaining the player's aesthetic appeal and feature set.
+
+```
+This is the update 1.3.0
+```

@@ -7,25 +7,21 @@ import {
   FaPause,
   FaForward,
   FaBackward,
-  FaVolumeUp,
-  FaVolumeMute,
   FaRandom,
   FaRedo,
   FaBars,
   FaTimes,
   FaEye,
-  FaEyeSlash,
   FaLock,
   FaLockOpen,
-  FaVolumeDown,
 } from "react-icons/fa";
 import { MdEqualizer } from "react-icons/md";
 import Playlist from "./Playlist";
 import Visualizer from "../Visualizer/Visualizer";
 import Equalizer from "../Visualizer/Equalizer";
-import StartButton from "./StartButton";
-import { PlayerState, Track, SidebarMode } from "../../types/music";
+import { SidebarMode } from "../../types/music";
 import { DEFAULT_COVER, getSafeCoverArt } from "../../utils/imageUtils";
+import VolumeControl from "./VolumeControl"; // Import the new VolumeControl
 
 const Container = styled.div.attrs({
   className: "mp-root-container",
@@ -375,38 +371,6 @@ const PlayerSidebarContainer = styled(motion.div).attrs<{ $isOpen?: boolean }>(
 `;
 
 // Rename the button and update position
-const MusicControlButton = styled.button<{ $isOpen: boolean }>`
-  position: fixed;
-  right: ${(props) => (props.$isOpen ? "330px" : "20px")};
-  top: 20px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: ${(props) => props.theme.primary};
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5), 0 0 20px rgba(76, 175, 80, 0.3);
-  transform: scale(${(props) => (props.$isOpen ? 1 : 0.9)});
-
-  &:hover {
-    transform: scale(1.1);
-    background: ${(props) => props.theme.primaryHover};
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.7), 0 0 30px rgba(76, 175, 80, 0.4);
-  }
-
-  @media (max-width: 600px) {
-    right: ${(props) => (props.$isOpen ? "290px" : "10px")};
-    width: 40px;
-    height: 40px;
-    top: 10px;
-  }
-`;
 
 // Update SidebarIndicator to work with Framer Motion for smoother transitions
 const SidebarIndicator = styled(motion.div).attrs({
@@ -570,35 +534,135 @@ const AlbumArt = styled.div.attrs({
   position: relative;
   width: 220px;
   height: 220px;
-  max-width: calc(100% - 40px);
-  max-height: calc(100vw - 120px);
-  margin: 40px auto 15px;
-  border-radius: 10px;
+  aspect-ratio: 1 / 1; /* Force square aspect ratio */
+  max-width: min(calc(100% - 40px), 220px); /* Prevent oversizing */
+  max-height: min(calc(100vw - 120px), 220px);
+  margin: 20px auto;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
   z-index: 1;
-  user-select: none; // Prevent selection
+  user-select: none;
+  transform: translateZ(0); /* Hardware acceleration */
+  backface-visibility: hidden; /* Prevent flickering */
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
 
+  /* Enhanced hover effect container */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      rgba(76, 175, 80, 0.15) 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Container for the album art image with enhanced hover */
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  /* Hover effects */
+  &:hover {
+    transform: scale(1.02) translateZ(0);
+    box-shadow: 0 25px 35px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.15);
+
+    &::before {
+      opacity: 1;
+    }
+
+    img {
+      transform: scale(1.15);
+    }
+  }
+
+  /* Active state for click/touch feedback */
+  &:active {
+    transform: scale(0.98) translateZ(0);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    img {
+      transform: scale(1.08);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+
+  /* Maintain minimum size */
+  @media (max-width: 280px) {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+    min-height: 120px;
+  }
+
+  /* Container sizing rules for different screen sizes */
   @media (max-height: 700px) {
     width: 180px;
     height: 180px;
-    margin: 30px auto 10px;
+    margin: 15px auto;
   }
 
   @media (max-height: 600px) {
-    width: 140px;
-    height: 140px;
-    margin: 15px auto 10px;
+    width: 150px;
+    height: 150px;
+    margin: 12px auto;
   }
 
   @media (max-height: 500px) and (orientation: landscape) {
-    width: 120px;
-    height: 120px;
-    margin: 5px auto;
+    width: 130px;
+    height: 130px;
+    margin: 10px auto;
   }
 
+  /* Ensure proper spacing on very small screens */
   @media (max-width: 380px) {
-    margin-top: 60px; /* Extra space for the control buttons at the top */
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  /* Enhanced visual appearance with subtle inner shadow */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* Loading state */
+  &.loading::before {
+    opacity: 1;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 0.1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+    100% {
+      opacity: 0.1;
+    }
   }
 `;
 
@@ -896,7 +960,6 @@ const PlayPauseButton = styled(ControlButton).attrs({
   }
 `;
 
-// Updated Controls component with the enhanced play button
 const Controls = ({ isPlaying, onPlayPause, onPrev, onNext }) => (
   <ControlsContainer>
     <ControlButton onClick={onPrev}>
@@ -962,7 +1025,7 @@ const ProgressBar = styled.div.attrs({
   className: "mp-progress-track",
 })`
   width: 100%;
-  height: 6px;
+  height: 5px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 6px;
   position: relative;
@@ -1004,38 +1067,22 @@ const ProgressBar = styled.div.attrs({
 const Progress = styled.div.attrs<{
   $width: string;
   $isDragging?: boolean;
-}>((props) => ({
+  $isPlaying?: boolean;
+}>(() => ({
   className: "mp-progress-fill",
 }))`
   height: 100%;
   border-radius: inherit;
   width: ${(props) => props.$width};
   position: relative;
-  /* Faster transition during dragging for immediate visual feedback */
   transition: width ${(props) => (props.$isDragging ? "0s" : "0.08s")} linear;
-
-  /* Enhanced gradient for filled progress */
   background: linear-gradient(
     90deg,
     ${(props) => props.theme.primary} 0%,
     ${(props) => props.theme.primaryHover || "#43a047"} 100%
   );
 
-  /* Add real-time fill effect that follows cursor position */
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 100%;
-    height: 100%;
-    width: 5px;
-    background: ${(props) => props.theme.primaryHover || "#43a047"};
-    filter: blur(3px);
-    opacity: ${(props) => (props.$isDragging ? 1 : 0)};
-    border-radius: 0 6px 6px 0;
-  }
-
-  /* Add shimmering effect on the progress bar */
+  /* Shimmer effect - only active when music is playing */
   &::after {
     content: "";
     position: absolute;
@@ -1046,11 +1093,12 @@ const Progress = styled.div.attrs<{
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.1) 50%,
+      rgba(43, 167, 103, 0.87) 50%,
       transparent 100%
     );
     opacity: 0;
-    animation: shimmer 3s infinite;
+    animation: ${(props) =>
+      props.$isPlaying ? "shimmer 3s infinite" : "none"};
     pointer-events: none;
   }
 
@@ -1074,7 +1122,7 @@ const ProgressHandle = styled.div.attrs<{
   $visible: boolean;
   $position: string;
   $isDragging?: boolean;
-}>((props) => ({
+}>(() => ({
   className: "mp-progress-handle",
 }))`
   position: absolute;
@@ -1175,7 +1223,7 @@ const TimeTooltip = styled.div.attrs<{
   $visible: boolean;
   $position: string;
   $isDragging?: boolean;
-}>((props) => ({
+}>(() => ({
   className: "mp-time-tooltip",
 }))`
   position: absolute;
@@ -1354,7 +1402,6 @@ const PlayerSidebar = React.forwardRef<
   const nextTrack = mediaControls.handleNext;
 
   // Use this instead of directly accessing state.isPlaying
-  const isPlaying = state.isPlaying;
 
   const bgColor = state.currentTrack?.color || "#388e3c";
 
@@ -1397,11 +1444,6 @@ const PlayerSidebar = React.forwardRef<
       const duration = audioRef.current.duration;
       audioRef.current.currentTime = (clickX / width) * duration;
     }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    dispatch({ type: "SET_VOLUME", payload: value });
   };
 
   useEffect(() => {
@@ -1632,33 +1674,10 @@ const PlayerSidebar = React.forwardRef<
   };
 
   // Add this to your component
-  const toggleMute = () => {
-    if (state.volume === 0) {
-      // Restore previous volume or default to 0.7
-      const prevVolume = localStorage.getItem("prevVolume") || "0.7";
-      dispatch({ type: "SET_VOLUME", payload: parseFloat(prevVolume) });
-    } else {
-      // Store current volume before muting
-      localStorage.setItem("prevVolume", state.volume.toString());
-      dispatch({ type: "SET_VOLUME", payload: 0 });
-    }
-
-    // If using audio ref directly
-    if (audioRef.current) {
-      audioRef.current.volume = state.volume;
-    }
-  };
 
   // Updated volume control implementation in the PlayerSidebar component
-  const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
-  const volumeLevel = Math.round(state.volume * 100);
-
+  
   // Add this to your component
-  const getVolumeIcon = () => {
-    if (state.volume === 0) return <FaVolumeMute />;
-    if (state.volume < 0.3) return <FaVolumeDown />; // Import FaVolumeDown from react-icons/fa
-    return <FaVolumeUp />;
-  };
 
   return (
     <PlayerSidebarContainer
@@ -1761,6 +1780,7 @@ const PlayerSidebar = React.forwardRef<
                       : `${(state.progress / state.duration) * 100}%`
                   }
                   $isDragging={isDragging}
+                  $isPlaying={state.isPlaying}
                 />
                 {/* Time tooltip */}
                 <TimeTooltip
@@ -1797,66 +1817,19 @@ const PlayerSidebar = React.forwardRef<
       </AlbumSection>
 
       <ExtraControls>
-        {/* Playback Controls Group */}
+        {/* Volume Control Group */}
         <ControlGroup>
-          <VolumeControl>
-            <VolumeButton
-              onClick={toggleMute}
-              title={state.volume === 0 ? "Unmute" : "Mute"}
-              aria-label={state.volume === 0 ? "Unmute" : "Mute"}
-              className={state.volume === 0 ? "muted" : ""}
-            >
-              {getVolumeIcon()}
-            </VolumeButton>
-
-            <VolumeSliderContainer
-              onMouseEnter={() => setShowVolumeTooltip(true)}
-              onMouseLeave={() => setShowVolumeTooltip(false)}
-            >
-              <VolumeFill $level={state.volume} />
-              <VolumeSlider
-                value={state.volume}
-                onChange={handleVolumeChange}
-              />
-              <VolumeLevelIndicator
-                $level={state.volume}
-                $visible={showVolumeTooltip}
-              >
-                {volumeLevel}%
-              </VolumeLevelIndicator>
-            </VolumeSliderContainer>
-          </VolumeControl>
-
-          <div>
-            {/* Sidebar mode control remains the same */}
-            <ControlButton
-              onClick={cycleSidebarMode}
-              style={{
-                color: (() => {
-                  switch (state.sidebarMode) {
-                    case "auto":
-                      return "rgba(76, 175, 80, 1)";
-                    case "always":
-                      return "rgba(33, 150, 243, 1)";
-                    case "manual":
-                      return "rgba(255, 152, 0, 1)";
-                    default:
-                      return "rgba(76, 175, 80, 1)";
-                  }
-                })(),
-              }}
-              title={`Sidebar: ${state.sidebarMode} mode`}
-            >
-              {state.sidebarMode === "auto" && <FaEye />}
-              {state.sidebarMode === "always" && <FaLock />}
-              {state.sidebarMode === "manual" && <FaLockOpen />}
-            </ControlButton>
-          </div>
+          <VolumeControl
+            volume={Math.round(state.volume * 100)}
+            onVolumeChange={(newVolume) =>
+              dispatch({ type: "SET_VOLUME", payload: newVolume / 100 })
+            }
+          />
         </ControlGroup>
 
         {/* Feature Toggles in a Grid Layout */}
         <ToggleButtons>
-          {/* Playback Options */}
+          {/* First Row */}
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_SHUFFLE" })}
             style={{ color: state.isShuffling ? "#388e3c" : "" }}
@@ -1892,7 +1865,6 @@ const PlayerSidebar = React.forwardRef<
             )}
           </ControlButton>
 
-          {/* Visualization Options */}
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
             style={{ color: state.visualizerActive ? "#388e3c" : "" }}
@@ -1901,16 +1873,45 @@ const PlayerSidebar = React.forwardRef<
             <FaBars />
           </ControlButton>
 
-          <ControlButton
+          {/* Second Row */}
+          <EqualizerButton
             onClick={() => dispatch({ type: "TOGGLE_EQUALIZER" })}
+            className={`${state.isPlaying ? "playing" : ""} ${
+              state.equalizerActive ? "active" : ""
+            }`}
             style={{ color: state.equalizerActive ? "#388e3c" : "" }}
             title="Toggle equalizer"
           >
             <MdEqualizer />
-          </ControlButton>
+          </EqualizerButton>
 
-          {/* Add an empty cell for balance in the grid */}
+          {/* Empty cell for spacing */}
           <div></div>
+
+          {/* Sidebar mode button aligned with other controls */}
+          <ControlButton
+            className="sidebar-mode-button"
+            onClick={cycleSidebarMode}
+            style={{
+              color: (() => {
+                switch (state.sidebarMode) {
+                  case "auto":
+                    return "rgba(76, 175, 80, 1)";
+                  case "always":
+                    return "rgba(33, 150, 243, 1)";
+                  case "manual":
+                    return "rgba(255, 152, 0, 1)";
+                  default:
+                    return "rgba(76, 175, 80, 1)";
+                }
+              })(),
+            }}
+            title={`Sidebar: ${state.sidebarMode} mode`}
+          >
+            {state.sidebarMode === "auto" && <FaEye />}
+            {state.sidebarMode === "always" && <FaLock />}
+            {state.sidebarMode === "manual" && <FaLockOpen />}
+          </ControlButton>
         </ToggleButtons>
       </ExtraControls>
     </PlayerSidebarContainer>
@@ -2338,64 +2339,6 @@ const CloseButton = styled.button.attrs({
 `;
 
 // Update SidebarModeIndicator to align with CloseButton
-const SidebarModeIndicator = styled.div.attrs<{ $mode?: SidebarMode }>(
-  (props) => ({
-    className: "mp-mode-indicator",
-  })
-)`
-  position: absolute;
-  top: 20px;
-  left: 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 8px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.2);
-  color: ${(props) => {
-    switch (props.$mode) {
-      case "auto":
-        return "rgba(76, 175, 80, 1)";
-      case "always":
-        return "rgba(33, 150, 243, 1)";
-      case "manual":
-        return "rgba(255, 152, 0, 1)";
-      default:
-        return "rgba(76, 175, 80, 1)";
-    }
-  }};
-  font-size: 0.75rem;
-  user-select: none;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  span.mode-name {
-    display: none;
-  }
-
-  &:hover span.mode-name {
-    display: inline;
-  }
-
-  @media (max-width: 380px) {
-    padding: 6px 10px;
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
-  }
-`;
 
 // Add proper type guard function to validate sidebarMode values
 const isValidSidebarMode = (mode: any): mode is SidebarMode => {
@@ -2607,28 +2550,6 @@ const MusicPlayer: React.FC = () => {
   }, []);
 
   // Add this function in the MusicPlayer component
-  const cycleSidebarMode = () => {
-    // Get current mode with fallback to "auto" if invalid
-    const currentMode = isValidSidebarMode(state.sidebarMode)
-      ? state.sidebarMode
-      : "auto";
-
-    // Define the cycle order
-    const modes: SidebarMode[] = ["auto", "always", "manual"];
-
-    // Find current index
-    const currentIndex = modes.indexOf(currentMode);
-
-    // Get next mode (loop back to beginning if at end)
-    const nextIndex = (currentIndex + 1) % modes.length;
-    const nextMode = modes[nextIndex];
-
-    // Update the sidebar mode
-    dispatch({ type: "SET_SIDEBAR_MODE", payload: nextMode });
-
-    // Optional: show feedback to user
-    // You could add a toast notification here if desired
-  };
 
   return (
     <Container>
@@ -2689,7 +2610,7 @@ const MusicPlayer: React.FC = () => {
 
 // Add these styled component definitions before the PlayerSidebar component
 
-// Container for volume controls and toggle buttons
+// Update the ExtraControls component for better organization
 const ExtraControls = styled.div.attrs({
   className: "mp-secondary-controls",
 })`
@@ -2698,7 +2619,6 @@ const ExtraControls = styled.div.attrs({
   gap: 15px;
   padding: 20px 15px;
   background: rgba(0, 0, 0, 0.2);
-  opacity: 0.5;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 1;
   user-select: none;
@@ -2709,386 +2629,7 @@ const ExtraControls = styled.div.attrs({
   }
 `;
 
-// Enhanced VolumeControl with animations and creative interaction
-const VolumeControl = styled.div.attrs({
-  className: "mp-volume-control",
-})`
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: ${(props) => props.theme.textSecondary};
-  transition: all 0.3s ease;
-  padding: 6px 2px;
-  border-radius: 20px;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.15);
-  }
-
-  /* Add the ripple effect container */
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 18px; /* Center on volume icon */
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      rgba(76, 175, 80, 0.2) 0%,
-      rgba(76, 175, 80, 0) 70%
-    );
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.5s ease;
-  }
-
-  &:active::after {
-    width: 80px;
-    height: 80px;
-    opacity: 1;
-    transition: all 0.3s ease-out;
-  }
-`;
-
-// Improved VolumeButton with visual feedback based on volume level
-const VolumeButton = styled.button.attrs({
-  className: "mp-volume-button",
-  type: "button",
-})`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  padding: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  z-index: 2;
-
-  /* Pulsing effect for muted state */
-  &.muted::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(255, 82, 82, 0.1);
-    animation: pulseMuted 2s infinite ease-in-out;
-  }
-
-  @keyframes pulseMuted {
-    0%,
-    100% {
-      transform: scale(0.95);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 0.6;
-    }
-  }
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.3);
-    color: #4caf50;
-    transform: scale(1.1);
-    box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  svg {
-    font-size: 26px;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-  }
-`;
-
-// Modern volume slider with interactive fill and glow effects
-const VolumeSliderContainer = styled.div`
-  position: relative;
-  width: 80px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-`;
-
-const VolumeSlider = styled.input.attrs({
-  className: "mp-volume-slider",
-  type: "range",
-  min: "0",
-  max: "1",
-  step: "0.01",
-})`
-  -webkit-appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.15);
-  outline: none;
-  opacity: 0.9;
-  transition: all 0.2s;
-  cursor: pointer;
-  position: relative;
-  z-index: 2;
-
-  /* Improved track with gradient */
-  &::-webkit-slider-runnable-track {
-    height: 4px;
-    cursor: pointer;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.2) 100%
-    );
-    border-radius: 4px;
-  }
-
-  &::-moz-range-track {
-    height: 4px;
-    cursor: pointer;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.2) 100%
-    );
-    border-radius: 4px;
-  }
-
-  /* Enhanced thumb design */
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #4caf50;
-    cursor: pointer;
-    margin-top: -5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-  }
-
-  &::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #4caf50;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-  }
-
-  /* Hover and focus states */
-  &:hover::-webkit-slider-thumb,
-  &:focus::-webkit-slider-thumb {
-    transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
-  }
-
-  &:hover::-moz-range-thumb,
-  &:focus::-moz-range-thumb {
-    transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
-  }
-
-  &:hover,
-  &:focus {
-    height: 6px;
-  }
-`;
-
-// Create a dynamic fill effect that updates with volume level
-const VolumeFill = styled.div.attrs<{ $level: number }>((props) => ({
-  style: {
-    width: `${props.$level * 100}%`,
-  },
-}))`
-  position: absolute;
-  height: 4px;
-  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
-  border-radius: 4px;
-  pointer-events: none;
-  z-index: 1;
-  transition: width 0.1s ease;
-  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
-`;
-
-// Optional volume level indicator that appears when hovering
-const VolumeLevelIndicator = styled.div.attrs<{
-  $level: number;
-  $visible: boolean;
-}>((props) => ({
-  style: {
-    opacity: props.$visible ? 1 : 0,
-    transform: `translateY(${props.$visible ? "0" : "10px"})`,
-  },
-}))`
-  position: absolute;
-  bottom: -22px;
-  left: ${(props) => props.$level * 100}%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 5;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 4px solid transparent;
-    border-bottom-color: rgba(0, 0, 0, 0.7);
-  }
-`;
-
-// Container for the toggle buttons
-const ToggleButtons = styled.div.attrs({
-  className: "mp-feature-toggles",
-})`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-
-  @media (max-width: 320px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-`;
-
-// Create an enhanced SidebarModeControl component for inside the sidebar
-const SidebarModeControl = styled.button.attrs<{ $mode?: SidebarMode }>(
-  (props) => ({
-    className: "mp-mode-control",
-    type: "button",
-  })
-)`
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.25);
-  color: ${(props) => {
-    switch (props.$mode) {
-      case "auto":
-        return "rgba(76, 175, 80, 1)";
-      case "always":
-        return "rgba(33, 150, 243, 1)";
-      case "manual":
-        return "rgba(255, 152, 0, 1)";
-      default:
-        return "rgba(76, 175, 80, 1)";
-    }
-  }};
-  font-size: 0.8rem;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.3s ease;
-  z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.4);
-    box-shadow: 0 0 10px
-      ${(props) => {
-        switch (props.$mode) {
-          case "auto":
-            return "rgba(76, 175, 80, 0.3)";
-          case "always":
-            return "rgba(33, 150, 243, 0.3)";
-          case "manual":
-            return "rgba(255, 152, 0, 0.3)";
-          default:
-            return "rgba(76, 175, 80, 0.3)";
-        }
-      }};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
-  }
-
-  span {
-    white-space: nowrap;
-  }
-
-  /* Subtle particle effect when clicked */
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: ${(props) => {
-      switch (props.$mode) {
-        case "auto":
-          return "rgba(76, 175, 80, 0.2)";
-        case "always":
-          return "rgba(33, 150, 243, 0.2)";
-        case "manual":
-          return "rgba(255, 152, 0, 0.2)";
-        default:
-          return "rgba(76, 175, 80, 0.2)";
-      }
-    }};
-    border-radius: 18px;
-    opacity: 0;
-    transform: scale(1.2);
-    pointer-events: none;
-  }
-
-  &:active::after {
-    animation: modeButtonPulse 0.5s ease-out;
-  }
-
-  @keyframes modeButtonPulse {
-    0% {
-      opacity: 0.7;
-      transform: scale(0.8);
-    }
-    70% {
-      opacity: 0;
-      transform: scale(1.5);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(1.5);
-    }
-  }
-`;
-
-// Add this after the ToggleButtons component definition
+// Update the ControlGroup to only handle volume control
 const ControlGroup = styled.div.attrs({
   className: "mp-control-group",
 })`
@@ -3098,223 +2639,109 @@ const ControlGroup = styled.div.attrs({
   width: 100%;
   margin-bottom: 5px;
   padding: 0 2px;
+`;
 
-  /* Add subtle hover effect for better visual feedback */
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);rgrgba(255, 255, 255, 0.02);ba(76, 175, 80, 0.7)    border-radius: 4px;
-  }
+// Update the ToggleButtons to include the sidebar mode button
+const ToggleButtons = styled.div.attrs({
+  className: "mp-feature-toggles",
+})`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
 
-  /* Add styling for volume section */
-  & > div:first-child {
-    flex-grow: 1;
-    max-width: 70%;
-  }
-
-  /* Add styling for mode button section */
-  & > div:last-child {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+  /* Add specific styling for sidebar mode button */
+  .sidebar-mode-button {
+    grid-column: 3; /* Place in last column */
+    grid-row: 2; /* Place in second row */
+    justify-self: center;
   }
 
   @media (max-width: 320px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
 
-    & > div:first-child {
-      max-width: 100%;
+    .sidebar-mode-button {
+      grid-column: 2;
+      grid-row: 2;
     }
   }
 `;
+
+// Create an enhanced SidebarModeControl component for inside the sidebar
+
+// Add this after the ToggleButtons component definition
 
 // Replace the conflicting styled components at the end of MusicPlayer.tsx with these renamed versions
 
 // Optimize the MusicExplorer component for mobile devices
-const MobileExplorerContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background: ${(props) => props.theme.background};
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  max-width: 1200px;
-  margin: 0 auto;
-
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    padding: 15px 10px;
-    border-radius: 0;
-    box-shadow: none;
-    max-height: calc(100vh - 140px); /* Account for player height */
-    overflow-y: auto;
-  }
-
-  @media (max-width: 480px) {
-    padding: 10px 8px;
-  }
-`;
 
 // Optimize the track list for mobile
-const MobileTrackGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  @media (max-width: 360px) {
-    grid-template-columns: 1fr;
-  }
-`;
 
 // Make search and filter controls more mobile-friendly
-const MobileFilterControls = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    gap: 8px;
-  }
-`;
 
 // Optimize the search input
-const MobileSearchInput = styled.input`
-  padding: 10px 15px;
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: 20px;
-  font-size: 16px;
-  flex: 1;
-  min-width: 200px;
-
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 14px;
-    min-width: 0;
-    width: 100%;
-  }
-`;
 
 // Make track cards more touch-friendly
-const MobileTrackCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  background: ${(props) => props.theme.surfaceVariant};
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  }
-
-  @media (max-width: 768px) {
-    border-radius: 6px;
-
-    /* Larger touch target on mobile */
-    &:active {
-      transform: scale(0.98);
-      opacity: 0.9;
-    }
-  }
-`;
 
 // Make the album art responsive
-const MobileCoverImage = styled.img`
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-
-  @media (max-width: 480px) {
-    height: auto; /* Let height be determined by width and aspect ratio */
-  }
-`;
 
 // Optimize track info for smaller screens
-const MobileTrackDetails = styled.div`
-  padding: 12px;
-
-  @media (max-width: 480px) {
-    padding: 8px 10px;
-  }
-`;
-
-const MobileTrackName = styled.h3`
-  margin: 0 0 5px;
-  font-size: 16px;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-
-  @media (max-width: 480px) {
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-`;
-
-const MobileArtistName = styled.p`
-  margin: 0;
-  font-size: 14px;
-  color: ${(props) => props.theme.textSecondary};
-
-  @media (max-width: 480px) {
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-`;
 
 // Add responsive styles to filtering options
-const MobileFilterDropdown = styled.select`
-  padding: 10px 15px;
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: 20px;
-  background-color: ${(props) => props.theme.surface};
-  color: ${(props) => props.theme.textPrimary};
-  font-size: 16px;
-
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 14px;
-    flex-grow: 1;
-    width: 100%;
-  }
-`;
 
 // Add this to your JSX to show a disclaimer for small screens
-const MobileOrientation = styled.p`
-  display: none;
 
-  @media (max-width: 480px) {
-    display: block;
-    font-size: 12px;
-    color: ${(props) => props.theme.textSecondary};
-    text-align: center;
-    margin: 10px 0;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 6px;
+// Create a specialized button for the equalizer that shows an animated gif when active
+const EqualizerButton = styled(ControlButton).attrs({
+  className: "mp-control-button mp-equalizer-button",
+})`
+  position: relative;
+
+  /* Container for the gif background - properly sized */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px; /* Smaller exact size that matches the icon */
+    height: 20px; /* Smaller exact size that matches the icon */
+    transform: translate(-50%, -50%);
+    background-image: url("/assets/covers/equalizer_animation.gif");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Show gif background only when playing and button is active */
+  &.playing.active::before {
+    opacity: 1;
+  }
+
+  /* Hide the static SVG icon when the animation is showing */
+  svg {
+    position: relative;
+    z-index: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &.playing.active svg {
+    opacity: 0;
+  }
+
+  /* Keep hover effect consistent */
+  &:hover {
+    color: ${(props) =>
+      props.style?.color || props.theme?.primary || "#4caf50"};
+  }
+
+  /* Add this to your component */
+  &:hover {
+    color: ${(props) =>
+      props.style?.color || props.theme?.primary || "#4caf50"};
   }
 `;
 
