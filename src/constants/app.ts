@@ -6,15 +6,15 @@
 // App identity
 export const APP_NAME = 'Dreaming Polar';
 export const APP_DESCRIPTION = 'An immersive music experience with beautiful visualizations';
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '1.4.0';
 
 // App assets
-export const APP_LOGO = '/assets/covers/logo.jpeg';
-export const APP_FAVICON = '/assets/covers/logo.jpeg';
-export const APP_SOCIAL_PREVIEW = '/assets/covers/logo.jpeg';
+export const APP_LOGO = '/assets/logos/logo_8_mini.png';
+export const APP_FAVICON = '/assets/logos/logo_8_mini.png';
+export const APP_SOCIAL_PREVIEW = '/assets/logos/logo_8_mini.png';
 
 // Default values
-export const DEFAULT_COVER = '/assets/covers/logo.jpeg'; // Using logo as default cover
+export const DEFAULT_COVER = '/assets/logos/logo_8_mini.png'; // Using logo as default cover
 export const DEFAULT_COLOR = '#3a1f7a'; // Primary brand color
 export const DEFAULT_ARTIST = 'Dreaming Polar';
 export const DEFAULT_ALBUM = 'Music Collection';

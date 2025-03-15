@@ -33,4 +33,5 @@ export interface PlayerState {
   error: string | null;
   lastUserAction: number;
   lastSidebarInteraction: number;
+  sidebarOpen: boolean; // Add this line to include the new property
 }

@@ -15,7 +15,7 @@ const Header = () => {
     <HeaderContainer>
       <LogoSection>
         <Link to="/">
-          <LogoImage src="/assets/covers/logo.jpeg" alt="Dreaming Polar Logo" />
+          <LogoImage src="/assets/logos/logo_8_mini.png" alt="Dreaming Polar" />
           <LogoText>Dreaming Polar</LogoText>
         </Link>
       </LogoSection>

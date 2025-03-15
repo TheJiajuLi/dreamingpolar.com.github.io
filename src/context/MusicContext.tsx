@@ -20,11 +20,13 @@ const initialState: PlayerState = {
   queue: musicLibrary, // Use the full library here
   visualizerActive: true,
   equalizerActive: true,
-  sidebarMode: "manual", // Change this from "auto" to "manual"
+  sidebarMode: "manual", // Default to manual
+  sidebarVisible: false, // Add this property for sidebar visibility
   isBuffering: false,
   error: null,
   lastUserAction: Date.now(),
   lastSidebarInteraction: Date.now(),
+  sidebarOpen: false, // Initialize the new property
 };
 
 type MusicAction =
@@ -46,7 +48,9 @@ type MusicAction =
   | { type: "SET_ERROR"; payload: string | null }
   | { type: "SET_SIDEBAR_MODE"; payload: SidebarMode }
   | { type: "SIDEBAR_INTERACTION" } // Track when user interacts with sidebar
-  | { type: "USER_INTERACTION" }; // Track general user interactions
+  | { type: "USER_INTERACTION" } // Track general user interactions
+  | { type: "TOGGLE_SIDEBAR_VISIBILITY" } // Add this new action type
+  | { type: "SET_SIDEBAR_OPEN"; payload: boolean }; // Add this new action type
 
 // Reducer to handle state changes
 const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
@@ -177,10 +181,34 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
     case "CYCLE_REPEAT_MODE":
       return {
         ...state,
-        repeatMode: state.repeatMode === "off" ? "all" : 
-                    state.repeatMode === "all" ? "one" : "off",
+        repeatMode:
+          state.repeatMode === "off"
+            ? "all"
+            : state.repeatMode === "all"
+            ? "one"
+            : "off",
         lastUserAction: Date.now(),
       };
+    case "TOGGLE_SIDEBAR_VISIBILITY":
+      console.log(
+        "Toggling sidebar visibility from",
+        state.sidebarVisible,
+        "to",
+        !state.sidebarVisible
+      );
+      return {
+        ...state,
+        sidebarVisible: !state.sidebarVisible,
+        lastSidebarInteraction: Date.now(),
+        lastUserAction: Date.now(),
+      };
+    case "SET_SIDEBAR_OPEN": {
+      // This action is specifically for the MusicPlayer component to listen for
+      return {
+        ...state,
+        sidebarOpen: action.payload, // true or false
+      };
+    }
     default:
       return state;
   }

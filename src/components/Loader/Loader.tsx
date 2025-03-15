@@ -41,7 +41,7 @@ const Loader = () => {
   return (
     <LoaderContainer>
       <Logo src="/assets/covers/logo.jpeg" alt="Dreaming Polar Logo" />
-      <LoadingText>Loading your experience...</LoadingText>
+      <LoadingText>Listen music like never before...</LoadingText>
     </LoaderContainer>
   );
 };

@@ -24,6 +24,12 @@ import { SidebarMode } from "../../types/music";
 import { DEFAULT_COVER, getSafeCoverArt } from "../../utils/imageUtils";
 import VolumeControl from "./VolumeControl"; // Import the new VolumeControl
 
+// Add this at the top of the file, before your component definitions
+// This adds the missing type declaration for webkitAudioContext
+interface Window {
+  webkitAudioContext: typeof AudioContext;
+}
+
 const Container = styled.div.attrs({
   className: "mp-root-container",
 })`
@@ -538,7 +544,7 @@ const AlbumArt = styled.div.attrs({
   aspect-ratio: 1 / 1; /* Force square aspect ratio */
   max-width: min(calc(100% - 40px), 220px); /* Prevent oversizing */
   max-height: min(calc(100vw - 120px), 220px);
-  margin: 20px auto;
+  margin: 35px auto 20px auto; /* Increase top margin from 20px to 35px */
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -616,24 +622,24 @@ const AlbumArt = styled.div.attrs({
   @media (max-height: 700px) {
     width: 180px;
     height: 180px;
-    margin: 15px auto;
+    margin: 30px auto 15px auto; /* Adjusted for smaller screens */
   }
 
   @media (max-height: 600px) {
     width: 150px;
     height: 150px;
-    margin: 12px auto;
+    margin: 25px auto 12px auto; /* Adjusted for even smaller screens */
   }
 
   @media (max-height: 500px) and (orientation: landscape) {
     width: 130px;
     height: 130px;
-    margin: 10px auto;
+    margin: 20px auto 10px auto; /* Adjusted for landscape mode */
   }
 
   /* Ensure proper spacing on very small screens */
   @media (max-width: 380px) {
-    margin-top: 25px;
+    margin-top: 40px; /* Increased from 25px to 40px */
     margin-bottom: 15px;
   }
 
@@ -1707,7 +1713,12 @@ const PlayerSidebar = React.forwardRef<
     >
       <SidebarGlow />
 
-      <CloseButton onClick={toggleOpen} aria-label="Close music player">
+      <CloseButton
+        onClick={() => {
+          toggleOpen(); // This calls the toggleSidebar function passed as prop
+        }}
+        aria-label="Close music player"
+      >
         <FaTimes />
         <div className="particles">
           <div className="particle"></div>
@@ -2381,10 +2392,11 @@ const MusicPlayer: React.FC = () => {
         window.removeEventListener("click", initializeAudioOnUserAction);
         window.removeEventListener("touchstart", initializeAudioOnUserAction);
 
-        // Initialize audio context
-        if (window.AudioContext || window.webkitAudioContext) {
-          const AudioContextClass =
-            window.AudioContext || window.webkitAudioContext;
+        // Initialize audio context with proper type handling
+        const AudioContextClass =
+          window.AudioContext || (window as any).webkitAudioContext;
+
+        if (AudioContextClass) {
           const audioContext = new AudioContextClass();
 
           // Resume audio context if needed
@@ -2503,17 +2515,25 @@ const MusicPlayer: React.FC = () => {
 
   // Toggle sidebar visibility manually
   const toggleSidebar = () => {
-    // If in manual mode, just toggle
-    if (state.sidebarMode === "manual") {
-      setSidebarOpen(!isSidebarOpen);
-      dispatch({ type: "SIDEBAR_INTERACTION" });
-    }
-    // In other modes, also switch to manual mode
-    else {
+    const newSidebarOpen = !isSidebarOpen;
+
+    // Update local state
+    setSidebarOpen(newSidebarOpen);
+
+    // Update context state
+    dispatch({ type: "SET_SIDEBAR_OPEN", payload: newSidebarOpen });
+
+    // Toggle visibility in global state for HorizontalMusicControls
+    dispatch({ type: "TOGGLE_SIDEBAR_VISIBILITY" });
+
+    // If in another mode, switch to manual mode
+    if (state.sidebarMode !== "manual") {
       dispatch({ type: "SET_SIDEBAR_MODE", payload: "manual" });
-      setSidebarOpen(!isSidebarOpen);
-      dispatch({ type: "SIDEBAR_INTERACTION" });
     }
+
+    // Record interactions for analytics
+    dispatch({ type: "SIDEBAR_INTERACTION" });
+    dispatch({ type: "USER_INTERACTION" });
   };
 
   // Add this effect after your other useEffects in the MusicPlayer component:
@@ -2536,6 +2556,14 @@ const MusicPlayer: React.FC = () => {
   }, []);
 
   // Add this function in the MusicPlayer component
+
+  // In MusicPlayer.tsx, add a useEffect to listen for the sidebar open state
+  useEffect(() => {
+    // When the sidebarOpen state changes in the context, update the local state
+    if (state.sidebarOpen !== undefined) {
+      setSidebarOpen(state.sidebarOpen);
+    }
+  }, [state.sidebarOpen]);
 
   return (
     <Container>
