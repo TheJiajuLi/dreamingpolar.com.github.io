@@ -14,6 +14,8 @@ export interface Track {
 
 export type Genre = 'all' | 'rock' | 'jazz' | 'electronic' | 'classical' | 'pop' | 'ambient';
 
+export type RepeatMode = "off" | "all" | "one";
+
 export interface PlayerState {
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -21,11 +23,12 @@ export interface PlayerState {
   progress: number;
   duration: number;
   isShuffling: boolean;
-  isRepeating: boolean;
+  repeatMode: RepeatMode;
   queue: Track[];
   visualizerActive: boolean;
   equalizerActive: boolean;
   sidebarMode: SidebarMode;
+  sidebarVisible: boolean;
   isBuffering: boolean;
   error: string | null;
   lastUserAction: number;

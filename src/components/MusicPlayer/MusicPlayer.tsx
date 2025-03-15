@@ -16,6 +16,7 @@ import {
   FaLockOpen,
 } from "react-icons/fa";
 import { MdEqualizer } from "react-icons/md";
+import { TbRepeatOff, TbRepeatOnce, TbRepeat } from "react-icons/tb";
 import Playlist from "./Playlist";
 import Visualizer from "../Visualizer/Visualizer";
 import Equalizer from "../Visualizer/Equalizer";
@@ -1399,7 +1400,20 @@ const PlayerSidebar = React.forwardRef<
   // Map the handler methods to our component functions
   const togglePlay = mediaControls.handlePlayPause;
   const prevTrack = mediaControls.handlePrev;
-  const nextTrack = mediaControls.handleNext;
+  const nextTrack = () => {
+    // If repeat one is enabled, just restart the current track
+    if (state.repeatMode === "one" && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current
+        .play()
+        .catch((err) => console.warn("Couldn't restart track:", err));
+      return;
+    }
+
+    // Otherwise dispatch the normal next track action
+    // The reducer should handle wrapping around if repeatMode is "all"
+    dispatch({ type: "NEXT_TRACK" });
+  };
 
   // Use this instead of directly accessing state.isPlaying
 
@@ -1838,32 +1852,37 @@ const PlayerSidebar = React.forwardRef<
             <FaRandom />
           </ControlButton>
 
-          <ControlButton
-            onClick={() => dispatch({ type: "TOGGLE_REPEAT" })}
-            style={{
-              color: state.isRepeating ? "#388e3c" : "",
-              position: "relative",
-            }}
-            title="Toggle repeat mode"
+          <RepeatButton
+            onClick={() => dispatch({ type: "CYCLE_REPEAT_MODE" })}
+            className={`${
+              state.repeatMode === "off"
+                ? "repeat-off"
+                : state.repeatMode === "all"
+                ? "repeat-all"
+                : "repeat-one"
+            } ${state.repeatMode !== "off" ? "active" : ""}`}
+            title={`Repeat mode: ${state.repeatMode}`}
+            aria-label={`Repeat mode: ${state.repeatMode}`}
           >
-            <FaRedo />
-            {state.isRepeating && (
-              <motion.span
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 0.7 }}
-                style={{
-                  position: "absolute",
-                  top: "-3px",
-                  right: "-3px",
-                  width: "6px",
-                  height: "6px",
-                  background: "#388e3c",
-                  borderRadius: "50%",
-                  boxShadow: "0 0 4px rgba(76, 175, 80, 0.8)",
-                }}
+            <div className="repeat-icon-container">
+              <TbRepeatOff
+                className={`repeat-off-icon ${
+                  state.repeatMode === "off" ? "active" : ""
+                }`}
               />
-            )}
-          </ControlButton>
+              <TbRepeat
+                className={`repeat-all-icon ${
+                  state.repeatMode === "all" ? "active" : ""
+                }`}
+              />
+              <TbRepeatOnce
+                className={`repeat-one-icon ${
+                  state.repeatMode === "one" ? "active" : ""
+                }`}
+              />
+              <span className="repeat-badge">1</span>
+            </div>
+          </RepeatButton>
 
           <ControlButton
             onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
@@ -2683,6 +2702,112 @@ const EqualizerButton = styled(ControlButton).attrs({
   &:hover {
     color: ${(props) =>
       props.style?.color || props.theme?.primary || "#4caf50"};
+  }
+`;
+
+// Add this new styled component for the enhanced repeat button
+const RepeatButton = styled(ControlButton).attrs({
+  className: "mp-control-button mp-repeat-button",
+})`
+  position: relative;
+  overflow: visible;
+
+  /* Inner content container for smooth transitions */
+  .repeat-icon-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Bottom indicator showing current state */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    height: 2px;
+    width: 16px;
+    background: ${(props) => props.theme.primary || "#4caf50"};
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 2px;
+    opacity: 0.9;
+  }
+
+  &.active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  &.repeat-one::after {
+    background: #3f51b5;
+    box-shadow: 0 0 4px rgba(63, 81, 181, 0.7);
+  }
+
+  &.repeat-all::after {
+    background: #4caf50;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.7);
+  }
+
+  /* Badge for repeat-one mode */
+  .repeat-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #3f51b5;
+    color: white;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 4px rgba(63, 81, 181, 0.8);
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.2s ease;
+  }
+
+  &.repeat-one .repeat-badge {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Icon animations */
+  svg {
+    position: absolute;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    transform: scale(0.7) rotate(-30deg);
+  }
+
+  svg.active {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  /* Icon colors based on state */
+  &.repeat-off svg.repeat-off-icon {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  &.repeat-all svg.repeat-all-icon {
+    color: #4caf50;
+  }
+
+  &.repeat-one svg.repeat-one-icon {
+    color: #3f51b5;
+  }
+
+  /* Hover effect */
+  &:hover {
+    &.repeat-off svg.repeat-off-icon {
+      color: rgba(255, 255, 255, 0.9);
+    }
   }
 `;
 

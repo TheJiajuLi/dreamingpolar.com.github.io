@@ -16,7 +16,7 @@ const initialState: PlayerState = {
   progress: 0,
   duration: 0,
   isShuffling: false,
-  isRepeating: false,
+  repeatMode: "off", // instead of isRepeating: false
   queue: musicLibrary, // Use the full library here
   visualizerActive: true,
   equalizerActive: true,
@@ -35,7 +35,7 @@ type MusicAction =
   | { type: "SET_PROGRESS"; payload: number }
   | { type: "SET_DURATION"; payload: number }
   | { type: "TOGGLE_SHUFFLE" }
-  | { type: "TOGGLE_REPEAT" }
+  | { type: "CYCLE_REPEAT_MODE" } // Replace TOGGLE_REPEAT with this
   | { type: "TOGGLE_REPEAT_ONE" } // Add this new action
   | { type: "SET_QUEUE"; payload: Track[] }
   | { type: "NEXT_TRACK" }
@@ -172,6 +172,13 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
     case "USER_INTERACTION":
       return {
         ...state,
+        lastUserAction: Date.now(),
+      };
+    case "CYCLE_REPEAT_MODE":
+      return {
+        ...state,
+        repeatMode: state.repeatMode === "off" ? "all" : 
+                    state.repeatMode === "all" ? "one" : "off",
         lastUserAction: Date.now(),
       };
     default:
