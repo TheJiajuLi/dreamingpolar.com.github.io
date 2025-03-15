@@ -2657,16 +2657,16 @@ const EqualizerButton = styled(ControlButton).attrs({
 })`
   position: relative;
 
-  /* Container for the gif background - properly sized */
+  /* Container for the animated GIF - shown when playing and active */
   &::before {
     content: "";
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 20px; /* Smaller exact size that matches the icon */
-    height: 20px; /* Smaller exact size that matches the icon */
+    width: 15px; /* Smaller exact size that matches the icon */
+    height: 15px; /* Smaller exact size that matches the icon */
     transform: translate(-50%, -50%);
-    background-image: url("/assets/covers/equalizer_animation.gif");
+    background-image: url("/assets/icons/equalizer_animation.gif");
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -2676,8 +2676,32 @@ const EqualizerButton = styled(ControlButton).attrs({
     pointer-events: none;
   }
 
-  /* Show gif background only when playing and button is active */
+  /* Container for the static PNG - shown when not playing but active */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 25px; /* Smaller exact size that matches the icon */
+    height: 25px; /* Smaller exact size that matches the icon */
+    transform: translate(-50%, -50%);
+    background-image: url("/assets/icons/equalizer_green.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Show animated GIF when playing and active */
   &.playing.active::before {
+    opacity: 1;
+  }
+
+  /* Show static PNG when not playing but active */
+  &.active:not(.playing)::after {
     opacity: 1;
   }
 
@@ -2688,17 +2712,11 @@ const EqualizerButton = styled(ControlButton).attrs({
     transition: opacity 0.2s ease;
   }
 
-  &.playing.active svg {
+  &.active svg {
     opacity: 0;
   }
 
   /* Keep hover effect consistent */
-  &:hover {
-    color: ${(props) =>
-      props.style?.color || props.theme?.primary || "#4caf50"};
-  }
-
-  /* Add this to your component */
   &:hover {
     color: ${(props) =>
       props.style?.color || props.theme?.primary || "#4caf50"};
