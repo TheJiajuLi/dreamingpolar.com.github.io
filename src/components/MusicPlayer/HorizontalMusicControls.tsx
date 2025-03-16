@@ -5,6 +5,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { MdExpandMore } from "react-icons/md";
 import { getSafeCoverArt } from "../../utils/imageUtils";
+import { useLayout } from "../../context/LayoutContext";
 
 // Move ButtonIcon outside the component
 const ButtonIcon = styled.img<{ $active?: boolean }>`
@@ -27,6 +28,7 @@ const ButtonIcon = styled.img<{ $active?: boolean }>`
 
 const HorizontalMusicControls: React.FC = () => {
   const { state, dispatch } = useMusicContext();
+  const { state: layoutState, dispatch: layoutDispatch } = useLayout();
   const [expanded, setExpanded] = useState(false);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [hoverPosition, setHoverPosition] = useState("0%");
@@ -75,6 +77,13 @@ const HorizontalMusicControls: React.FC = () => {
       transition: { duration: 0.3, ease: [0.34, 1.56, 0.64, 1] },
     });
   }, [expanded, contentControls]);
+
+  useEffect(() => {
+    layoutDispatch({
+      type: "SET_CONTROLS_EXPANDED",
+      payload: expanded,
+    });
+  }, [expanded, layoutDispatch]);
 
   // Format time helper function
   const formatTime = (time: number) => {
@@ -185,6 +194,11 @@ const HorizontalMusicControls: React.FC = () => {
     dispatch({ type: "SET_VOLUME", payload: volume });
   };
 
+  const containerStyle = {
+    paddingLeft: layoutState.explorerVisible ? "350px" : "60px",
+    transition: "padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  };
+
   return (
     <Container
       animate={containerControls} // Use containerControls for position/visibility
@@ -192,6 +206,7 @@ const HorizontalMusicControls: React.FC = () => {
       className="horizontal-music-controls"
       data-testid="horizontal-music-controls"
       data-sidebar-visible={state.sidebarVisible} // For debugging
+      style={containerStyle}
     >
       <ExpandToggle
         onClick={() => setExpanded(!expanded)}
@@ -231,7 +246,7 @@ const HorizontalMusicControls: React.FC = () => {
           </ProgressBar>
         </ProgressBarContainer>
 
-        <ContentContainer>
+        <ContentContainer $explorerVisible={layoutState.explorerVisible}>
           <TrackInfoSection>
             {state.currentTrack && (
               <motion.div
@@ -482,13 +497,14 @@ const TimeTooltip = styled.div.attrs<{ $visible: boolean; $position: string }>(
   transition: opacity 0.15s ease, transform 0.15s ease;
 `;
 
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ $explorerVisible: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex: 1;
   width: 100%;
-  padding: 0 12px;
+  padding: 0 ${({ $explorerVisible }) => ($explorerVisible ? "12px" : "20px")};
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const TrackInfoSection = styled.div`

@@ -8,7 +8,6 @@ import {
   FaForward,
   FaBackward,
   FaRandom,
-  FaRedo,
   FaBars,
   FaTimes,
   FaEye,
@@ -17,7 +16,6 @@ import {
 } from "react-icons/fa";
 import { MdEqualizer } from "react-icons/md";
 import { TbRepeatOff, TbRepeatOnce, TbRepeat } from "react-icons/tb";
-import Playlist from "./Playlist";
 import Visualizer from "../Visualizer/Visualizer";
 import Equalizer from "../Visualizer/Equalizer";
 import { SidebarMode } from "../../types/music";
@@ -2581,14 +2579,6 @@ const MusicPlayer: React.FC = () => {
         <BackgroundVisualizer>
           {state.visualizerActive && <Visualizer />}
         </BackgroundVisualizer>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Playlist />
-        </motion.div>
       </MainContent>
 
       {/* Visual indicator when sidebar is closed */}
