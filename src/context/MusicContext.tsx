@@ -7,26 +7,33 @@ import React, {
 } from "react";
 import { PlayerState, Track, SidebarMode } from "../types/music";
 import musicLibrary from "../data/musicLibrary";
+import LocalStorage from "../utils/LocalStorage"; // Import LocalStorage utility
 
 // Initial state for the player
-const initialState: PlayerState = {
-  currentTrack: null,
-  isPlaying: false,
-  volume: 0.7,
-  progress: 0,
-  duration: 0,
-  isShuffling: false,
-  repeatMode: "off", // instead of isRepeating: false
-  queue: musicLibrary, // Use the full library here
-  visualizerActive: true,
-  equalizerActive: true,
-  sidebarMode: "manual", // Default to manual
-  sidebarVisible: false, // Add this property for sidebar visibility
-  isBuffering: false,
-  error: null,
-  lastUserAction: Date.now(),
-  lastSidebarInteraction: Date.now(),
-  sidebarOpen: false, // Initialize the new property
+const getInitialState = (): PlayerState => {
+  const lastPlayed = LocalStorage.getLastPlayed();
+  const playbackState = LocalStorage.getPlaybackState();
+  const savedQueue = LocalStorage.getQueue();
+
+  return {
+    currentTrack: lastPlayed || null,
+    isPlaying: false,
+    volume: playbackState?.volume ?? 0.7,
+    progress: playbackState?.progress ?? 0,
+    duration: lastPlayed?.duration ?? 0,
+    isShuffling: playbackState?.isShuffling ?? false,
+    repeatMode: playbackState?.repeatMode ?? "off",
+    queue: savedQueue.length > 0 ? savedQueue : musicLibrary,
+    visualizerActive: true,
+    equalizerActive: true,
+    sidebarMode: "manual",
+    sidebarVisible: false,
+    isBuffering: false,
+    error: null,
+    lastUserAction: Date.now(),
+    lastSidebarInteraction: Date.now(),
+    sidebarOpen: false,
+  };
 };
 
 type MusicAction =
@@ -50,21 +57,27 @@ type MusicAction =
   | { type: "SIDEBAR_INTERACTION" } // Track when user interacts with sidebar
   | { type: "USER_INTERACTION" } // Track general user interactions
   | { type: "TOGGLE_SIDEBAR_VISIBILITY" } // Add this new action type
-  | { type: "SET_SIDEBAR_OPEN"; payload: boolean }; // Add this new action type
+  | { type: "SET_SIDEBAR_OPEN"; payload: boolean } // Add this new action type
+  | { type: "SET_ACTIVE_CONTEXT"; payload: PlaybackContext }; // Add new action type
 
 // Reducer to handle state changes
 const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
   switch (action.type) {
-    case "SET_TRACK":
+    case "SET_TRACK": {
+      const track = action.payload;
+      LocalStorage.saveLastPlayed(track);
+      LocalStorage.updateSession(track.id);
       return {
         ...state,
-        currentTrack: action.payload,
+        currentTrack: track,
         isPlaying: false, // Explicitly set to false when changing tracks
         progress: 0,
+        duration: track.duration || 0, // Set initial duration from track data
         error: null,
         isBuffering: true,
         lastUserAction: Date.now(),
       };
+    }
     case "PLAY":
       return {
         ...state,
@@ -83,10 +96,30 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
         volume: action.payload,
         lastUserAction: Date.now(),
       };
-    case "SET_PROGRESS":
-      return { ...state, progress: action.payload };
-    case "SET_DURATION":
-      return { ...state, duration: action.payload };
+    case "SET_PROGRESS": {
+      if (state.currentTrack) {
+        LocalStorage.saveToHistory(state.currentTrack, action.payload);
+      }
+      // Only update progress if it's a valid number
+      const newProgress = isNaN(action.payload)
+        ? state.progress
+        : action.payload;
+      return {
+        ...state,
+        progress: newProgress,
+        isBuffering: false,
+      };
+    }
+    case "SET_DURATION": {
+      // Only update duration if it's a valid number
+      const newDuration = isNaN(action.payload)
+        ? state.duration
+        : action.payload;
+      return {
+        ...state,
+        duration: newDuration,
+      };
+    }
     case "TOGGLE_SHUFFLE":
       return {
         ...state,
@@ -96,43 +129,84 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
     case "SET_QUEUE":
       return { ...state, queue: [...action.payload] }; // Create a new array to ensure immutability
     case "NEXT_TRACK": {
-      if (!state.currentTrack || state.queue.length === 0) return state;
+      if (!state.currentTrack || !state.activeContext) return state;
 
-      const currentIndex = state.queue.findIndex(
+      const contextTracks = state.activeContext.tracks;
+      const currentIndex = contextTracks.findIndex(
         (track) => track.id === state.currentTrack!.id
       );
-      const nextIndex = (currentIndex + 1) % state.queue.length;
 
+      let nextIndex: number;
+
+      if (state.repeatMode === "one") {
+        // Repeat current track
+        nextIndex = currentIndex;
+      } else if (state.repeatMode === "all") {
+        // Go to next track in current context, loop back to start if at end
+        nextIndex = (currentIndex + 1) % contextTracks.length;
+      } else {
+        // No repeat - stop at end of context
+        if (currentIndex === contextTracks.length - 1) {
+          return {
+            ...state,
+            isPlaying: false,
+            progress: 0,
+          };
+        }
+        nextIndex = currentIndex + 1;
+      }
+
+      // Handle shuffle within current context
+      if (state.isShuffling && state.repeatMode !== "one") {
+        const remainingTracks = contextTracks.filter(
+          (_, i) => i > currentIndex
+        );
+        if (remainingTracks.length > 0) {
+          const randomTrack =
+            remainingTracks[Math.floor(Math.random() * remainingTracks.length)];
+          nextIndex = contextTracks.indexOf(randomTrack);
+        }
+      }
+
+      const nextTrack = contextTracks[nextIndex];
       return {
         ...state,
-        currentTrack: state.queue[nextIndex],
+        currentTrack: nextTrack,
         isPlaying: true,
         progress: 0,
         isBuffering: true,
         lastUserAction: Date.now(),
+        queue: contextTracks, // Update queue to match current context
       };
     }
     case "PREV_TRACK": {
-      if (!state.currentTrack || state.queue.length === 0) return state;
+      if (!state.currentTrack || !state.activeContext) return state;
 
-      // If we're more than 3 seconds into the track, just restart it
-      if (state.progress > 3) {
-        return {
-          ...state,
-          progress: 0,
-          lastUserAction: Date.now(),
-        };
-      }
-
-      const currentIndex = state.queue.findIndex(
+      const contextTracks = state.activeContext.tracks;
+      const currentIndex = contextTracks.findIndex(
         (track) => track.id === state.currentTrack!.id
       );
-      const prevIndex =
-        (currentIndex - 1 + state.queue.length) % state.queue.length;
+
+      let prevIndex: number;
+
+      if (state.repeatMode === "one") {
+        prevIndex = currentIndex;
+      } else if (state.repeatMode === "all") {
+        prevIndex =
+          (currentIndex - 1 + contextTracks.length) % contextTracks.length;
+      } else {
+        if (currentIndex === 0) {
+          return {
+            ...state,
+            progress: 0,
+          };
+        }
+        prevIndex = currentIndex - 1;
+      }
 
       return {
         ...state,
-        currentTrack: state.queue[prevIndex],
+        currentTrack: contextTracks[prevIndex],
         isPlaying: true,
         progress: 0,
         isBuffering: true,
@@ -189,19 +263,23 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
             : "off",
         lastUserAction: Date.now(),
       };
-    case "TOGGLE_SIDEBAR_VISIBILITY":
+    case "TOGGLE_SIDEBAR_VISIBILITY": {
+      // Add a check to prevent unnecessary updates
+      const newVisibility = !state.sidebarVisible;
       console.log(
-        "Toggling sidebar visibility from",
-        state.sidebarVisible,
-        "to",
-        !state.sidebarVisible
+        `Toggling sidebar visibility from ${state.sidebarVisible} to ${newVisibility}`
       );
+
+      // Only update if value is actually changing
+      if (state.sidebarVisible === newVisibility) {
+        return state; // No change needed
+      }
+
       return {
         ...state,
-        sidebarVisible: !state.sidebarVisible,
-        lastSidebarInteraction: Date.now(),
-        lastUserAction: Date.now(),
+        sidebarVisible: newVisibility,
       };
+    }
     case "SET_SIDEBAR_OPEN": {
       // This action is specifically for the MusicPlayer component to listen for
       return {
@@ -209,6 +287,12 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
         sidebarOpen: action.payload, // true or false
       };
     }
+    case "SET_ACTIVE_CONTEXT":
+      return {
+        ...state,
+        activeContext: action.payload,
+        queue: action.payload.tracks, // Update queue to match context
+      };
     default:
       return state;
   }
@@ -225,7 +309,7 @@ const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
 // Provider component
 export function MusicProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(musicReducer, initialState);
+  const [state, dispatch] = useReducer(musicReducer, getInitialState());
   const [isLoadingTracks] = useState(false);
 
   // Set the first track as current if none is selected
@@ -234,6 +318,13 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_TRACK", payload: state.queue[0] });
     }
   }, [state.queue, state.currentTrack]);
+
+  useEffect(() => {
+    // Start new session when app loads
+    LocalStorage.startNewSession();
+    // Clean up old data
+    LocalStorage.cleanupOldData();
+  }, []);
 
   return (
     <MusicContext.Provider value={{ state, dispatch, isLoadingTracks }}>

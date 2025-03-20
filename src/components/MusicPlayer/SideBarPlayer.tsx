@@ -22,143 +22,6 @@ import { SidebarMode } from "../../types/music";
 import { DEFAULT_COVER, getSafeCoverArt } from "../../utils/imageUtils";
 import VolumeControl from "./VolumeControl"; // Import the new VolumeControl
 
-// Add this at the top of the file, before your component definitions
-// This adds the missing type declaration for webkitAudioContext
-interface Window {
-  webkitAudioContext: typeof AudioContext;
-}
-
-const Container = styled.div.attrs({
-  className: "mp-root-container",
-})`
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
-  user-select: none; // Add this line to prevent text selection throughout the app
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(56, 142, 60, 0.2) 25%,
-      rgba(76, 175, 80, 0.4) 50%,
-      rgba(56, 142, 60, 0.2) 75%,
-      transparent 100%
-    );
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5), 0 0 30px rgba(76, 175, 80, 0.3);
-    animation: flowLeft 8s infinite linear;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(56, 142, 60, 0.2) 25%,
-      rgba(76, 175, 80, 0.4) 50%,
-      rgba(56, 142, 60, 0.2) 75%,
-      transparent 100%
-    );
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5), 0 0 30px rgba(76, 175, 80, 0.3);
-    animation: flowRight 8s infinite linear;
-  }
-
-  @keyframes flowLeft {
-    0% {
-      background-position: 0% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
-  }
-
-  @keyframes flowRight {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 0% 0;
-    }
-  }
-`;
-
-const MainContent = styled.div.attrs({
-  className: "mp-content-area",
-})`
-  flex: 1;
-  position: relative;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    width: 2px;
-    top: 0;
-    bottom: 0;
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(56, 142, 60, 0.2) 25%,
-      rgba(76, 175, 80, 0.4) 50%,
-      rgba(56, 142, 60, 0.2) 75%,
-      transparent 100%
-    );
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5), 0 0 30px rgba(76, 175, 80, 0.3);
-  }
-
-  &::before {
-    left: 0;
-    animation: flowUp 12s infinite linear;
-  }
-
-  &::after {
-    right: 0;
-    animation: flowDown 12s infinite linear;
-  }
-
-  @keyframes flowUp {
-    0% {
-      background-position: 0 200%;
-    }
-    100% {
-      background-position: 0 0;
-    }
-  }
-
-  @keyframes flowDown {
-    0% {
-      background-position: 0 0;
-    }
-    100% {
-      background-position: 0 200%;
-    }
-  }
-
-  @media (max-width: 600px) {
-    padding: 15px 10px;
-  }
-`;
-
 // Add this new component for the energy particles
 const EnergyParticles = styled.div.attrs({
   className: "mp-ambient-particles",
@@ -371,65 +234,6 @@ const PlayerSidebarContainer = styled(motion.div).attrs<{ $isOpen?: boolean }>(
     & > div:last-of-type {
       grid-column: 2;
       padding-left: 0;
-    }
-  }
-`;
-
-// Rename the button and update position
-
-// Update SidebarIndicator to work with Framer Motion for smoother transitions
-const SidebarIndicator = styled(motion.div).attrs({
-  className: "mp-sidebar-trigger",
-})`
-  position: fixed;
-  right: 0;
-  top: 50%;
-  width: 4px;
-  height: 100px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(76, 175, 80, 0.3) 20%,
-    rgba(76, 175, 80, 0.7) 50%,
-    rgba(76, 175, 80, 0.3) 80%,
-    transparent 100%
-  );
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  cursor: pointer;
-  z-index: 999;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(76, 175, 80, 0.4);
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.7), 0 0 20px rgba(76, 175, 80, 0.4);
-    opacity: 0.6;
-    animation: waterBounce 2.5s ease-in-out infinite;
-  }
-
-  @keyframes waterBounce {
-    0%,
-    100% {
-      transform: scaleY(1);
-      opacity: 0.6;
-    }
-    50% {
-      transform: scaleY(1.2) translateY(-5px);
-      opacity: 0.8;
-    }
-  }
-
-  @media (max-width: 380px) {
-    height: 120px;
-
-    &::before {
-      opacity: 0.8;
     }
   }
 `;
@@ -1073,12 +877,13 @@ const Progress = styled.div.attrs<{
   $width: string;
   $isDragging?: boolean;
   $isPlaying?: boolean;
-}>(() => ({
-  className: "mp-progress-fill",
+}>((props) => ({
+  style: {
+    width: props.$width, // Move this dynamic property to style
+  },
 }))`
   height: 100%;
   border-radius: inherit;
-  width: ${(props) => props.$width};
   position: relative;
   transition: width ${(props) => (props.$isDragging ? "0s" : "0.08s")} linear;
   background: linear-gradient(
@@ -1127,37 +932,32 @@ const ProgressHandle = styled.div.attrs<{
   $visible: boolean;
   $position: string;
   $isDragging?: boolean;
-}>(() => ({
-  className: "mp-progress-handle",
+}>((props) => ({
+  style: {
+    left: props.$position, // Move this dynamic property to style
+    transform: `translate(-50%, -50%) scale(${props.$visible ? 1 : 0})`,
+    width: props.$isDragging ? "18px" : "12px",
+    height: props.$isDragging ? "18px" : "12px",
+    background: props.$isDragging ? "white" : props.theme.primary,
+    boxShadow: props.$isDragging
+      ? `0 0 0 4px rgba(76, 175, 80, 0.3), 
+         0 0 15px rgba(76, 175, 80, 0.8),
+         0 0 30px rgba(76, 175, 80, 0.4)`
+      : `0 0 0 2px rgba(76, 175, 80, 0.2), 
+         0 0 8px rgba(76, 175, 80, 0.6)`,
+  },
 }))`
   position: absolute;
   top: 50%;
-  left: ${(props) => props.$position};
-  width: ${(props) => (props.$isDragging ? "18px" : "12px")};
-  height: ${(props) => (props.$isDragging ? "18px" : "12px")};
-  background: ${(props) =>
-    props.$isDragging
-      ? "white" // White when dragging for high contrast
-      : props.theme.primary};
   border-radius: 50%;
-  transform: translate(-50%, -50%) scale(${(props) => (props.$visible ? 1 : 0)});
-  box-shadow: ${(props) =>
-    props.$isDragging
-      ? `0 0 0 4px rgba(76, 175, 80, 0.3), 
-       0 0 15px rgba(76, 175, 80, 0.8),
-       0 0 30px rgba(76, 175, 80, 0.4)`
-      : `0 0 0 2px rgba(76, 175, 80, 0.2), 
-       0 0 8px rgba(76, 175, 80, 0.6)`};
-  /* Remove transition delays during active interaction */
-  transition: ${(props) =>
-    props.$isDragging
-      ? "transform 0.05s linear, background-color 0.1s ease, box-shadow 0.1s ease"
-      : "transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease, width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)"};
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s ease, box-shadow 0.2s ease,
+    width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
   z-index: 2;
-  will-change: transform, width, height, left; /* Optimize for animation performance */
+  will-change: transform, width, height, left;
 
-  /* Maintain other styles unchanged */
   /* Inner dot for enhanced visual presence */
   &::before {
     content: "";
@@ -1228,24 +1028,23 @@ const TimeTooltip = styled.div.attrs<{
   $visible: boolean;
   $position: string;
   $isDragging?: boolean;
-}>(() => ({
-  className: "mp-time-tooltip",
+}>((props) => ({
+  style: {
+    opacity: props.$visible ? 1 : 0,
+    transform: `translateX(-50%) translateY(${props.$visible ? 0 : 10}px)`,
+    left: props.$position,
+    background: props.$isDragging
+      ? props.theme.primaryDark || "#2e7d32"
+      : "rgba(0, 0, 0, 0.75)",
+    padding: props.$isDragging ? "5px 10px" : "4px 8px",
+    fontSize: props.$isDragging ? "0.85rem" : "0.75rem",
+    fontWeight: props.$isDragging ? 600 : 500,
+  },
 }))`
   position: absolute;
   bottom: ${(props) => (props.$isDragging ? "28px" : "24px")};
-  left: ${(props) => props.$position};
-  transform: translateX(-50%)
-    translateY(${(props) => (props.$visible ? "0" : "10px")});
-  background: ${(props) =>
-    props.$isDragging
-      ? props.theme.primaryDark || "#2e7d32"
-      : "rgba(0, 0, 0, 0.75)"};
   color: white;
-  padding: ${(props) => (props.$isDragging ? "5px 10px" : "4px 8px")};
   border-radius: 6px;
-  font-size: ${(props) => (props.$isDragging ? "0.85rem" : "0.75rem")};
-  font-weight: ${(props) => (props.$isDragging ? "600" : "500")};
-  opacity: ${(props) => (props.$visible ? "1" : "0")};
   transition: opacity 0.15s ease, transform 0.15s ease,
     background-color 0.2s ease, padding 0.2s ease;
   pointer-events: none;
@@ -1387,564 +1186,573 @@ class MediaControlHandler {
   };
 }
 
-// PlayerSidebar Component
-const PlayerSidebar = React.forwardRef<
-  HTMLDivElement,
-  { isOpen: boolean; toggleOpen: () => void }
->(({ isOpen, toggleOpen }, ref) => {
-  const { state, dispatch } = useMusicContext();
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
+// Update the PlayerSidebar interface
+interface PlayerSidebarProps {
+  isOpen: boolean;
+  toggleOpen: () => void;
+  setSidebarOpen: (isOpen: boolean) => void;
+}
 
-  // Create a media control handler instance
-  const mediaControls = useRef(
-    new MediaControlHandler(audioRef, dispatch)
-  ).current;
+// Update the PlayerSidebar component
+const PlayerSidebar = React.forwardRef<HTMLDivElement, PlayerSidebarProps>(
+  ({ isOpen, toggleOpen, setSidebarOpen }, ref) => {
+    const { state, dispatch } = useMusicContext();
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // Map the handler methods to our component functions
-  const togglePlay = mediaControls.handlePlayPause;
-  const prevTrack = mediaControls.handlePrev;
-  const nextTrack = () => {
-    // If repeat one is enabled, just restart the current track
-    if (state.repeatMode === "one" && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current
-        .play()
-        .catch((err) => console.warn("Couldn't restart track:", err));
-      return;
-    }
+    // Create a media control handler instance
+    const mediaControls = useRef(
+      new MediaControlHandler(audioRef, dispatch)
+    ).current;
 
-    // Otherwise dispatch the normal next track action
-    // The reducer should handle wrapping around if repeatMode is "all"
-    dispatch({ type: "NEXT_TRACK" });
-  };
-
-  // Use this instead of directly accessing state.isPlaying
-
-  const bgColor = state.currentTrack?.color || "#388e3c";
-
-  useEffect(() => {
-    if (state.isPlaying) {
-      audioRef.current?.play();
-    } else {
-      audioRef.current?.pause();
-    }
-  }, [state.isPlaying, state.currentTrack]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = state.volume;
-    }
-  }, [state.volume]);
-
-  const formatTime = (time: number) => {
-    if (time && !isNaN(time)) {
-      const minutes = Math.floor(time / 60);
-      const seconds = Math.floor(time % 60);
-      return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-    }
-    return "0:00";
-  };
-
-  const updateProgress = () => {
-    if (audioRef.current) {
-      const currentTime = audioRef.current.currentTime;
-      const duration = audioRef.current.duration;
-      dispatch({ type: "SET_PROGRESS", payload: currentTime });
-      dispatch({ type: "SET_DURATION", payload: duration });
-    }
-  };
-
-  const setProgress = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (progressBarRef.current && audioRef.current) {
-      const width = progressBarRef.current.clientWidth;
-      const clickX = e.nativeEvent.offsetX;
-      const duration = audioRef.current.duration;
-      audioRef.current.currentTime = (clickX / width) * duration;
-    }
-  };
-
-  useEffect(() => {
-    if (state.isPlaying && audioRef.current) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn("Failed to start playback:", error);
-          dispatch({ type: "PAUSE" });
-        });
+    // Map the handler methods to our component functions
+    const togglePlay = mediaControls.handlePlayPause;
+    const prevTrack = mediaControls.handlePrev;
+    const nextTrack = () => {
+      // If repeat one is enabled, just restart the current track
+      if (state.repeatMode === "one" && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current
+          .play()
+          .catch((err) => console.warn("Couldn't restart track:", err));
+        return;
       }
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-    }
-  }, [state.currentTrack, state.isPlaying, dispatch]);
 
-  useEffect(() => {
-    // Monitor and handle audio playback errors
-    const handleMediaError = () => {
-      if (audioRef.current?.error) {
-        console.error("Media error:", audioRef.current.error);
-
-        // Retry playback with exponential backoff
-        let retryCount = 0;
-        const maxRetries = 3;
-
-        const retryPlayback = () => {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            const delay = Math.pow(2, retryCount) * 1000;
-
-            console.log(`Retrying playback in ${delay / 1000} seconds...`);
-            setTimeout(() => {
-              if (audioRef.current) {
-                audioRef.current.load();
-                audioRef.current.play().catch((err) => {
-                  console.warn("Retry failed:", err);
-                  retryPlayback();
-                });
-              }
-            }, delay);
-          } else {
-            // If all retries fail, skip to next track
-            console.warn("All retries failed, skipping track");
-            nextTrack();
-          }
-        };
-
-        retryPlayback();
-      }
+      // Otherwise dispatch the normal next track action
+      // The reducer should handle wrapping around if repeatMode is "all"
+      dispatch({ type: "NEXT_TRACK" });
     };
 
-    const audioElement = audioRef.current;
-    if (audioElement) {
-      audioElement.addEventListener("error", handleMediaError);
-    }
+    // Use this instead of directly accessing state.isPlaying
 
-    return () => {
-      if (audioElement) {
-        audioElement.removeEventListener("error", handleMediaError);
+    const bgColor = state.currentTrack?.color || "#388e3c";
+
+    useEffect(() => {
+      if (state.isPlaying) {
+        audioRef.current?.play();
+      } else {
+        audioRef.current?.pause();
       }
+    }, [state.isPlaying, state.currentTrack]);
+
+    useEffect(() => {
+      if (audioRef.current) {
+        audioRef.current.volume = state.volume;
+      }
+    }, [state.volume]);
+
+    const formatTime = (time: number) => {
+      if (time && !isNaN(time)) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      }
+      return "0:00";
     };
-  }, []);
 
-  // Add these state variables to PlayerSidebar component
-  const [isHoveringProgress, setIsHoveringProgress] = useState(false);
-  const [hoverPosition, setHoverPosition] = useState("0%");
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Add this state variable
-  const [hoverTime, setHoverTime] = useState<string | null>(null);
-
-  // Add these functions to PlayerSidebar component
-  // Replace the handleProgressHover function with this enhanced version
-  const handleProgressHover = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (progressBarRef.current) {
-      // Get precise position data
-      const rect = progressBarRef.current.getBoundingClientRect();
-
-      // Calculate exact position to 3 decimal places for smoother experience
-      const rawPosition = (e.clientX - rect.left) / rect.width;
-      const position = Math.max(0, Math.min(1, rawPosition)) * 100;
-
-      // Update position with high precision - critical for smooth feeling
-      setHoverPosition(`${position.toFixed(3)}%`);
-
-      // Calculate and set hover time immediately
-      if (audioRef.current?.duration) {
-        const timeAtPosition = (position * audioRef.current.duration) / 100;
-        setHoverTime(formatTime(timeAtPosition));
-      }
-
-      // Set hover state immediately without animation delay
-      if (!isHoveringProgress) {
-        setIsHoveringProgress(true);
-      }
-    }
-  };
-
-  const handleProgressLeave = () => {
-    if (!isDragging) {
-      setIsHoveringProgress(false);
-    }
-  };
-
-  const handleProgressDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    handleProgressMove(e);
-  };
-
-  // Add this function to get the timestamp at hover position
-  const getHoverTime = (position: number): string => {
-    if (audioRef.current) {
-      const duration = audioRef.current.duration;
-      const timeAtPosition = (position / 100) * duration;
-      return formatTime(timeAtPosition);
-    }
-    return "0:00";
-  };
-
-  const handleProgressMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (progressBarRef.current) {
-      const rect = progressBarRef.current.getBoundingClientRect();
-      const rawPosition = (e.clientX - rect.left) / rect.width;
-      const position = Math.max(0, Math.min(1, rawPosition)) * 100;
-
-      // Update position with immediate effect - no toFixed for maximum responsiveness
-      const positionString = `${position}%`;
-      setHoverPosition(positionString);
-
-      // Calculate and set hover time
-      setHoverTime(getHoverTime(position));
-
-      if (isDragging && audioRef.current) {
-        // Update audio position
+    const updateProgress = () => {
+      if (audioRef.current) {
+        const currentTime = audioRef.current.currentTime;
         const duration = audioRef.current.duration;
-        audioRef.current.currentTime = (position / 100) * duration;
+        dispatch({ type: "SET_PROGRESS", payload: currentTime });
+        dispatch({ type: "SET_DURATION", payload: duration });
+      }
+    };
 
-        // Force a direct DOM update for maximum responsiveness
-        if (progressBarRef.current.querySelector(".mp-progress-fill")) {
-          (
-            progressBarRef.current.querySelector(
-              ".mp-progress-fill"
-            ) as HTMLElement
-          ).style.width = positionString;
+    const setProgress = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (progressBarRef.current && audioRef.current) {
+        const width = progressBarRef.current.clientWidth;
+        const clickX = e.nativeEvent.offsetX;
+        const duration = audioRef.current.duration;
+        audioRef.current.currentTime = (clickX / width) * duration;
+      }
+    };
+
+    useEffect(() => {
+      if (state.isPlaying && audioRef.current) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.warn("Failed to start playback:", error);
+            dispatch({ type: "PAUSE" });
+          });
+        }
+      } else if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    }, [state.currentTrack, state.isPlaying, dispatch]);
+
+    useEffect(() => {
+      // Monitor and handle audio playback errors
+      const handleMediaError = () => {
+        if (audioRef.current?.error) {
+          console.error("Media error:", audioRef.current.error);
+
+          // Retry playback with exponential backoff
+          let retryCount = 0;
+          const maxRetries = 3;
+
+          const retryPlayback = () => {
+            if (retryCount < maxRetries) {
+              retryCount++;
+              const delay = Math.pow(2, retryCount) * 1000;
+
+              console.log(`Retrying playback in ${delay / 1000} seconds...`);
+              setTimeout(() => {
+                if (audioRef.current) {
+                  audioRef.current.load();
+                  audioRef.current.play().catch((err) => {
+                    console.warn("Retry failed:", err);
+                    retryPlayback();
+                  });
+                }
+              }, delay);
+            } else {
+              // If all retries fail, skip to next track
+              console.warn("All retries failed, skipping track");
+              nextTrack();
+            }
+          };
+
+          retryPlayback();
+        }
+      };
+
+      const audioElement = audioRef.current;
+      if (audioElement) {
+        audioElement.addEventListener("error", handleMediaError);
+      }
+
+      return () => {
+        if (audioElement) {
+          audioElement.removeEventListener("error", handleMediaError);
+        }
+      };
+    }, []);
+
+    // Add these state variables to PlayerSidebar component
+    const [isHoveringProgress, setIsHoveringProgress] = useState(false);
+    const [hoverPosition, setHoverPosition] = useState("0%");
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Add this state variable
+    const [hoverTime, setHoverTime] = useState<string | null>(null);
+
+    // Add these functions to PlayerSidebar component
+    // Replace the handleProgressHover function with this enhanced version
+    const handleProgressHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (progressBarRef.current) {
+        // Get precise position data
+        const rect = progressBarRef.current.getBoundingClientRect();
+
+        // Calculate exact position to 3 decimal places for smoother experience
+        const rawPosition = (e.clientX - rect.left) / rect.width;
+        const position = Math.max(0, Math.min(1, rawPosition)) * 100;
+
+        // Update position with high precision - critical for smooth feeling
+        setHoverPosition(`${position.toFixed(3)}%`);
+
+        // Calculate and set hover time immediately
+        if (audioRef.current?.duration) {
+          const timeAtPosition = (position * audioRef.current.duration) / 100;
+          setHoverTime(formatTime(timeAtPosition));
+        }
+
+        // Set hover state immediately without animation delay
+        if (!isHoveringProgress) {
+          setIsHoveringProgress(true);
         }
       }
-    }
-  };
+    };
 
-  const handleProgressDragEnd = () => {
-    setIsDragging(false);
-    setTimeout(() => {
-      if (!isHoveringProgress) {
+    const handleProgressLeave = () => {
+      if (!isDragging) {
         setIsHoveringProgress(false);
       }
-    }, 100);
-  };
+    };
 
-  // Add these event listeners to document in a useEffect
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && progressBarRef.current) {
-        e.preventDefault();
+    const handleProgressDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
+      setIsDragging(true);
+      handleProgressMove(e);
+    };
 
-        // Use more precise position calculations
+    // Add this function to get the timestamp at hover position
+    const getHoverTime = (position: number): string => {
+      if (audioRef.current) {
+        const duration = audioRef.current.duration;
+        const timeAtPosition = (position / 100) * duration;
+        return formatTime(timeAtPosition);
+      }
+      return "0:00";
+    };
+
+    const handleProgressMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (progressBarRef.current) {
         const rect = progressBarRef.current.getBoundingClientRect();
         const rawPosition = (e.clientX - rect.left) / rect.width;
         const position = Math.max(0, Math.min(1, rawPosition)) * 100;
 
-        // Update position with high precision
-        setHoverPosition(`${position.toFixed(3)}%`);
+        // Update position with immediate effect - no toFixed for maximum responsiveness
+        const positionString = `${position}%`;
+        setHoverPosition(positionString);
 
-        // Update audio time with the same high precision
-        if (audioRef.current) {
+        // Calculate and set hover time
+        setHoverTime(getHoverTime(position));
+
+        if (isDragging && audioRef.current) {
+          // Update audio position
           const duration = audioRef.current.duration;
           audioRef.current.currentTime = (position / 100) * duration;
+
+          // Force a direct DOM update for maximum responsiveness
+          if (progressBarRef.current.querySelector(".mp-progress-fill")) {
+            (
+              progressBarRef.current.querySelector(
+                ".mp-progress-fill"
+              ) as HTMLElement
+            ).style.width = positionString;
+          }
         }
       }
     };
 
-    // Use a more optimized approach with requestAnimationFrame for smoother updates
-    let animationId: number;
-    const smoothMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        e.preventDefault();
-        cancelAnimationFrame(animationId);
+    const handleProgressDragEnd = () => {
+      setIsDragging(false);
+      setTimeout(() => {
+        if (!isHoveringProgress) {
+          setIsHoveringProgress(false);
+        }
+      }, 100);
+    };
 
-        animationId = requestAnimationFrame(() => {
-          handleMouseMove(e);
+    // Add these event listeners to document in a useEffect
+    useEffect(() => {
+      const handleMouseMove = (e: MouseEvent) => {
+        if (isDragging && progressBarRef.current) {
+          e.preventDefault();
+
+          // Use more precise position calculations
+          const rect = progressBarRef.current.getBoundingClientRect();
+          const rawPosition = (e.clientX - rect.left) / rect.width;
+          const position = Math.max(0, Math.min(1, rawPosition)) * 100;
+
+          // Update position with high precision
+          setHoverPosition(`${position.toFixed(3)}%`);
+
+          // Update audio time with the same high precision
+          if (audioRef.current) {
+            const duration = audioRef.current.duration;
+            audioRef.current.currentTime = (position / 100) * duration;
+          }
+        }
+      };
+
+      // Use a more optimized approach with requestAnimationFrame for smoother updates
+      let animationId: number;
+      const smoothMouseMove = (e: MouseEvent) => {
+        if (isDragging) {
+          e.preventDefault();
+          cancelAnimationFrame(animationId);
+
+          animationId = requestAnimationFrame(() => {
+            handleMouseMove(e);
+          });
+        }
+      };
+
+      const handleMouseUp = () => {
+        if (isDragging) {
+          handleProgressDragEnd();
+          cancelAnimationFrame(animationId);
+        }
+      };
+
+      if (isDragging) {
+        document.addEventListener("mousemove", smoothMouseMove, {
+          passive: false,
         });
+        document.addEventListener("mouseup", handleMouseUp);
       }
-    };
 
-    const handleMouseUp = () => {
-      if (isDragging) {
-        handleProgressDragEnd();
+      return () => {
+        document.removeEventListener("mousemove", smoothMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
         cancelAnimationFrame(animationId);
-      }
+      };
+    }, [isDragging]);
+
+    // Add this function in the PlayerSidebar component
+    const cycleSidebarMode = () => {
+      const currentMode = isValidSidebarMode(state.sidebarMode)
+        ? state.sidebarMode
+        : "auto";
+
+      const modes: SidebarMode[] = ["auto", "always", "manual"];
+      const currentIndex = modes.indexOf(currentMode);
+      const nextIndex = (currentIndex + 1) % modes.length;
+      const nextMode = modes[nextIndex];
+
+      dispatch({ type: "SET_SIDEBAR_MODE", payload: nextMode });
     };
 
-    if (isDragging) {
-      document.addEventListener("mousemove", smoothMouseMove, {
-        passive: false,
-      });
-      document.addEventListener("mouseup", handleMouseUp);
-    }
+    // Add this to your component
 
-    return () => {
-      document.removeEventListener("mousemove", smoothMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      cancelAnimationFrame(animationId);
+    // Updated volume control implementation in the PlayerSidebar component
+
+    // Add this to your component
+
+    // Update the handleClose function
+    const handleClose = () => {
+      toggleOpen(); // Use the toggleOpen function
+      dispatch({ type: "SET_SIDEBAR_MODE", payload: "manual" });
+      dispatch({ type: "SIDEBAR_INTERACTION" });
+      dispatch({ type: "USER_INTERACTION" });
     };
-  }, [isDragging]);
 
-  // Add this function in the PlayerSidebar component
-  const cycleSidebarMode = () => {
-    const currentMode = isValidSidebarMode(state.sidebarMode)
-      ? state.sidebarMode
-      : "auto";
-
-    const modes: SidebarMode[] = ["auto", "always", "manual"];
-    const currentIndex = modes.indexOf(currentMode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-    const nextMode = modes[nextIndex];
-
-    dispatch({ type: "SET_SIDEBAR_MODE", payload: nextMode });
-  };
-
-  // Add this to your component
-
-  // Updated volume control implementation in the PlayerSidebar component
-
-  // Add this to your component
-
-  return (
-    <PlayerSidebarContainer
-      $isOpen={isOpen}
-      className="player-sidebar"
-      ref={ref}
-      initial={{ right: "-280px" }}
-      animate={{ right: isOpen ? 0 : "-280px" }}
-      transition={{
-        duration: ANIMATION_TIMING.sidebar,
-        ease: [0.34, 1.56, 0.64, 1],
-      }}
-    >
-      <SidebarGlow />
-
-      <CloseButton
-        onClick={() => {
-          toggleOpen(); // This calls the toggleSidebar function passed as prop
+    return (
+      <PlayerSidebarContainer
+        $isOpen={isOpen}
+        className="player-sidebar"
+        ref={ref}
+        initial={{ right: "-280px" }}
+        animate={{ right: isOpen ? 0 : "-280px" }}
+        transition={{
+          duration: ANIMATION_TIMING.sidebar,
+          ease: [0.34, 1.56, 0.64, 1],
         }}
-        aria-label="Close music player"
       >
-        <FaTimes />
-        <div className="particles">
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-        </div>
-      </CloseButton>
+        <SidebarGlow />
 
-      <audio
-        ref={audioRef}
-        src={state.currentTrack?.audioSrc}
-        onTimeUpdate={updateProgress}
-        onEnded={nextTrack}
-        onError={(e) => {
-          console.error("Audio error:", e);
-          // Handle the error appropriately
-          if (state.isPlaying) {
-            dispatch({ type: "PAUSE" });
-            setTimeout(() => {
-              nextTrack(); // Try playing the next track instead
-            }, 500);
-          }
-        }}
-        onCanPlayThrough={() => {
-          // Automatically attempt to play when the track is ready
-          if (state.isPlaying && audioRef.current) {
-            audioRef.current.play().catch((error) => {
-              console.warn("Auto-play was prevented:", error);
+        <CloseButton onClick={handleClose} aria-label="Close sidebar">
+          <FaTimes />
+          <div className="particles">
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+          </div>
+        </CloseButton>
+
+        <audio
+          ref={audioRef}
+          src={state.currentTrack?.audioSrc}
+          onTimeUpdate={updateProgress}
+          onEnded={nextTrack}
+          onError={(e) => {
+            console.error("Audio error:", e);
+            // Handle the error appropriately
+            if (state.isPlaying) {
               dispatch({ type: "PAUSE" });
-            });
-          }
-        }}
-      />
-
-      <AlbumSection $bgColor={bgColor}>
-        <AlbumBackground $bgColor={bgColor} />
-
-        {state.currentTrack ? (
-          <>
-            <AlbumArt>
-              <Cover
-                src={getSafeCoverArt(state.currentTrack?.coverArt)}
-                alt={state.currentTrack?.title || "Album Cover"}
-              />
-              <AlbumArtRipple />
-              {state.equalizerActive && <Equalizer />}
-            </AlbumArt>
-
-            <TrackInfo>
-              <TrackTitle>{state.currentTrack.title}</TrackTitle>
-              <TrackArtist>{state.currentTrack.artist}</TrackArtist>
-              <TrackAlbum>{state.currentTrack.album}</TrackAlbum>
-            </TrackInfo>
-
-            <Controls
-              isPlaying={state.isPlaying}
-              onPlayPause={togglePlay}
-              onPrev={prevTrack}
-              onNext={nextTrack}
-            />
-
-            <ProgressContainer>
-              <ProgressBar
-                ref={progressBarRef}
-                onClick={setProgress}
-                onMouseMove={handleProgressHover}
-                onMouseEnter={handleProgressHover}
-                onMouseLeave={handleProgressLeave}
-                onMouseDown={handleProgressDragStart}
-              >
-                <Progress
-                  $width={
-                    isDragging
-                      ? hoverPosition
-                      : `${(state.progress / state.duration) * 100}%`
-                  }
-                  $isDragging={isDragging}
-                  $isPlaying={state.isPlaying}
-                />
-                {/* Time tooltip */}
-                <TimeTooltip
-                  $visible={isHoveringProgress}
-                  $position={hoverPosition}
-                  $isDragging={isDragging}
-                >
-                  {hoverTime || formatTime(state.progress)}
-                </TimeTooltip>
-                <ProgressHandle
-                  $visible={isHoveringProgress || isDragging}
-                  $position={
-                    isDragging
-                      ? hoverPosition
-                      : isHoveringProgress
-                      ? hoverPosition
-                      : `${(state.progress / state.duration) * 100}%`
-                  }
-                  $isDragging={isDragging}
-                />
-              </ProgressBar>
-              <TimeInfo>
-                <span>{formatTime(state.progress)}</span>
-                <span>{formatTime(state.duration)}</span>
-              </TimeInfo>
-            </ProgressContainer>
-          </>
-        ) : (
-          <TrackInfo>
-            <TrackTitle>No track selected</TrackTitle>
-            <TrackArtist>Select a track to play</TrackArtist>
-          </TrackInfo>
-        )}
-      </AlbumSection>
-
-      <ExtraControls>
-        {/* Volume Control Group */}
-        <ControlGroup>
-          <VolumeControl
-            volume={Math.round(state.volume * 100)}
-            onVolumeChange={(newVolume) =>
-              dispatch({ type: "SET_VOLUME", payload: newVolume / 100 })
+              setTimeout(() => {
+                nextTrack(); // Try playing the next track instead
+              }, 500);
             }
-          />
-        </ControlGroup>
+          }}
+          onCanPlayThrough={() => {
+            // Automatically attempt to play when the track is ready
+            if (state.isPlaying && audioRef.current) {
+              audioRef.current.play().catch((error) => {
+                console.warn("Auto-play was prevented:", error);
+                dispatch({ type: "PAUSE" });
+              });
+            }
+          }}
+        />
 
-        {/* Feature Toggles in a Grid Layout */}
-        <ToggleButtons>
-          {/* First Row */}
-          <ControlButton
-            onClick={() => dispatch({ type: "TOGGLE_SHUFFLE" })}
-            style={{ color: state.isShuffling ? "#388e3c" : "" }}
-            title="Toggle shuffle mode"
-          >
-            <FaRandom />
-          </ControlButton>
+        <AlbumSection $bgColor={bgColor}>
+          <AlbumBackground $bgColor={bgColor} />
 
-          <RepeatButton
-            onClick={() => dispatch({ type: "CYCLE_REPEAT_MODE" })}
-            className={`${
-              state.repeatMode === "off"
-                ? "repeat-off"
-                : state.repeatMode === "all"
-                ? "repeat-all"
-                : "repeat-one"
-            } ${state.repeatMode !== "off" ? "active" : ""}`}
-            title={`Repeat mode: ${state.repeatMode}`}
-            aria-label={`Repeat mode: ${state.repeatMode}`}
-          >
-            <div className="repeat-icon-container">
-              <TbRepeatOff
-                className={`repeat-off-icon ${
-                  state.repeatMode === "off" ? "active" : ""
-                }`}
+          {state.currentTrack ? (
+            <>
+              <AlbumArt>
+                <Cover
+                  src={getSafeCoverArt(state.currentTrack?.coverArt)}
+                  alt={state.currentTrack?.title || "Album Cover"}
+                />
+                <AlbumArtRipple />
+                {state.equalizerActive && <Equalizer />}
+              </AlbumArt>
+
+              <TrackInfo>
+                <TrackTitle>{state.currentTrack.title}</TrackTitle>
+                <TrackArtist>{state.currentTrack.artist}</TrackArtist>
+                <TrackAlbum>{state.currentTrack.album}</TrackAlbum>
+              </TrackInfo>
+
+              <Controls
+                isPlaying={state.isPlaying}
+                onPlayPause={togglePlay}
+                onPrev={prevTrack}
+                onNext={nextTrack}
               />
-              <TbRepeat
-                className={`repeat-all-icon ${
-                  state.repeatMode === "all" ? "active" : ""
-                }`}
-              />
-              <TbRepeatOnce
-                className={`repeat-one-icon ${
-                  state.repeatMode === "one" ? "active" : ""
-                }`}
-              />
-              <span className="repeat-badge">1</span>
-            </div>
-          </RepeatButton>
 
-          <ControlButton
-            onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
-            style={{ color: state.visualizerActive ? "#388e3c" : "" }}
-            title="Toggle visualizer"
-          >
-            <FaBars />
-          </ControlButton>
+              <ProgressContainer>
+                <ProgressBar
+                  ref={progressBarRef}
+                  onClick={setProgress}
+                  onMouseMove={handleProgressHover}
+                  onMouseEnter={handleProgressHover}
+                  onMouseLeave={handleProgressLeave}
+                  onMouseDown={handleProgressDragStart}
+                >
+                  <Progress
+                    $width={
+                      isDragging
+                        ? hoverPosition
+                        : `${(state.progress / state.duration) * 100}%`
+                    }
+                    $isDragging={isDragging}
+                    $isPlaying={state.isPlaying}
+                  />
+                  {/* Time tooltip */}
+                  <TimeTooltip
+                    $visible={isHoveringProgress}
+                    $position={hoverPosition}
+                    $isDragging={isDragging}
+                  >
+                    {hoverTime || formatTime(state.progress)}
+                  </TimeTooltip>
+                  <ProgressHandle
+                    $visible={isHoveringProgress || isDragging}
+                    $position={
+                      isDragging
+                        ? hoverPosition
+                        : isHoveringProgress
+                        ? hoverPosition
+                        : `${(state.progress / state.duration) * 100}%`
+                    }
+                    $isDragging={isDragging}
+                  />
+                </ProgressBar>
+                <TimeInfo>
+                  <span>{formatTime(state.progress)}</span>
+                  <span>{formatTime(state.duration)}</span>
+                </TimeInfo>
+              </ProgressContainer>
+            </>
+          ) : (
+            <TrackInfo>
+              <TrackTitle>No track selected</TrackTitle>
+              <TrackArtist>Select a track to play</TrackArtist>
+            </TrackInfo>
+          )}
+        </AlbumSection>
 
-          {/* Second Row */}
-          <EqualizerButton
-            onClick={() => dispatch({ type: "TOGGLE_EQUALIZER" })}
-            className={`${state.isPlaying ? "playing" : ""} ${
-              state.equalizerActive ? "active" : ""
-            }`}
-            style={{ color: state.equalizerActive ? "#388e3c" : "" }}
-            title="Toggle equalizer"
-          >
-            <MdEqualizer />
-          </EqualizerButton>
+        <ExtraControls>
+          {/* Volume Control Group */}
+          <ControlGroup>
+            <VolumeControl
+              volume={Math.round(state.volume * 100)}
+              onVolumeChange={(newVolume) =>
+                dispatch({ type: "SET_VOLUME", payload: newVolume / 100 })
+              }
+            />
+          </ControlGroup>
 
-          {/* Empty cell for spacing */}
-          <div></div>
+          {/* Feature Toggles in a Grid Layout */}
+          <ToggleButtons>
+            {/* First Row */}
+            <ControlButton
+              onClick={() => dispatch({ type: "TOGGLE_SHUFFLE" })}
+              style={{ color: state.isShuffling ? "#388e3c" : "" }}
+              title="Toggle shuffle mode"
+            >
+              <FaRandom />
+            </ControlButton>
 
-          {/* Sidebar mode button aligned with other controls */}
-          <ControlButton
-            className="sidebar-mode-button"
-            onClick={cycleSidebarMode}
-            style={{
-              color: (() => {
-                switch (state.sidebarMode) {
-                  case "auto":
-                    return "rgba(76, 175, 80, 1)";
-                  case "always":
-                    return "rgba(33, 150, 243, 1)";
-                  case "manual":
-                    return "rgba(255, 152, 0, 1)";
-                  default:
-                    return "rgba(76, 175, 80, 1)";
-                }
-              })(),
-            }}
-            title={`Sidebar: ${state.sidebarMode} mode`}
-          >
-            {state.sidebarMode === "auto" && <FaEye />}
-            {state.sidebarMode === "always" && <FaLock />}
-            {state.sidebarMode === "manual" && <FaLockOpen />}
-          </ControlButton>
-        </ToggleButtons>
-      </ExtraControls>
-    </PlayerSidebarContainer>
-  );
-});
+            <RepeatButton
+              onClick={() => dispatch({ type: "CYCLE_REPEAT_MODE" })}
+              className={`${
+                state.repeatMode === "off"
+                  ? "repeat-off"
+                  : state.repeatMode === "all"
+                  ? "repeat-all"
+                  : "repeat-one"
+              } ${state.repeatMode !== "off" ? "active" : ""}`}
+              title={`Repeat mode: ${state.repeatMode}`}
+              aria-label={`Repeat mode: ${state.repeatMode}`}
+            >
+              <div className="repeat-icon-container">
+                <TbRepeatOff
+                  className={`repeat-off-icon ${
+                    state.repeatMode === "off" ? "active" : ""
+                  }`}
+                />
+                <TbRepeat
+                  className={`repeat-all-icon ${
+                    state.repeatMode === "all" ? "active" : ""
+                  }`}
+                />
+                <TbRepeatOnce
+                  className={`repeat-one-icon ${
+                    state.repeatMode === "one" ? "active" : ""
+                  }`}
+                />
+                <span className="repeat-badge">1</span>
+              </div>
+            </RepeatButton>
+
+            <ControlButton
+              onClick={() => dispatch({ type: "TOGGLE_VISUALIZER" })}
+              style={{ color: state.visualizerActive ? "#388e3c" : "" }}
+              title="Toggle visualizer"
+            >
+              <FaBars />
+            </ControlButton>
+
+            {/* Second Row */}
+            <EqualizerButton
+              onClick={() => dispatch({ type: "TOGGLE_EQUALIZER" })}
+              className={`${state.isPlaying ? "playing" : ""} ${
+                state.equalizerActive ? "active" : ""
+              }`}
+              style={{ color: state.equalizerActive ? "#388e3c" : "" }}
+              title="Toggle equalizer"
+            >
+              <MdEqualizer />
+            </EqualizerButton>
+
+            {/* Empty cell for spacing */}
+            <div></div>
+
+            {/* Sidebar mode button aligned with other controls */}
+            <ControlButton
+              className="sidebar-mode-button"
+              onClick={cycleSidebarMode}
+              style={{
+                color: (() => {
+                  switch (state.sidebarMode) {
+                    case "auto":
+                      return "rgba(76, 175, 80, 1)";
+                    case "always":
+                      return "rgba(33, 150, 243, 1)";
+                    case "manual":
+                      return "rgba(255, 152, 0, 1)";
+                    default:
+                      return "rgba(76, 175, 80, 1)";
+                  }
+                })(),
+              }}
+              title={`Sidebar: ${state.sidebarMode} mode`}
+            >
+              {state.sidebarMode === "auto" && <FaEye />}
+              {state.sidebarMode === "always" && <FaLock />}
+              {state.sidebarMode === "manual" && <FaLockOpen />}
+            </ControlButton>
+          </ToggleButtons>
+        </ExtraControls>
+      </PlayerSidebarContainer>
+    );
+  }
+);
 
 // Add this styled component definition before it's referenced
 const SidebarGlow = styled.div.attrs({
@@ -2374,7 +2182,7 @@ const isValidSidebarMode = (mode: any): mode is SidebarMode => {
 };
 
 // Update the MusicPlayer component to use framer-motion for animations
-const MusicPlayer: React.FC = () => {
+const SideBarPlayer: React.FC = () => {
   const { state, dispatch } = useMusicContext();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -2564,7 +2372,16 @@ const MusicPlayer: React.FC = () => {
   }, [state.sidebarOpen]);
 
   return (
-    <Container>
+    <PlayerSidebarContainer
+      $isOpen={isSidebarOpen}
+      ref={sidebarRef}
+      initial={{ right: "-280px" }}
+      animate={{ right: isSidebarOpen ? 0 : "-280px" }}
+      transition={{
+        duration: ANIMATION_TIMING.sidebar,
+        ease: [0.34, 1.56, 0.64, 1],
+      }}
+    >
       <EnergyParticles />
 
       <audio
@@ -2572,40 +2389,19 @@ const MusicPlayer: React.FC = () => {
         src={state.currentTrack?.audioSrc}
         onTimeUpdate={() => updateProgress(audioRef)}
         onEnded={nextTrack}
-        preload="auto"
       />
 
-      <MainContent>
-        <BackgroundVisualizer>
-          {state.visualizerActive && <Visualizer />}
-        </BackgroundVisualizer>
-      </MainContent>
-
-      {/* Visual indicator when sidebar is closed */}
-      <AnimatePresence>
-        {!isSidebarOpen && (
-          <SidebarIndicator
-            ref={indicatorRef}
-            onClick={toggleSidebar}
-            initial={{ opacity: 0, scaleY: 0.7 }}
-            animate={{ opacity: 0.8, scaleY: 1 }}
-            exit={{ opacity: 0, scaleY: 0.7 }}
-            transition={{
-              duration: ANIMATION_TIMING.buttonTransition,
-              delay: ANIMATION_TIMING.buttonDelay,
-              ease: [0.2, 0.8, 0.2, 1.2],
-            }}
-            style={{ transformOrigin: "center" }}
-          />
-        )}
-      </AnimatePresence>
+      <BackgroundVisualizer>
+        {state.visualizerActive && <Visualizer />}
+      </BackgroundVisualizer>
 
       <PlayerSidebar
         isOpen={isSidebarOpen}
         toggleOpen={toggleSidebar}
+        setSidebarOpen={setSidebarOpen}
         ref={sidebarRef}
       />
-    </Container>
+    </PlayerSidebarContainer>
   );
 };
 
@@ -2847,4 +2643,4 @@ const RepeatButton = styled(ControlButton).attrs({
   }
 `;
 
-export default MusicPlayer;
+export default SideBarPlayer;

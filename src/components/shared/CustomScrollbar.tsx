@@ -4,9 +4,17 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef
 } from "react";
 import styled from "styled-components";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useMotionValue,
+} from "framer-motion";
+import { performanceOptimizer } from "../../utils/performanceOptimizer";
 
 interface CustomScrollbarProps {
   children: ReactNode;
@@ -18,98 +26,168 @@ interface CustomScrollbarProps {
 const CustomScrollbar = forwardRef<HTMLDivElement, CustomScrollbarProps>(
   ({ children, className, height, style }, forwardedRef) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
+    // Define scrollTimeoutRef at component level
+    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+    
     const [isScrolling, setIsScrolling] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [thumbHeight, setThumbHeight] = useState(40);
-    const [dragStartY, setDragStartY] = useState(0);
-    const [startScrollTop, setStartScrollTop] = useState(0);
+    const [isAtEdge, setIsAtEdge] = useState({ top: true, bottom: false });
     const [isHovered, setIsHovered] = useState(false);
 
-    // Optimized scroll monitoring
+    // Enhanced scroll monitoring
     const { scrollYProgress } = useScroll({
       container: containerRef,
-      smooth: true,
-      layoutEffect: false,
+      offset: ["start start", "end end"],
     });
 
-    // Enhanced spring animation
+    // Advanced spring animation with edge resistance
     const smoothProgress = useSpring(scrollYProgress, {
-      damping: 25,
-      stiffness: 250,
+      damping: 20,
+      stiffness: 300,
       mass: 0.5,
       restSpeed: 0.001,
     });
+    
+    // Edge bounce effect
+    const bounceScale = useMotionValue(1);
 
-    // Optimized thumb size calculation
-    const updateThumbSize = useCallback(() => {
-      if (containerRef.current) {
-        const { clientHeight, scrollHeight } = containerRef.current;
-        const ratio = clientHeight / scrollHeight;
-        const size = Math.max(ratio * clientHeight, 40);
-        setThumbHeight(size);
-      }
-    }, []);
-
-    // Improved scroll handling
-    const handleScroll = useCallback(() => {
-      setIsScrolling(true);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = window.setTimeout(() => setIsScrolling(false), 100);
-    }, []);
-
-    let scrollTimeout: number;
-
-    // Enhanced drag handling
-    const handleDrag = useCallback(
-      (e: MouseEvent) => {
-        if (!isDragging || !containerRef.current) return;
-
-        const deltaY = e.clientY - dragStartY;
-        const container = containerRef.current;
-        const scrollRatio = container.scrollHeight / container.clientHeight;
-        const scrollSpeed = 1.2; // Adjust for faster/slower scrolling
-
-        const newScrollTop =
-          startScrollTop + deltaY * scrollRatio * scrollSpeed;
-        container.scrollTop = Math.max(
-          0,
-          Math.min(
-            container.scrollHeight - container.clientHeight,
-            newScrollTop
-          )
-        );
-      },
-      [isDragging, dragStartY, startScrollTop]
+    // Transform scroll progress to thumb position
+    const thumbY = useTransform(
+      smoothProgress,
+      [0, 1],
+      [0, containerRef.current?.clientHeight 
+        ? containerRef.current.clientHeight - thumbHeight 
+        : 0],
+      { clamp: true }
     );
 
-    // Use effects for event listeners
+    // Update thumb size based on scroll content
+    const updateThumbSize = useCallback(() => {
+      if (!containerRef.current) return;
+      
+      const { clientHeight, scrollHeight } = containerRef.current;
+      const ratio = clientHeight / scrollHeight;
+      const calculatedHeight = Math.max(
+        Math.min(ratio * clientHeight, clientHeight / 2), 
+        40
+      );
+      
+      setThumbHeight(calculatedHeight);
+    }, []);
+
+    // Optimized scroll handler with throttling
+    const handleScroll = useCallback(() => {
+      if (!containerRef.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      const isAtTop = scrollTop <= 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+      setIsAtEdge({ top: isAtTop, bottom: isAtBottom });
+      setIsScrolling(true);
+
+      if (isAtTop || isAtBottom) {
+        bounceScale.set(0.98);
+        setTimeout(() => bounceScale.set(1), 150);
+      }
+
+      // Clear previous timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+    }, [bounceScale]);
+
+    // Use throttled scroll handler for better performance
+    const throttledScroll = performanceOptimizer.throttle(handleScroll, 16);
+
+    // Optimize useEffect dependencies
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
 
-      const resizeObserver = new ResizeObserver(updateThumbSize);
+      // Function references that won't change
+      const handleScrollEvent = () => throttledScroll();
+      const handleResizeEvent = () => updateThumbSize();
+      
+      // Set up event listeners
+      const resizeObserver = new ResizeObserver(handleResizeEvent);
       resizeObserver.observe(container);
-
-      container.addEventListener("scroll", handleScroll, { passive: true });
-      window.addEventListener("resize", updateThumbSize, { passive: true });
-
+      
+      container.addEventListener("scroll", handleScrollEvent, { passive: true });
+      window.addEventListener("resize", handleResizeEvent, { passive: true });
+      
+      // Initial thumb size
+      updateThumbSize();
+      
+      // Clean up event listeners
       return () => {
         resizeObserver.disconnect();
-        container.removeEventListener("scroll", handleScroll);
-        window.removeEventListener("resize", updateThumbSize);
+        if (container) {
+          container.removeEventListener("scroll", handleScrollEvent);
+        }
+        window.removeEventListener("resize", handleResizeEvent);
+        
+        // Clear timeouts
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
       };
-    }, [updateThumbSize, handleScroll]);
+    }, [throttledScroll, updateThumbSize]);
 
-    // Add this useEffect to handle the forwarded ref
-    useEffect(() => {
-      if (!containerRef.current) return;
+    // Improved drag handling with momentum
+    const handleThumbDrag = useCallback(
+      (e: React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-      if (typeof forwardedRef === "function") {
-        forwardedRef(containerRef.current);
-      } else if (forwardedRef) {
-        forwardedRef.current = containerRef.current;
-      }
-    }, [forwardedRef]);
+        if (!containerRef.current) return;
+
+        setIsDragging(true);
+        const startY = e.clientY;
+        const scrollableHeight = containerRef.current.scrollHeight;
+        const containerHeight = containerRef.current.clientHeight;
+        const scrollTrackHeight = containerHeight - thumbHeight;
+        const startScrollTop = containerRef.current.scrollTop;
+
+        const drag = (e: PointerEvent) => {
+          if (!containerRef.current) return;
+
+          const deltaY = e.clientY - startY;
+          const percentDelta = deltaY / scrollTrackHeight;
+          const deltaScroll =
+            percentDelta * (scrollableHeight - containerHeight);
+
+          containerRef.current.scrollTop = Math.max(
+            0,
+            Math.min(
+              startScrollTop + deltaScroll,
+              scrollableHeight - containerHeight
+            )
+          );
+        };
+
+        const endDrag = () => {
+          setIsDragging(false);
+          document.removeEventListener("pointermove", drag);
+          document.removeEventListener("pointerup", endDrag);
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        };
+
+        // Set grabbing cursor and prevent text selection while dragging
+        document.body.style.cursor = "grabbing";
+        document.body.style.userSelect = "none";
+
+        document.addEventListener("pointermove", drag);
+        document.addEventListener("pointerup", endDrag);
+      },
+      [thumbHeight]
+    );
 
     return (
       <ScrollbarContainer
@@ -121,7 +199,7 @@ const CustomScrollbar = forwardRef<HTMLDivElement, CustomScrollbarProps>(
           ref={containerRef}
           className={className}
           $height={height}
-          style={style}
+          style={{ ...style, transform: `scale(${bounceScale.get()})` }}
         >
           {children}
         </ScrollableContent>
@@ -129,6 +207,7 @@ const CustomScrollbar = forwardRef<HTMLDivElement, CustomScrollbarProps>(
         <ScrollbarTrack
           animate={{
             opacity: isHovered || isScrolling || isDragging ? 1 : 0.3,
+            width: isHovered || isDragging ? "10px" : "6px",
           }}
           transition={{ duration: 0.2 }}
         >
@@ -136,33 +215,28 @@ const CustomScrollbar = forwardRef<HTMLDivElement, CustomScrollbarProps>(
             as={motion.div}
             style={{
               height: thumbHeight,
-              y: useTransform(
-                smoothProgress,
-                [0, 1],
-                [
-                  0,
-                  containerRef.current
-                    ? containerRef.current.clientHeight - thumbHeight
-                    : 0,
-                ]
-              ),
+              y: thumbY,
+              scale: bounceScale,
             }}
             animate={{
               opacity: isScrolling || isDragging || isHovered ? 1 : 0.7,
-              scale: isScrolling || isDragging ? 1.1 : 1,
+              width: isHovered || isDragging ? "100%" : "80%",
+              x: "-50%",
             }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onPointerDown={handleThumbDrag} // Changed from handleDragStart to handleThumbDrag
             transition={{
-              opacity: { duration: 0.15 },
+              opacity: { duration: 0.2 },
               scale: {
                 type: "spring",
                 stiffness: 400,
-                damping: 30,
-                mass: 0.8,
+                damping: 25,
               },
             }}
-            whileHover={{ scale: 1.15 }}
             $isDragging={isDragging}
             $isHovered={isHovered}
+            $isAtEdge={isAtEdge}
           />
         </ScrollbarTrack>
       </ScrollbarContainer>
@@ -179,9 +253,11 @@ const ScrollbarContainer = styled.div`
 const ScrollableContent = styled.div<{ $height?: string }>`
   height: ${(props) => props.$height || "100%"};
   overflow-y: auto;
-  padding-right: 12px;
+  padding-right: 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  transform-origin: center;
+  transition: transform 0.2s ease;
 
   &::-webkit-scrollbar {
     display: none;
@@ -190,38 +266,57 @@ const ScrollableContent = styled.div<{ $height?: string }>`
 
 const ScrollbarTrack = styled(motion.div)`
   position: absolute;
-  top: 4px;
-  right: 4px;
-  bottom: 4px;
-  width: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  transition: width 0.2s ease;
-
-  &:hover {
-    width: 10px;
-  }
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  width: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
 `;
 
 const ScrollbarThumb = styled(motion.div)<{
   $isDragging?: boolean;
   $isHovered?: boolean;
+  $isAtEdge: { top: boolean; bottom: boolean };
 }>`
   position: absolute;
-  width: 100%;
+  left: 50%;
+  width: 80%;
   border-radius: inherit;
-  background: ${(props) =>
-    props.$isDragging || props.$isHovered
-      ? "linear-gradient(180deg, #4caf50 0%, #388e3c 100%)"
-      : "linear-gradient(180deg, rgba(76, 175, 80, 0.8) 0%, rgba(56, 142, 60, 0.9) 100%)"};
+  background: ${(props) => {
+    if (props.$isDragging) {
+      return "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)";
+    }
+    if (props.$isHovered) {
+      return "linear-gradient(135deg, #66bb6a 0%, #43a047 100%)";
+    }
+    return "linear-gradient(135deg, rgba(76, 175, 80, 0.8) 0%, rgba(67, 160, 71, 0.9) 100%)";
+  }};
   cursor: grab;
   touch-action: none;
-  will-change: transform, opacity;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  will-change: transform, width, opacity;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   &:active {
     cursor: grabbing;
-    background: linear-gradient(180deg, #4caf50 0%, #388e3c 100%);
+    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(47, 185, 23, 0.78);
+    border-radius: 1px;
+    transform: translate(-50%, -50%);
+    opacity: ${(props) => (props.$isHovered ? 1 : 0)};
+    transition: opacity 0.2s ease;
   }
 `;
 

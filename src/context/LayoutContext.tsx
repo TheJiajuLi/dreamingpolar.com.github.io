@@ -6,13 +6,19 @@ interface LayoutState {
   mainContentWidth: string;
   horizontalControlsExpanded: boolean;
   sidebarVisible: boolean;
+  mobileControlsVisible: boolean;
+  mobileControlsExpanded: boolean;
+  lastInteractionTime: number;
 }
 
 type LayoutAction =
   | { type: "TOGGLE_EXPLORER" }
   | { type: "SET_EXPLORER_WIDTH"; payload: number }
   | { type: "SET_CONTROLS_EXPANDED"; payload: boolean }
-  | { type: "SET_SIDEBAR_VISIBLE"; payload: boolean };
+  | { type: "SET_SIDEBAR_VISIBLE"; payload: boolean }
+  | { type: "SET_MOBILE_CONTROLS_VISIBLE"; payload: boolean }
+  | { type: "SET_MOBILE_CONTROLS_EXPANDED"; payload: boolean }
+  | { type: "UPDATE_INTERACTION_TIME" };
 
 const initialState: LayoutState = {
   explorerVisible: true,
@@ -20,6 +26,9 @@ const initialState: LayoutState = {
   mainContentWidth: "calc(100% - 350px)",
   horizontalControlsExpanded: false,
   sidebarVisible: false,
+  mobileControlsVisible: true,
+  mobileControlsExpanded: false,
+  lastInteractionTime: Date.now(),
 };
 
 const layoutReducer = (
