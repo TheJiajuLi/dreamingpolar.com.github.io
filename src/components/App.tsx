@@ -144,7 +144,12 @@ const AppContent: React.FC = () => {
 // Main App component with all providers
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <ThemeProvider>
         <AppContent />
       </ThemeProvider>
@@ -180,9 +185,9 @@ const MainLayout = styled.div<{ $hasMobileControls?: boolean }>`
 const ExplorerSection = styled(motion.div)`
   flex: 1; // Make it take all available space
   width: 100%; // Full width
-  height: 94.2%;
+  height: 92%;
   overflow: hidden;
-  margin-top: 40px;
+  margin-top: 50px;
   backdrop-filter: blur(10px);
   transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;

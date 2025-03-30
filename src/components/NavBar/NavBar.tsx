@@ -73,16 +73,12 @@ const NavContainer = styled(motion.nav)`
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: ${({ theme }) =>
-    theme.background?.nav || "rgba(20, 20, 30, 0.8)"};
-  backdrop-filter: blur(10px);
+  height: 45px;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const Logo = styled.div`
