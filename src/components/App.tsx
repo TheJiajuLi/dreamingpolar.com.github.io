@@ -9,7 +9,6 @@ import MusicExplorer from "./MusicExplorer/MusicExplorer";
 import SideBarPlayer from "./MusicPlayer/SideBarPlayer";
 import MobileMusicControls from "./MusicPlayer/MobileMusicControls";
 import HorizontalPlayerBar from "./MusicPlayer/HorizontalPlayerBar";
-import ThemeSwitcher from "./ThemeSwitcher/ThemeSwitcher";
 
 // Wrap this component to access theme context
 const AppContent: React.FC = () => {
@@ -33,7 +32,6 @@ const AppContent: React.FC = () => {
       <MusicProvider>
         <LayoutProvider>
           <AppContainer>
-            <ThemeSwitcher />
             <MainLayout $hasMobileControls={isMobile}>
               {/* Explorer Section */}
               {layoutState.explorerVisible && (
@@ -41,15 +39,16 @@ const AppContent: React.FC = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
+                  style={{ width: "100%" }} // Make it full width
                 >
                   <MusicExplorer />
                 </ExplorerSection>
               )}
 
-              {/* Player Section */}
-              <PlayerSection $expanded={!layoutState.explorerVisible}>
+              {/* Hidden Player Section - Contains the audio element but visually hidden */}
+              <HiddenPlayerSection>
                 <SideBarPlayer />
-              </PlayerSection>
+              </HiddenPlayerSection>
             </MainLayout>
 
             {/* Independent Player Controls Section */}
@@ -103,57 +102,50 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.background.gradient};
-  backdrop-filter: blur(${({ theme }) => theme.background.blur});
 `;
 
 const MainLayout = styled.div<{ $hasMobileControls?: boolean }>`
   display: flex;
-  height: calc(100vh - 100px); /* Leave space for player controls */
+    flex: 1;
+  width: 100%;
   position: relative;
   overflow: hidden;
-  gap: 20px;
-  padding: 20px 20px 0 20px;
-
+  margin-bottom: 72px;
   @media (max-width: 768px) {
     height: calc(100vh - 80px); /* Adjust for mobile controls */
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px 12px 0 12px;
+    padding: 0;
+    margin-bottom: 90px;
   }
 `;
 
 const ExplorerSection = styled(motion.div)`
-  height: 100%;
+  flex: 1; // Make it take all available space
+  width: 100%; // Full width
+  height: 94.2%;
   overflow: hidden;
-  background: ${({ theme }) => theme.explorer.background};
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
+  margin-top: 40px;  backdrop-filter: blur(10px);
   transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
-  margin-left: 10px;
-  border: 1px solid ${({ theme }) => theme.explorer.border};
 
   @media (max-width: 768px) {
     height: 100%;
-    margin-left: 0;
-    border-radius: 0;
+    margin-top: 0;
+    border-radius: 0px;
+    border-left: none;
+    border-right: none;
+    border-top: none;
   }
 `;
 
-const PlayerSection = styled.div<{ $expanded: boolean }>`
-  flex: 1;
-  height: 100%;
+// This hidden element is critical for music playback functionality
+const HiddenPlayerSection = styled.div`
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
   border-radius: 12px;
-  background: ${({ theme }) => theme.player.background};
-  backdrop-filter: blur(10px);
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-left: ${(props) => (props.$expanded ? "0" : "20px")};
-  border: 1px solid ${({ theme }) => theme.explorer.border};
-
-  @media (max-width: 768px) {
-    margin-left: 0;
-  }
 `;
 
 const PlayerControlsSection = styled.div`
@@ -168,11 +160,11 @@ const PlayerControlsSection = styled.div`
 const MobileControlsWrapper = styled(motion.div)`
   pointer-events: auto;
   width: 100%;
-  padding: 0 12px 12px;
+  padding: 0;
   background: ${({ theme }) => theme.player.controls};
   backdrop-filter: blur(20px);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 `;
 
@@ -180,9 +172,6 @@ const HorizontalControlsWrapper = styled(motion.div)`
   pointer-events: auto;
   width: 100%;
   padding: 0 15px 20px;
-  background: ${({ theme }) => theme.player.controls};
-  backdrop-filter: blur(20px);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
 `;
 
 export default App;
