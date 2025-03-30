@@ -11,6 +11,8 @@ import {
   FaVolumeUp,
   FaPalette,
 } from "react-icons/fa";
+import { FiUpload } from "react-icons/fi"; // Import upload icon
+import { Link } from "react-router-dom"; // Import Link for navigation
 import { getSafeCoverArt } from "../../utils/imageUtils";
 import { AppTheme } from "../../styles/themes"; // Import the AppTheme type
 
@@ -515,6 +517,21 @@ const ThemeOption = styled(motion.div)<{ $isActive: boolean; $color: string }>`
   }
 `;
 
+const UploadLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: ${({ theme }) => theme.text.primary};
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.background.hover};
+  }
+`;
+
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
   const seconds = Math.floor(time % 60);
@@ -836,6 +853,11 @@ const HorizontalPlayerBar: React.FC<HTMLMotionProps<"div">> = (props) => {
             )}
           </AnimatePresence>
         </ThemeSwitcherContainer>
+
+        <UploadLink to="/community-upload" target="_blank">
+          <FiUpload size={20} />
+          <span>Upload to Community</span>
+        </UploadLink>
       </ExtraControls>
     </HorizontalBar>
   );

@@ -9,9 +9,13 @@ import MusicExplorer from "./MusicExplorer/MusicExplorer";
 import SideBarPlayer from "./MusicPlayer/SideBarPlayer";
 import MobileMusicControls from "./MusicPlayer/MobileMusicControls";
 import HorizontalPlayerBar from "./MusicPlayer/HorizontalPlayerBar";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import CommunityUploadPage from "./CommunityUpload/CommunityUploadPage";
+import NavBar from "./NavBar/NavBar"; // Import NavBar component
 
-// Wrap this component to access theme context
-const AppContent: React.FC = () => {
+// Create a separate router component to access useLocation
+const AppRouter: React.FC = () => {
+  const location = useLocation();
   const { state: layoutState } = useLayout();
   const { currentTheme } = useThemeContext();
   const [isMobile, setIsMobile] = useState(false);
@@ -29,67 +33,122 @@ const AppContent: React.FC = () => {
 
   return (
     <StyledThemeProvider theme={currentTheme}>
-      <MusicProvider>
-        <LayoutProvider>
-          <AppContainer>
-            <MainLayout $hasMobileControls={isMobile}>
-              {/* Explorer Section */}
-              {layoutState.explorerVisible && (
+      <AppContainer>
+        <NavBar /> {/* Add this line to include the navigation */}
+        <MainLayout $hasMobileControls={isMobile}>
+          {/* Explorer/Content Section */}
+          <Routes location={location}>
+            <Route
+              path="/"
+              element={
+                layoutState.explorerVisible && (
+                  <ExplorerSection
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    style={{ width: "100%" }}
+                  >
+                    <MusicExplorer />
+                  </ExplorerSection>
+                )
+              }
+            />
+            <Route
+              path="/explorer"
+              element={
                 <ExplorerSection
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  style={{ width: "100%" }} // Make it full width
+                  style={{ width: "100%" }}
                 >
                   <MusicExplorer />
                 </ExplorerSection>
-              )}
+              }
+            />
+            <Route
+              path="/community-upload"
+              element={
+                <ExplorerSection
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  style={{ width: "100%" }}
+                >
+                  <CommunityUploadPage />
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ExplorerSection
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  style={{ width: "100%" }}
+                >
+                  <div>Settings Page (Coming Soon)</div>
+                </ExplorerSection>
+              }
+            />
+          </Routes>
 
-              {/* Hidden Player Section - Contains the audio element but visually hidden */}
-              <HiddenPlayerSection>
-                <SideBarPlayer />
-              </HiddenPlayerSection>
-            </MainLayout>
-
-            {/* Independent Player Controls Section */}
-            <PlayerControlsSection>
-              <AnimatePresence mode="wait">
-                {isMobile ? (
-                  <MobileControlsWrapper
-                    key="mobile"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ type: "spring", damping: 20 }}
-                  >
-                    <MobileMusicControls />
-                  </MobileControlsWrapper>
-                ) : (
-                  <HorizontalControlsWrapper
-                    key="desktop"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ type: "spring", damping: 20 }}
-                  >
-                    <HorizontalPlayerBar />
-                  </HorizontalControlsWrapper>
-                )}
-              </AnimatePresence>
-            </PlayerControlsSection>
-          </AppContainer>
-        </LayoutProvider>
-      </MusicProvider>
+          {/* Hidden Player Section - Contains the audio element but visually hidden */}
+          <HiddenPlayerSection>
+            <SideBarPlayer />
+          </HiddenPlayerSection>
+        </MainLayout>
+        {/* Independent Player Controls Section */}
+        <PlayerControlsSection>
+          <AnimatePresence mode="wait">
+            {isMobile ? (
+              <MobileControlsWrapper
+                key="mobile"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+              >
+                <MobileMusicControls />
+              </MobileControlsWrapper>
+            ) : (
+              <HorizontalControlsWrapper
+                key="desktop"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+              >
+                <HorizontalPlayerBar />
+              </HorizontalControlsWrapper>
+            )}
+          </AnimatePresence>
+        </PlayerControlsSection>
+      </AppContainer>
     </StyledThemeProvider>
   );
 };
 
-// Main App component with ThemeProvider
+// Wrap this component to access context providers
+const AppContent: React.FC = () => {
+  return (
+    <LayoutProvider>
+      <MusicProvider>
+        <AppRouter />
+      </MusicProvider>
+    </LayoutProvider>
+  );
+};
+
+// Main App component with all providers
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </BrowserRouter>
   );
 };
 
@@ -106,7 +165,7 @@ const AppContainer = styled.div`
 
 const MainLayout = styled.div<{ $hasMobileControls?: boolean }>`
   display: flex;
-    flex: 1;
+  flex: 1;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -123,7 +182,8 @@ const ExplorerSection = styled(motion.div)`
   width: 100%; // Full width
   height: 94.2%;
   overflow: hidden;
-  margin-top: 40px;  backdrop-filter: blur(10px);
+  margin-top: 40px;
+  backdrop-filter: blur(10px);
   transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
 

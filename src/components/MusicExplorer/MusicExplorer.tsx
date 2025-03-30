@@ -15,6 +15,7 @@ import { getSafeCoverArt } from "../../utils/imageUtils";
 import { FaSortAlphaDown, FaPause, FaPlay } from "react-icons/fa";
 import { useLayout } from "../../context/LayoutContext";
 import { FiZoomIn, FiZoomOut } from "react-icons/fi"; // Add these to your imports
+import CommunityTracksSection from "./CommunityTracksSection";
 
 interface TrackStats {
   plays: number;
@@ -848,6 +849,7 @@ const MusicExplorer: React.FC = () => {
       >
         <CustomScrollbar ref={scrollContainerRef}>
           {renderContent()}
+          <CommunityTracksSection />
         </CustomScrollbar>
       </ContentContainer>
       <AlbumArtColorVisualizer />
