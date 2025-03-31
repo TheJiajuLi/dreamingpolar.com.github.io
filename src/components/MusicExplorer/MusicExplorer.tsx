@@ -771,7 +771,7 @@ const MusicExplorer: React.FC = () => {
               >
                 <CategoryIconWrapper $active={showSortPanel}>
                   <StyledImage
-                    src="public/assets/icons/categories.png"
+                    src="public/assets/icons/equalizer_green.png"
                     alt="Sort options"
                   />
                 </CategoryIconWrapper>
