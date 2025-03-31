@@ -1,106 +1,125 @@
 import React from "react";
 import styled from "styled-components";
-import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import {
-  FiHome,
-  FiUpload,
-  FiSearch,
-  FiMusic,
-  FiSettings,
-} from "react-icons/fi";
+import { FiHome, FiSearch, FiMusic, FiSettings, FiLock } from "react-icons/fi";
 
 const NavBar: React.FC = () => {
   const location = useLocation();
 
   return (
-    <NavContainer
-      initial={{ y: -60 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <NavList>
-        <NavItem
-          $isActive={
-            location.pathname === "/" || location.pathname === "/explorer"
-          }
-        >
-          <NavLink to="/explorer">
-            <FiHome size={20} />
-            <NavText>Home</NavText>
-          </NavLink>
-        </NavItem>
-
-        <NavItem $isActive={location.pathname === "/search"}>
-          <NavLink to="/search">
-            <FiSearch size={20} />
-            <NavText>Search</NavText>
-          </NavLink>
-        </NavItem>
-
-        <NavItem $isActive={location.pathname === "/library"}>
-          <NavLink to="/library">
-            <FiMusic size={20} />
-            <NavText>Library</NavText>
-          </NavLink>
-        </NavItem>
-
-        <NavItem $isActive={location.pathname === "/community-upload"}>
-          <NavLink
-            to="/community-upload"
-            aria-label="Upload music to community"
+    <Nav>
+      <NavContainer>
+        <LogoWrapper>
+          <Logo />
+        </LogoWrapper>
+        <NavList>
+          <NavItem
+            $isActive={
+              location.pathname === "/" || location.pathname === "/explorer"
+            }
           >
-            <FiUpload size={20} />
-            <NavText>Upload</NavText>
-          </NavLink>
-        </NavItem>
+            <NavLink to="/explorer">
+              <FiHome size={20} />
+              <NavText>Home</NavText>
+            </NavLink>
+          </NavItem>
 
-        <NavItem $isActive={location.pathname === "/settings"}>
-          <NavLink to="/settings">
-            <FiSettings size={20} />
-            <NavText>Settings</NavText>
-          </NavLink>
-        </NavItem>
-      </NavList>
+          <NavItem $isActive={location.pathname === "/search"}>
+            <NavLink to="/search">
+              <FiSearch size={20} />
+              <NavText>Search</NavText>
+            </NavLink>
+          </NavItem>
 
-      <Logo>Dreaming Polar</Logo>
-    </NavContainer>
+          <NavItem $isActive={location.pathname === "/library"}>
+            <NavLink to="/library">
+              <FiMusic size={20} />
+              <NavText>Library</NavText>
+            </NavLink>
+          </NavItem>
+
+          <NavItem>
+            <NavLink to="/community-upload" title="Admin Only">
+              <FiLock size={20} />
+              <NavText>Admin Upload</NavText>
+            </NavLink>
+          </NavItem>
+
+          <NavItem $isActive={location.pathname === "/settings"}>
+            <NavLink to="/settings">
+              <FiSettings size={20} />
+              <NavText>Settings</NavText>
+            </NavLink>
+          </NavItem>
+        </NavList>
+      </NavContainer>
+    </Nav>
   );
 };
 
-const NavContainer = styled(motion.nav)`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 45px;
-  z-index: 100;
+const Nav = styled.nav`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-`;
-
-const Logo = styled.div`
-  font-size: 18px;
-  font-weight: 700;
-  background: linear-gradient(to right, #5e35b1, #1e88e5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  padding: 1rem;
 
   @media (max-width: 768px) {
-    font-size: 16px;
+    padding: 0.5rem 0.25rem; // Reduced padding for mobile
+  }
+`;
+
+const NavContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 2rem;
+  padding: 0 1rem;
+
+  @media (max-width: 768px) {
+    padding: 0.25rem; // Reduced padding
+    gap: 0.5rem; // Reduced gap between items
+  }
+`;
+
+const LogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+
+  @media (max-width: 768px) {
+    margin-right: 2px; // Reduced margin
+  }
+`;
+
+const Logo = styled.img.attrs({
+  src: "/assets/logos/logo_5_mini.png",
+  alt: "Dreaming Polar",
+  loading: "eager",
+})`
+  height: 40px;
+  width: auto;
+  margin-left: 0.8rem;
+
+  @media (max-width: 768px) {
+    height: 20px; // Reduced from 24px to 20px
+    margin-left: 0.4rem; // Reduced margin
   }
 `;
 
 const NavList = styled.ul`
   display: flex;
+  align-items: center;
   list-style: none;
-  gap: 10px;
+  gap: 1.5rem;
+  margin: 0;
   padding: 0;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem; // Reduced gap between nav items
+  }
 `;
 
-const NavItem = styled.li<{ $isActive: boolean }>`
+const NavItem = styled.li<{ $isActive?: boolean }>`
   position: relative;
 
   &::after {
@@ -113,6 +132,15 @@ const NavItem = styled.li<{ $isActive: boolean }>`
     background: ${({ theme, $isActive }) =>
       $isActive ? theme.accent?.primary || "#5e35b1" : "transparent"};
     transition: background-color 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+
+    svg {
+      width: 14px; // Reduced from 16px
+      height: 14px; // Reduced from 16px
+    }
   }
 `;
 
@@ -128,11 +156,21 @@ const NavLink = styled(Link)`
   &:hover {
     color: ${({ theme }) => theme.accent?.primary || "#5e35b1"};
   }
+
+  @media (max-width: 768px) {
+    padding: 4px 6px; // Reduced padding
+    gap: 4px; // Reduced gap
+  }
 `;
 
 const NavText = styled.span`
   font-size: 14px;
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 11px;
+    margin-top: 2px;
+  }
 
   @media (max-width: 768px) {
     display: none;

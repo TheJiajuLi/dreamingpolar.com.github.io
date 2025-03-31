@@ -7,15 +7,16 @@ import React, {
   useLayoutEffect,
 } from "react";
 import styled from "styled-components";
-import { motion, AnimatePresence, m } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaPause, FaPlay } from "react-icons/fa"; // Remove FaSortAlphaDown
+import { FiZoomIn, FiZoomOut } from "react-icons/fi";
 import { useMusicContext } from "../../context/MusicContext";
 import CustomScrollbar from "../shared/CustomScrollbar";
 import { Track } from "../../types/music";
 import { getSafeCoverArt } from "../../utils/imageUtils";
-import { FaSortAlphaDown, FaPause, FaPlay } from "react-icons/fa";
 import { useLayout } from "../../context/LayoutContext";
-import { FiZoomIn, FiZoomOut } from "react-icons/fi"; // Add these to your imports
 import CommunityTracksSection from "./CommunityTracksSection";
+import { ICONS } from "../../constants/assetPaths";
 
 interface TrackStats {
   plays: number;
@@ -645,7 +646,7 @@ const MusicExplorer: React.FC = () => {
         >
           {isExpanded
             ? viewMode === "albums"
-              ? "Music Explorer"
+              ? "All Time Best" // Changed from "Music Explorer" to "All Time Best"
               : selectedAlbum?.title || "Tracks"
             : "DP"}
         </Title>
@@ -769,12 +770,9 @@ const MusicExplorer: React.FC = () => {
                 data-sort-button
               >
                 <CategoryIconWrapper $active={showSortPanel}>
-                  <img
+                  <StyledImage
                     src="public/assets/icons/categories.png"
                     alt="Sort options"
-                    width="16"
-                    height="16"
-                    style={{ objectFit: "contain" }}
                   />
                 </CategoryIconWrapper>
               </IconButtonWithTooltip>
@@ -1102,11 +1100,7 @@ const TrackItem: React.FC<TrackItemProps> = ({
           ) : (
             <motion.img
               key="not-favorite"
-              src={
-                isHovered
-                  ? "public/assets/icons/selected.png"
-                  : "public/assets/icons/add_1.png"
-              } // Use custom icons
+              src={isHovered ? ICONS.selected : ICONS.add}
               alt="Add to favorites"
               width="20"
               height="20"
@@ -1502,20 +1496,18 @@ const Title = styled(motion.div).attrs<{ $isExpanded: boolean }>((props) => ({
   style: {
     fontSize: props.$isExpanded
       ? window.innerWidth <= 768
-        ? "1.25rem"
+        ? "0.85rem" // Reduced from 1.25rem to 0.85rem for mobile
         : "1.5rem"
       : window.innerWidth <= 768
       ? "0"
-      : "1.2rem", // Set font size to 0 on mobile collapsed
+      : "1.2rem",
     padding: props.$isExpanded
       ? window.innerWidth <= 768
-        ? "12px"
+        ? "6px" // Reduced padding for mobile
         : "16px"
       : window.innerWidth <= 768
       ? "0"
-      : "8px", // Remove padding on mobile collapsed
-    opacity: !props.$isExpanded && window.innerWidth <= 768 ? 0 : 1, // Hide text on mobile collapsed
-    display: !props.$isExpanded && window.innerWidth <= 768 ? "none" : "flex", // Remove from layout on mobile collapsed
+      : "8px",
   },
 }))`
   font-weight: 600;
@@ -1523,8 +1515,7 @@ const Title = styled(motion.div).attrs<{ $isExpanded: boolean }>((props) => ({
   margin: 0;
   transition: all 0.3s ease;
   align-items: center;
-  gap: 8px;
-  width: ${(props) => (props.$isExpanded ? "auto" : "auto")};
+  gap: 4px; // Reduced gap for mobile
   text-align: center;
   justify-content: center;
   white-space: nowrap;
@@ -1532,14 +1523,9 @@ const Title = styled(motion.div).attrs<{ $isExpanded: boolean }>((props) => ({
   text-overflow: ellipsis;
 
   @media (max-width: 768px) {
-    display: ${(props) =>
-      !props.$isExpanded
-        ? "none"
-        : "flex"}; // Hide completely on mobile collapsed
+    letter-spacing: -0.3px;
+    line-height: 1.1;
   }
-
-  /* Responsive text shadow for better visibility */
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
 // Define the rotation animation separately
@@ -1806,10 +1792,23 @@ const AlbumGrid = styled.div.attrs<{
 }>((props) => ({
   style: {
     gridTemplateColumns: props.$isExpanded
-      ? `repeat(auto-fill, minmax(${props.$albumSize}px, 1fr))`
+      ? window.innerWidth <= 768
+        ? `repeat(auto-fill, minmax(${Math.max(
+            80,
+            props.$albumSize * 0.8
+          )}px, 1fr))` // Slightly smaller on mobile
+        : `repeat(auto-fill, minmax(${props.$albumSize}px, 1fr))`
       : "1fr",
-    gap: props.$isExpanded ? "12px" : "8px",
-    padding: props.$isExpanded ? "12px" : "6px",
+    gap: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "8px"
+        : "12px"
+      : "8px",
+    padding: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "8px"
+        : "12px"
+      : "6px",
   },
 }))`
   display: grid;
@@ -1973,6 +1972,16 @@ const AlbumSizeButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.2s ease;
 
+  @media (max-width: 768px) {
+    width: 24px; // Smaller size on mobile
+    height: 24px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
   &:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #4caf50;
@@ -1981,12 +1990,6 @@ const AlbumSizeButton = styled(motion.button)`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
   }
 `;
 
@@ -2068,26 +2071,19 @@ const SliderThumb = styled(motion.div).attrs<{ $progress: number }>(
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   z-index: 5;
-  transition: transform 0.05s ease-out, box-shadow 0.1s ease;
+
+  @media (max-width: 768px) {
+    width: 14px; // Slightly smaller on mobile
+    height: 14px;
+    border-width: 1.5px;
+  }
 
   &:hover {
     transform: translate(-50%, -50%) scale(1.2);
-    box-shadow: 0 0 10px var(--album-color-primary, rgba(76, 175, 80, 0.6));
   }
 
   &:active {
-    cursor: pointer;
     transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 0 15px var(--album-color-primary, rgba(76, 175, 80, 0.8));
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 3px;
-    background: var(--album-color-primary, rgba(76, 175, 80, 0.8));
-    border-radius: 50%;
-    opacity: 0.8;
   }
 `;
 
@@ -2109,25 +2105,27 @@ const HeaderControls = styled.div<{ $isExpanded?: boolean }>`
   }
 `;
 
-// Update CompactSizeControls to ensure email popup is fully visible
+// Update CompactSizeControls for better mobile display
 const CompactSizeControls = styled(motion.div)`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--theme-background-gradient, rgba(0, 0, 0, 0.35));
   backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: 24px;
+  padding: 6px 8px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-color: var(--theme-border-color, rgba(255, 255, 255, 0.1));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   position: relative;
-  overflow: visible; /* Changed from hidden to visible to show the email popup */
-  classname: size-controls;
-  z-index: 10; /* Ensure controls are above other elements */
-`;
+  z-index: 10;
 
-// Create a compact version of AlbumSizeControls for the header
+  @media (max-width: 768px) {
+    padding: 4px 6px;
+    gap: 4px;
+    transform: scale(0.9);
+    margin-right: 8px;
+  }
+`;
 
 // Add this new component inside MusicExplorer.tsx
 const AlbumArtColorVisualizer = () => {
@@ -2502,7 +2500,12 @@ const SliderContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 0 6px;
-  margin-right: 8px; /* Add margin to prevent overlap with other elements */
+
+  @media (max-width: 768px) {
+    width: 80px; // Smaller width on mobile
+    height: 20px;
+    padding: 0 4px;
+  }
 
   /* Create a slight background for better visibility */
   &::before {
@@ -2516,6 +2519,12 @@ const SliderContainer = styled.div`
 `;
 
 // Add SizeLabel component definition
+const StyledImage = styled.img`
+  object-fit: contain;
+  width: 16px;
+  height: 16px;
+`;
+
 const EmptyStateMessage = styled.div`
   text-align: center;
   color: rgba(255, 255, 255, 0.7);

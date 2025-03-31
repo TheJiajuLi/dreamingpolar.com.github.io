@@ -4,50 +4,68 @@ import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { MusicProvider } from "../context/MusicContext";
 import { LayoutProvider, useLayout } from "../context/LayoutContext";
-import { ThemeProvider, useThemeContext } from "../context/ThemeContext";
+import {
+  ThemeProvider,
+  useThemeContext,
+  ThemeContextType,
+} from "../context/ThemeContext";
+import { AppTheme } from "../styles/themes";
 import MusicExplorer from "./MusicExplorer/MusicExplorer";
 import SideBarPlayer from "./MusicPlayer/SideBarPlayer";
 import MobileMusicControls from "./MusicPlayer/MobileMusicControls";
 import HorizontalPlayerBar from "./MusicPlayer/HorizontalPlayerBar";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import CommunityUploadPage from "./CommunityUpload/CommunityUploadPage";
-import NavBar from "./NavBar/NavBar"; // Import NavBar component
+import NavBar from "./NavBar/NavBar";
+import SearchPage from "./Search/SearchPage";
+import LibraryPage from "./Library/LibraryPage";
 
-// Create a separate router component to access useLocation
+// Update type guard to handle theme context structure
+const isValidTheme = (theme: unknown): theme is ThemeContextType => {
+  if (!theme || typeof theme !== "object") return false;
+
+  const contextObj = theme as Partial<ThemeContextType>;
+  return (
+    !!contextObj.currentTheme &&
+    typeof contextObj.currentTheme === "object" &&
+    "background" in contextObj.currentTheme &&
+    "text" in contextObj.currentTheme &&
+    "ui" in contextObj.currentTheme
+  );
+};
+
 const AppRouter: React.FC = () => {
   const location = useLocation();
   const { state: layoutState } = useLayout();
-  const { currentTheme } = useThemeContext();
+  const themeContext = useThemeContext();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  if (!isValidTheme(themeContext)) {
+    console.error(
+      "Theme validation failed:",
+      JSON.stringify(themeContext, null, 2)
+    );
+    return null;
+  }
+
   return (
-    <StyledThemeProvider theme={currentTheme}>
+    <StyledThemeProvider theme={themeContext.currentTheme}>
       <AppContainer>
-        <NavBar /> {/* Add this line to include the navigation */}
+        <NavBar />
         <MainLayout $hasMobileControls={isMobile}>
-          {/* Explorer/Content Section */}
           <Routes location={location}>
             <Route
               path="/"
               element={
                 layoutState.explorerVisible && (
-                  <ExplorerSection
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    style={{ width: "100%" }}
-                  >
+                  <ExplorerSection style={{ width: "100%" }}>
                     <MusicExplorer />
                   </ExplorerSection>
                 )
@@ -56,12 +74,7 @@ const AppRouter: React.FC = () => {
             <Route
               path="/explorer"
               element={
-                <ExplorerSection
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  style={{ width: "100%" }}
-                >
+                <ExplorerSection style={{ width: "100%" }}>
                   <MusicExplorer />
                 </ExplorerSection>
               }
@@ -69,12 +82,7 @@ const AppRouter: React.FC = () => {
             <Route
               path="/community-upload"
               element={
-                <ExplorerSection
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  style={{ width: "100%" }}
-                >
+                <ExplorerSection style={{ width: "100%" }}>
                   <CommunityUploadPage />
                 </ExplorerSection>
               }
@@ -82,24 +90,33 @@ const AppRouter: React.FC = () => {
             <Route
               path="/settings"
               element={
-                <ExplorerSection
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  style={{ width: "100%" }}
-                >
+                <ExplorerSection style={{ width: "100%" }}>
                   <div>Settings Page (Coming Soon)</div>
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <SearchPage />
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/library"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <LibraryPage />
                 </ExplorerSection>
               }
             />
           </Routes>
 
-          {/* Hidden Player Section - Contains the audio element but visually hidden */}
           <HiddenPlayerSection>
             <SideBarPlayer />
           </HiddenPlayerSection>
         </MainLayout>
-        {/* Independent Player Controls Section */}
         <PlayerControlsSection>
           <AnimatePresence mode="wait">
             {isMobile ? (
@@ -109,6 +126,7 @@ const AppRouter: React.FC = () => {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 100, opacity: 0 }}
                 transition={{ type: "spring", damping: 20 }}
+                $theme={themeContext.currentTheme}
               >
                 <MobileMusicControls />
               </MobileControlsWrapper>
@@ -130,7 +148,6 @@ const AppRouter: React.FC = () => {
   );
 };
 
-// Wrap this component to access context providers
 const AppContent: React.FC = () => {
   return (
     <LayoutProvider>
@@ -141,7 +158,6 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Main App component with all providers
 const App: React.FC = () => {
   return (
     <BrowserRouter
@@ -157,37 +173,48 @@ const App: React.FC = () => {
   );
 };
 
-// Styled components that use theme props
-const AppContainer = styled.div`
+const AppContainer = styled.div.attrs<{ theme: AppTheme }>(({ theme }) => ({
+  style: {
+    background: theme.background.gradient,
+  },
+}))`
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
-  background: ${({ theme }) => theme.background.gradient};
 `;
 
-const MainLayout = styled.div<{ $hasMobileControls?: boolean }>`
+const MainLayout = styled.div.attrs<{ $hasMobileControls?: boolean }>(
+  ({ $hasMobileControls }) => ({
+    style: {
+      marginBottom: $hasMobileControls ? "54.2px" : "32px",
+    },
+  })
+)`
   display: flex;
   flex: 1;
   width: 100%;
   position: relative;
   overflow: hidden;
-  margin-bottom: 72px;
+
   @media (max-width: 768px) {
-    height: calc(100vh - 80px); /* Adjust for mobile controls */
+    height: calc(100vh - 80px);
     padding: 0;
-    margin-bottom: 90px;
   }
 `;
 
-const ExplorerSection = styled(motion.div)`
-  flex: 1; // Make it take all available space
-  width: 100%; // Full width
+const ExplorerSection = styled(motion.div).attrs(() => ({
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+}))`
+  flex: 1;
+  width: 100%;
   height: 92%;
   overflow: hidden;
-  margin-top: 50px;
+  margin-top: 0px;
   backdrop-filter: blur(10px);
   transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
@@ -196,13 +223,10 @@ const ExplorerSection = styled(motion.div)`
     height: 100%;
     margin-top: 0;
     border-radius: 0px;
-    border-left: none;
-    border-right: none;
-    border-top: none;
+    border: none;
   }
 `;
 
-// This hidden element is critical for music playback functionality
 const HiddenPlayerSection = styled.div`
   position: absolute;
   width: 1px;
@@ -222,11 +246,16 @@ const PlayerControlsSection = styled.div`
   pointer-events: none;
 `;
 
-const MobileControlsWrapper = styled(motion.div)`
+const MobileControlsWrapper = styled(motion.div).attrs<{ $theme: AppTheme }>(
+  ({ $theme }) => ({
+    style: {
+      background: $theme?.background?.secondary || "rgba(0, 0, 0, 0.8)",
+    },
+  })
+)`
   pointer-events: auto;
   width: 100%;
   padding: 0;
-  background: ${({ theme }) => theme.player.controls};
   backdrop-filter: blur(20px);
   border-top-left-radius: 0;
   border-top-right-radius: 0;

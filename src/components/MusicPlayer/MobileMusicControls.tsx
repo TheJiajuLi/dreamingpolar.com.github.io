@@ -6,16 +6,13 @@ import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
 import { getSafeCoverArt } from "../../utils/imageUtils";
 import { useLayout } from "../../context/LayoutContext";
 import BottleSwitch from "../shared/NewSideBarToggleling";
-// Import the ArtColorVisualizer
 import ArtColorVisualizer from "../Visualizer/ArtColorVisualizer";
-// Import artColorExtractor utility
 import { artColorExtractor } from "../../utils/artColorExtractor";
 
 const MobileMusicControls: React.FC = () => {
   const { state, dispatch } = useMusicContext();
   const { state: layoutState, dispatch: layoutDispatch } = useLayout();
   const [isToggleVisible, setIsToggleVisible] = useState(true);
-  // Add state for extracted colors
   const [colors, setColors] = useState<{
     primary: string;
     vibrant: string;
@@ -26,7 +23,6 @@ const MobileMusicControls: React.FC = () => {
     accent: "#43a047",
   });
 
-  // Extract album art colors when current track changes
   useEffect(() => {
     if (state.currentTrack?.coverArt) {
       const extractColors = async () => {
@@ -47,15 +43,12 @@ const MobileMusicControls: React.FC = () => {
     }
   }, [state.currentTrack]);
 
-  // Create animated gradient background
   const backgroundGradient = useMemo(() => {
     return `linear-gradient(135deg, 
       ${colors.primary}22 0%, 
       ${colors.vibrant}33 50%, 
       ${colors.accent}22 100%)`;
   }, [colors]);
-
-  // Other handlers remain the same
 
   const handlePlayPause = () => {
     dispatch({ type: state.isPlaying ? "PAUSE" : "PLAY" });
@@ -92,7 +85,6 @@ const MobileMusicControls: React.FC = () => {
         transition={{ type: "spring", damping: 20 }}
         style={{ background: backgroundGradient }}
       >
-        {/* Add the visualizer as background */}
         <VisualizerBackground>
           {state.currentTrack?.coverArt && (
             <ArtColorVisualizer
@@ -104,7 +96,6 @@ const MobileMusicControls: React.FC = () => {
           <VisualOverlay $isPlaying={state.isPlaying} />
         </VisualizerBackground>
 
-        {/* Add a glassmorphism panel */}
         <GlassPanelContent>
           <ControlsSection>
             <TrackInfo>
@@ -182,16 +173,20 @@ const MobileMusicControls: React.FC = () => {
   );
 };
 
-// Update styled components with background and dynamic colors
 const MobileContainer = styled(motion.div)`
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 12px;
+  padding: 6px;
   z-index: 1000;
   overflow: hidden;
-  height: 90px;
+  height: 60px;
+
+  @media (max-width: 768px) {
+    height: 54px;
+    padding: 4px;
+  }
 `;
 
 const VisualizerBackground = styled.div`
@@ -216,23 +211,21 @@ const VisualOverlay = styled.div<{ $isPlaying: boolean }>`
   transition: backdrop-filter 1.2s ease;
 `;
 
-// Update the GlassPanelContent to adjust for the removed progress bar
 const GlassPanelContent = styled.div`
   position: relative;
   z-index: 2;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center; // Center the controls vertically now that progress is gone
+  justify-content: center;
 `;
 
-// Update the ControlsSection styling to fill the available space
 const ControlsSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
-  height: 100%; // Take up full height
+  padding: 0 4px;
+  height: 100%;
 `;
 
 const TrackInfo = styled.div`
@@ -240,16 +233,16 @@ const TrackInfo = styled.div`
   align-items: center;
   flex: 1;
   min-width: 0;
-  margin-right: 16px;
+  margin-right: 12px;
 `;
 
 const AlbumArtWrapper = styled.div<{ $isPlaying: boolean }>`
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  margin-right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  margin-right: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transform: ${(props) => (props.$isPlaying ? "scale(1.05)" : "scale(1)")};
   transition: transform 0.5s ease;
 `;
@@ -280,41 +273,42 @@ const TextInfo = styled.div`
 
 const TrackName = styled.div`
   color: white;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 `;
 
 const ArtistName = styled.div`
   color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 `;
 
 const PlaybackControls = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 `;
 
 const IconButton = styled.button`
   background: none;
   border: none;
   color: white;
-  font-size: 20px;
-  padding: 8px;
+  font-size: 14px;
+  padding: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 
-  /* Remove focus outline and tap highlight */
   outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -328,6 +322,11 @@ const IconButton = styled.button`
   &:active {
     transform: scale(0.9);
   }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 3px;
+  }
 `;
 
 const PlayButton = styled(IconButton)<{
@@ -336,10 +335,10 @@ const PlayButton = styled(IconButton)<{
 }>`
   background: ${(props) => props.$accentColor || "#4caf50"};
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  font-size: 24px;
-  box-shadow: 0 2px 15px
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  box-shadow: 0 2px 12px
     ${(props) =>
       props.$isPlaying
         ? `${props.$accentColor || "#4caf50"}90`
@@ -365,38 +364,53 @@ const PlayButton = styled(IconButton)<{
     transform: scale(0.95);
     background: ${(props) => props.$accentColor || "#43a047"};
   }
+
+  @media (max-width: 768px) {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
 `;
 
 const StyledBottleSwitch = styled(BottleSwitch)`
-  margin-right: 12px;
+  margin-right: 8px;
   transform-origin: center;
-  min-width: 32px;
-  height: 48px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  min-width: 24px;
+  height: 32px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 
   @media (min-width: 769px) {
     display: none;
   }
+
+  @media (max-width: 768px) {
+    min-width: 20px;
+    height: 28px;
+    margin-right: 6px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
 `;
 
 const SidebarPlayerToggle = styled(motion.button)<{ $accentColor: string }>`
-  background: transparent; // Remove background
+  background: transparent;
   border: none;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: 4px;
   position: relative;
-  overflow: visible; // Allow icon to extend beyond button bounds
+  overflow: visible;
 
-  /* Remove focus outline and tap highlight on all devices */
   outline: none;
   -webkit-tap-highlight-color: transparent;
 
-  /* Prevent blue highlight on touch devices */
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -408,10 +422,9 @@ const SidebarPlayerToggle = styled(motion.button)<{ $accentColor: string }>`
   }
 `;
 
-// Update the ToggleIconImage for a floating effect without container visibility
 const ToggleIconImage = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
   filter: brightness(1.2) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   transition: all 0.3s ease;
@@ -429,9 +442,7 @@ const ToggleIconImage = styled.img`
   }
 `;
 
-// Add a global style to remove focus outlines and highlighting
 const GlobalClickStyles = createGlobalStyle`
-  /* Remove focus styles for all interactive elements in this component */
   button, 
   [role="button"],
   input,
@@ -441,7 +452,6 @@ const GlobalClickStyles = createGlobalStyle`
       outline: none !important;
     }
     
-    /* Remove blue highlight on mobile */
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;

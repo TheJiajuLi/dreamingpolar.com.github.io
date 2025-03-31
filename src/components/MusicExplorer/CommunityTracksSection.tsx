@@ -1,9 +1,9 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '../../context/ThemeContext';
+import React from "react";
+import styled from "styled-components";
+import { useThemeContext } from "../../context/ThemeContext";
 
 const Container = styled.div`
-  background-color: ${({ theme }) => theme.background.secondary};
+  /* Remove background-color to blend with parent */
   color: ${({ theme }) => theme.text.primary};
   padding: 20px;
 `;
@@ -15,13 +15,11 @@ const TracksList = styled.div`
 `;
 
 const CommunityTracksSection: React.FC = () => {
-  const { currentTheme } = useTheme();
+  const { currentTheme } = useThemeContext();
 
   return (
     <Container>
-      <TracksList>
-        {/* Your content */}
-      </TracksList>
+      <TracksList>{/* Your content */}</TracksList>
     </Container>
   );
 };
