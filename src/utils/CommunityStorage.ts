@@ -1,13 +1,16 @@
 // src/utils/CommunityStorage.ts
 import { genreColors } from '../data/colorSchemes';
 import { Track, GenreType } from '../types/music';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { storage, db } from '../firebase/config';
 
 export interface CommunityTrack {
   id: string;
   title: string;
   artist: string;
   album: string;
-  genre: GenreType;
+  genre: string;
   coverArt: string;
   audioSrc: string;
   duration: number;
@@ -17,187 +20,90 @@ export interface CommunityTrack {
   isOriginal: boolean;
 }
 
-const COMMUNITY_TRACKS_KEY = 'dreaming_polar_community_tracks';
-
 export class CommunityStorage {
   // Add a helper method to get genre color
   static getGenreColor(genre: GenreType): string {
     return genreColors[genre] || '#333333'; // Default color if genre not found
   }
 
-  static saveTrack(track: CommunityTrack): void {
+  static async uploadAudioFile(file: File): Promise<string> {
     try {
-      // Ensure track has a color based on its genre
-      const trackWithColor = {
-        ...track,
-        color: track.color || CommunityStorage.getGenreColor(track.genre)
-      };
-
-      // Get existing tracks
-      const existingTracksJson = localStorage.getItem(COMMUNITY_TRACKS_KEY);
-      const existingTracks: CommunityTrack[] = existingTracksJson 
-        ? JSON.parse(existingTracksJson) 
-        : [];
+      // Create a storage reference with a unique name
+      const timestamp = Date.now();
+      const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+      const storageRef = ref(storage, `audio/${fileName}`);
       
-      // Add new track
-      const updatedTracks = [...existingTracks, trackWithColor];
+      // Upload the file
+      const snapshot = await uploadBytes(storageRef, file);
       
-      // Save back to localStorage
-      localStorage.setItem(COMMUNITY_TRACKS_KEY, JSON.stringify(updatedTracks));
-      
-      // Dispatch an event to notify the app
-      const event = new CustomEvent('community-track-added', { 
-        detail: trackWithColor 
-      });
-      window.dispatchEvent(event);
+      // Get download URL
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
     } catch (error) {
-      console.error('Error saving community track:', error);
+      console.error("Error uploading audio file:", error);
+      throw new Error("Failed to upload audio file");
     }
   }
-  
+
+  static async uploadCoverArt(file: File): Promise<string> {
+    try {
+      // Create a storage reference
+      const timestamp = Date.now();
+      const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+      const storageRef = ref(storage, `covers/${fileName}`);
+      
+      // Upload the file
+      const snapshot = await uploadBytes(storageRef, file);
+      
+      // Get download URL
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading cover art:", error);
+      throw new Error("Failed to upload cover art");
+    }
+  }
+
+  static async saveTrack(track: CommunityTrack): Promise<void> {
+    try {
+      // Save track metadata to Firestore
+      await addDoc(collection(db, "communityTracks"), track);
+    } catch (error) {
+      console.error("Error saving track:", error);
+      throw new Error("Failed to save track metadata");
+    }
+  }
+
   static async getAllTracks(): Promise<CommunityTrack[]> {
     try {
-      const tracks = localStorage.getItem(COMMUNITY_TRACKS_KEY);
-      return tracks ? JSON.parse(tracks) : [];
+      // Get all tracks from Firestore, ordered by upload date
+      const q = query(collection(db, "communityTracks"), orderBy("uploadDate", "desc"));
+      const querySnapshot = await getDocs(q);
+      
+      const tracks: CommunityTrack[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as CommunityTrack;
+        tracks.push(data);
+      });
+      
+      return tracks;
     } catch (error) {
-      console.error('Failed to get community tracks:', error);
+      console.error("Error getting tracks:", error);
       return [];
     }
   }
 
-  static getTrackById(id: string): CommunityTrack | null {
-    try {
-      const tracks = CommunityStorage.getAllTracks();
-      return tracks.find(track => track.id === id) || null;
-    } catch (error) {
-      console.error('Error retrieving community track:', error);
-      return null;
-    }
-  }
-  
-  // Convert CommunityTrack to Track for the player
   static convertToTrack(communityTrack: CommunityTrack): Track {
     return {
       id: communityTrack.id,
       title: communityTrack.title,
       artist: communityTrack.artist,
       album: communityTrack.album,
-      genre: communityTrack.genre,
+      genre: communityTrack.genre as GenreType,
       coverArt: communityTrack.coverArt,
       audioSrc: communityTrack.audioSrc,
       duration: communityTrack.duration,
-      color: communityTrack.color || CommunityStorage.getGenreColor(communityTrack.genre)
+      color: communityTrack.color || CommunityStorage.getGenreColor(communityTrack.genre as GenreType)
     };
-  }
-  
-  // Simulate file uploads by creating object URLs
-  static uploadAudioFile(file: File): Promise<string> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const audioUrl = URL.createObjectURL(file);
-        resolve(audioUrl);
-      }, 1500); // Simulate upload delay
-    });
-  }
-  
-  static uploadCoverArt(file: File): Promise<string> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const coverUrl = URL.createObjectURL(file);
-        resolve(coverUrl);
-      }, 1000); // Simulate upload delay
-    });
-  }
-
-  static cleanupAllStorageKeys(): void {
-    const keysToClean = [
-      'current_track',
-      'player_state',
-      'queue_state',
-      'recent_plays',
-      'track_progress',
-      'volume_state'
-    ];
-
-    keysToClean.forEach(key => localStorage.removeItem(key));
-  }
-
-  static async deleteTrack(trackId: string): Promise<void> {
-    try {
-      const tracks = await this.getAllTracks();
-      const updatedTracks = tracks.filter(track => track.id !== trackId);
-      localStorage.setItem(COMMUNITY_TRACKS_KEY, JSON.stringify(updatedTracks));
-    } catch (error) {
-      console.error('Failed to delete track:', error);
-      throw error;
-    }
-  }
-
-  static async updateTrack(trackId: string, updatedTrack: Partial<CommunityTrack>): Promise<void> {
-    try {
-      const tracks = await this.getAllTracks();
-      const trackIndex = tracks.findIndex(track => track.id === trackId);
-      
-      if (trackIndex > -1) {
-        tracks[trackIndex] = { ...tracks[trackIndex], ...updatedTrack };
-        localStorage.setItem(COMMUNITY_TRACKS_KEY, JSON.stringify(tracks));
-      }
-    } catch (error) {
-      console.error('Failed to update track:', error);
-      throw error;
-    }
-  }
-
-  static purgeAllCommunityContent(): boolean {
-    try {
-      // 1. Get all localStorage keys
-      const allKeys = { ...localStorage };
-      
-      // 2. Find and revoke all blob URLs
-      Object.keys(allKeys).forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value && value.startsWith('blob:')) {
-          URL.revokeObjectURL(value);
-          localStorage.removeItem(key);
-        }
-      });
-
-      // 3. Clear all community tracks
-      localStorage.removeItem(COMMUNITY_TRACKS_KEY);
-
-      // 4. Clear all player states
-      const keysToRemove = [
-        'current_track',
-        'player_state',
-        'queue_state',
-        'recent_plays',
-        'track_progress',
-        'volume_state',
-        'blobUrls'
-      ];
-
-      keysToRemove.forEach(key => localStorage.removeItem(key));
-
-      // 5. Clear all media elements
-      document.querySelectorAll('audio, video').forEach(element => {
-        if (element instanceof HTMLMediaElement) {
-          element.pause();
-          element.src = '';
-          element.load();
-        }
-      });
-
-      // 6. Clear all images with blob URLs
-      document.querySelectorAll('img[src^="blob:"]').forEach(img => {
-        const blobUrl = img.src;
-        img.src = '/assets/covers/default_cover.jpeg'; // Set default cover
-        URL.revokeObjectURL(blobUrl);
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Failed to purge community content:', error);
-      return false;
-    }
   }
 }

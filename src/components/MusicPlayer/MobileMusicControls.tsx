@@ -84,6 +84,7 @@ const MobileMusicControls: React.FC = () => {
         exit={{ y: 100 }}
         transition={{ type: "spring", damping: 20 }}
         style={{ background: backgroundGradient }}
+        className="mobile-player-container"
       >
         <VisualizerBackground>
           {state.currentTrack?.coverArt && (
@@ -182,6 +183,9 @@ const MobileContainer = styled(motion.div)`
   z-index: 1000;
   overflow: hidden;
   height: 60px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 
   @media (max-width: 768px) {
     height: 54px;
@@ -247,7 +251,9 @@ const AlbumArtWrapper = styled.div<{ $isPlaying: boolean }>`
   transition: transform 0.5s ease;
 `;
 
-const AlbumArt = styled.img<{ $isPlaying: boolean }>`
+const AlbumArt = styled.img.attrs({
+  draggable: false,
+})<{ $isPlaying: boolean }>`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -255,6 +261,12 @@ const AlbumArt = styled.img<{ $isPlaying: boolean }>`
   transition: transform 5s ease;
   animation: ${(props) =>
     props.$isPlaying ? "subtlePulse 3s infinite alternate" : "none"};
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
 
   @keyframes subtlePulse {
     0% {
@@ -269,6 +281,9 @@ const AlbumArt = styled.img<{ $isPlaying: boolean }>`
 const TextInfo = styled.div`
   min-width: 0;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 `;
 
 const TrackName = styled.div`
@@ -279,6 +294,9 @@ const TrackName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 `;
 
 const ArtistName = styled.div`
@@ -288,6 +306,9 @@ const ArtistName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 `;
 
 const PlaybackControls = styled.div`
@@ -443,11 +464,20 @@ const ToggleIconImage = styled.img`
 `;
 
 const GlobalClickStyles = createGlobalStyle`
+  /* Apply to all elements in the player */
+  .mobile-player-container * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+  
   button, 
   [role="button"],
   input,
   select,
-  a {
+  a,
+  img,
+  svg {
     &:focus {
       outline: none !important;
     }
@@ -456,6 +486,11 @@ const GlobalClickStyles = createGlobalStyle`
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+  }
+  
+  img {
+    -webkit-user-drag: none;
+    user-drag: none;
   }
 `;
 
