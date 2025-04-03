@@ -38,17 +38,6 @@ interface FilterOptions {
 }
 
 // Animated equalizer component that activates when music is playing
-const AnimatedEqualizer = ({ isPlaying }: { isPlaying: boolean }) => {
-  return (
-    <EqualizerContainer $isPlaying={isPlaying}>
-      <EqualizerBar $delay={0} $height={0.7} />
-      <EqualizerBar $delay={0.2} $height={1} />
-      <EqualizerBar $delay={0.1} $height={0.5} />
-      <EqualizerBar $delay={0.3} $height={0.8} />
-    </EqualizerContainer>
-  );
-};
-
 const EqualizerContainer = styled.div<{ $isPlaying: boolean }>`
   display: flex;
   align-items: flex-end;
@@ -311,8 +300,8 @@ const MusicExplorer: React.FC = () => {
       type: "SET_ACTIVE_CONTEXT",
       payload: {
         id: "explorer",
-        type: "explorer",
-        tracks: currentTracks, // Use the current view's tracks
+        type: "queue", // Changed from "explorer" to "queue" which is a valid type
+        tracks: currentTracks,
         name: "Music Explorer",
       },
     });
