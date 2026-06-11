@@ -65,13 +65,10 @@ async function handleEnter() {
   _output && (_output.scrollTop = _output.scrollHeight);
 }
 
-// ── Header toggle button ───────────────────────────────────
+// ── Toolbar toggle button (injected into coding-toolbar) ───
 function injectToggleBtn() {
-  const header = document.querySelector('header.page-header');
-  if (!header) return;
-
   _toggleBtn = document.createElement('button');
-  _toggleBtn.className = 'dp-terminal-btn';
+  _toggleBtn.className = 'dp-terminal-toolbar-btn';
   _toggleBtn.title     = 'Toggle terminal  (>_)';
   _toggleBtn.innerHTML = ICON_TERMINAL;
   _toggleBtn.addEventListener('click', () => {
@@ -79,12 +76,10 @@ function injectToggleBtn() {
     (state === 'closed' || !state) ? openTerminal() : closeTerminal();
   });
 
-  const startCodingBtn = header.querySelector('#start-coding-btn');
-  if (startCodingBtn) {
-    startCodingBtn.insertAdjacentElement('afterend', _toggleBtn);
-  } else {
-    const fsBtn = header.querySelector('.dp-fullscreen-btn');
-    fsBtn ? header.insertBefore(_toggleBtn, fsBtn) : header.appendChild(_toggleBtn);
+  const toolbar = document.querySelector('.coding-toolbar');
+  if (toolbar) {
+    const runBtn = toolbar.querySelector('.run-btn');
+    runBtn ? toolbar.insertBefore(_toggleBtn, runBtn) : toolbar.appendChild(_toggleBtn);
   }
 }
 

@@ -131,7 +131,122 @@
   margin-bottom: 5px;
 }
 
-/* ── Polar Bear chat panel (future) ─────────────────────────── */
-/* Reserved namespace — styles added here as chat feature is built */
+/* ── AI header button ───────────────────────────────────────── */
+.ai-header-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.ai-header-btn:hover    { background: rgba(22, 163, 74, 0.1); }
+.ai-header-btn.active   { background: rgba(22, 163, 74, 0.15); }
+.ai-header-btn:disabled { opacity: 0.45; cursor: default; }
+
+.ai-header-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── AI header dialog (centered in header) ──────────────────── */
+.ai-header-dialog {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 38px;
+  min-width: 440px;
+  background: var(--surface, #ffffff);
+  border: 1.5px solid rgba(22, 163, 74, 0.45);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+.ai-header-dialog.visible { display: flex; }
+
+.ai-header-input {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  color: var(--text, #102040);
+  font-size: 0.82rem;
+  outline: none;
+}
+.ai-header-input::placeholder { color: var(--text-muted, #94a3b8); }
+
+.ai-header-submit {
+  height: 26px;
+  padding: 0 12px;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.ai-header-submit:hover    { background: #15803d; }
+.ai-header-submit:disabled { opacity: 0.5; cursor: default; }
+
+.ai-header-cancel {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: background 0.12s, color 0.12s;
+}
+.ai-header-cancel:hover { background: rgba(0,0,0,0.06); color: var(--text, #102040); }
+
+/* ── Terminal toolbar button ────────────────────────────────── */
+.dp-terminal-toolbar-btn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dp-terminal-toolbar-btn:hover,
+.dp-terminal-toolbar-btn.active {
+  background: rgba(100, 116, 139, 0.08);
+  border-color: var(--text-muted, #64748b);
+  color: var(--text, #102040);
+}
 
 /* ── Theme overrides live in theme_controller.css ───────────── */

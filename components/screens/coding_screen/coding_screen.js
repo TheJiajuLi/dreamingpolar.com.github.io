@@ -8,7 +8,6 @@ import * as TextHL   from './coding_screen_python/python_text_highlight/python_t
 import * as Completion from './coding_screen_python/python_code-completion/python_code_completion.js';
 import { createImportBtn } from '../../import/import_btn.js';
 import { addImportedCell } from '../../customise_code_block/customise_code_block.js';
-import { ask, SYSTEM_PYTHON, SYSTEM_LATEX } from '../../ai/ai_client.js';
 
 const CODE_KEY = 'dreaming-polar-code';
 
@@ -120,11 +119,6 @@ function setupCodingScreen() {
   runBtn.innerHTML = '&#9654; Run';
   runBtn.title = 'Run (Ctrl+Enter)';
 
-  const aiGenBtn = document.createElement('button');
-  aiGenBtn.className = 'ai-gen-btn';
-  aiGenBtn.innerHTML = '小梦';
-  aiGenBtn.title = 'Ask Polar Bear (小梦) to generate code';
-
   const toolbar = document.createElement('div');
   toolbar.className = 'coding-toolbar';
   const icmSlot = document.createElement('div');
@@ -132,19 +126,7 @@ function setupCodingScreen() {
   mountICM(icmSlot);
 
   toolbar.appendChild(icmSlot);
-  toolbar.appendChild(aiGenBtn);
   toolbar.appendChild(runBtn);
-
-  // ── AI prompt row ─────────────────────────────────────────
-  const aiPromptRow = document.createElement('div');
-  aiPromptRow.className = 'ai-prompt-row';
-  aiPromptRow.innerHTML = `
-    <span class="ai-prompt-icon">✨</span>
-    <input class="ai-prompt-input" type="text" autocomplete="off" spellcheck="false"
-           placeholder="Tell 小梦 what to write (e.g. 画一个3D高斯分布)…">
-    <button class="ai-prompt-submit">Generate</button>
-    <button class="ai-prompt-cancel">✕</button>
-  `;
 
   const editorWrap = document.createElement('div');
   editorWrap.className = 'code-editor-area';
@@ -164,7 +146,7 @@ function setupCodingScreen() {
   statusBar.className   = 'compiler-status-bar';
   statusBar.textContent = 'Idle — Python loads on first run.';
 
-  singleView.append(toolbar, aiPromptRow, editorWrap, statusBar);
+  singleView.append(toolbar, editorWrap, statusBar);
 
   // ── Python ICM features ───────────────────────────────────
   function icmActivate() {
@@ -251,61 +233,7 @@ function setupCodingScreen() {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
   });
 
-  // ── AI Generate wiring ────────────────────────────────────
-  const aiInput    = aiPromptRow.querySelector('.ai-prompt-input');
-  const aiSubmit   = aiPromptRow.querySelector('.ai-prompt-submit');
-  const aiCancel   = aiPromptRow.querySelector('.ai-prompt-cancel');
-
-  function openAiRow() {
-    aiPromptRow.classList.add('visible');
-    aiInput.focus();
-  }
-  function closeAiRow() {
-    aiPromptRow.classList.remove('visible');
-    aiInput.value = '';
-  }
-
-  aiGenBtn.addEventListener('click', () => {
-    if (aiPromptRow.classList.contains('visible')) closeAiRow();
-    else openAiRow();
-  });
-  aiCancel.addEventListener('click', closeAiRow);
-
-  async function runAiGenerate() {
-    const prompt = aiInput.value.trim();
-    if (!prompt) return;
-    aiGenBtn.disabled = true;
-    aiSubmit.disabled = true;
-    aiSubmit.textContent = '…';
-
-    try {
-      const mode = getCurrentMode();
-      const systemPrompt = (mode === 'latex') ? SYSTEM_LATEX : SYSTEM_PYTHON;
-      const code = await ask(prompt, systemPrompt);
-      editor.value = code;
-      localStorage.setItem(CODE_KEY, code);
-      editor.dispatchEvent(new Event('input'));
-      closeAiRow();
-      if (mode === 'python' || mode === 'latex' || mode === 'mathjax') run();
-    } catch (e) {
-      aiSubmit.textContent = 'Generate';
-      aiSubmit.disabled = false;
-      aiGenBtn.disabled = false;
-      statusBar.className = 'compiler-status-bar error';
-      statusBar.textContent = `小梦: ${e.message}`;
-      return;
-    }
-
-    aiSubmit.textContent = 'Generate';
-    aiSubmit.disabled = false;
-    aiGenBtn.disabled = false;
-  }
-
-  aiSubmit.addEventListener('click', runAiGenerate);
-  aiInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); runAiGenerate(); } });
-  aiInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeAiRow(); });
-
-  // Handle ai-insert-and-run events from terminal
+  // Handle ai-insert-and-run events from terminal and header AI button
   document.addEventListener('ai-insert-and-run', ({ detail: { code } }) => {
     editor.value = code;
     localStorage.setItem(CODE_KEY, code);
