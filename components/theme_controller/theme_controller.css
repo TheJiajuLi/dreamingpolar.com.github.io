@@ -619,7 +619,22 @@ code, pre           { font-size: var(--font-sz-code, 0.84rem); }
 [data-theme="dark"]   .content-screen-label { color: #c9d1d9; font-weight: 800; letter-spacing: 0.14em; }
 [data-theme="grey"]   .content-screen-label { font-weight: 800; letter-spacing: 0.14em; }
 [data-theme="dark"]   .content-screen-header { border-bottom-color: var(--border, #30363d); }
-[data-theme="dark"]   .content-screen-body   { scrollbar-color: var(--border, #30363d) transparent; }
+[data-theme="dark"]   .content-screen-body   { background: #0d1117; scrollbar-color: var(--border, #30363d) transparent; }
+[data-theme="grey"]   .content-screen-body   { background: #22272e; scrollbar-color: #444c56 transparent; }
+[data-theme="aurora"] .content-screen-body   { background: #07071a; scrollbar-color: rgba(192,132,252,0.2) transparent; }
+
+/* ── cards / math-blocks inside content body ─────────────── */
+[data-theme="dark"]   .content-screen-body .card,
+[data-theme="dark"]   .content-screen-body .math-block   { background: #0d1117; border: none; }
+[data-theme="grey"]   .content-screen-body .card,
+[data-theme="grey"]   .content-screen-body .math-block   { background: #22272e; border: none; }
+[data-theme="aurora"] .content-screen-body .card,
+[data-theme="aurora"] .content-screen-body .math-block   { background: #07071a; border: none; }
+
+/* ── output-plot rendered image container ────────────────── */
+[data-theme="dark"]   .example-pair .output-plot--rendered { background: #0d1117; }
+[data-theme="grey"]   .example-pair .output-plot--rendered { background: #22272e; }
+[data-theme="aurora"] .example-pair .output-plot--rendered { background: #07071a; }
 
 /* ── .example-pair .output-plot ──────────────────────────── */
 [data-theme="dark"]   .example-pair .output-plot           { background: rgba(0,0,0,0.25); border-top-color: rgba(255,255,255,0.07); color: #8b949e; }

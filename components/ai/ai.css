@@ -262,31 +262,89 @@
 [data-theme="grey"]   { --ai-dialog-bg: rgba(22,27,34,0.94); }
 [data-theme="aurora"] { --ai-dialog-bg: rgba(7,7,26,0.94);   }
 
+/* ── Dark theme icon — invert to white + green glow ─────── */
+[data-theme="dark"] .ai-header-icon {
+  animation: ai-icon-breathe-dark 3.2s ease-in-out infinite;
+}
+[data-theme="dark"] .ai-header-btn:disabled .ai-header-icon {
+  animation: ai-icon-working-dark 0.9s ease-in-out infinite;
+}
+[data-theme="dark"] .ai-header-btn:hover { background: rgba(63,185,80,0.1); }
+
+@keyframes ai-icon-breathe-dark {
+  0%, 100% {
+    filter: brightness(0) invert(1)
+            drop-shadow(0 0 5px rgba(63,185,80,0.6))
+            drop-shadow(0 0 2px rgba(63,185,80,0.35));
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(0) invert(1)
+            drop-shadow(0 0 13px rgba(63,185,80,0.95))
+            drop-shadow(0 0 26px rgba(63,185,80,0.4));
+    transform: scale(1.07);
+  }
+}
+@keyframes ai-icon-working-dark {
+  0%   { filter: brightness(0) invert(1) drop-shadow(0 0 9px rgba(63,185,80,1));  opacity: 1; }
+  50%  { filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(63,185,80,0.3)); opacity: 0.55; }
+  100% { filter: brightness(0) invert(1) drop-shadow(0 0 9px rgba(63,185,80,1));  opacity: 1; }
+}
+
+/* ── Grey theme icon ─────────────────────────────────────── */
+[data-theme="grey"] .ai-header-icon {
+  animation: ai-icon-breathe-grey 3.2s ease-in-out infinite;
+}
+[data-theme="grey"] .ai-header-btn:disabled .ai-header-icon {
+  animation: ai-icon-working-dark 0.9s ease-in-out infinite; /* reuse dark */
+}
+[data-theme="grey"] .ai-header-btn:hover { background: rgba(87,171,90,0.1); }
+
+@keyframes ai-icon-breathe-grey {
+  0%, 100% {
+    filter: brightness(0) invert(1)
+            drop-shadow(0 0 5px rgba(87,171,90,0.6))
+            drop-shadow(0 0 2px rgba(87,171,90,0.35));
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(0) invert(1)
+            drop-shadow(0 0 13px rgba(87,171,90,0.95))
+            drop-shadow(0 0 26px rgba(87,171,90,0.4));
+    transform: scale(1.07);
+  }
+}
+
+/* ── Aurora theme icon — white + purple glow ─────────────── */
 [data-theme="aurora"] .ai-header-icon {
   animation: ai-icon-breathe-aurora 3.2s ease-in-out infinite;
 }
 [data-theme="aurora"] .ai-header-btn:disabled .ai-header-icon {
   animation: ai-icon-working-aurora 0.9s ease-in-out infinite;
 }
+[data-theme="aurora"] .ai-header-btn:hover { background: rgba(192,132,252,0.12); }
 
 @keyframes ai-icon-breathe-aurora {
   0%, 100% {
-    filter: drop-shadow(0 0 5px rgba(192,132,252,0.6))
+    filter: brightness(0) invert(1)
+            sepia(1) saturate(2.5) hue-rotate(230deg)
+            drop-shadow(0 0 5px rgba(192,132,252,0.65))
             drop-shadow(0 0 2px rgba(99,102,241,0.4));
     transform: scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 14px rgba(192,132,252,0.95))
+    filter: brightness(0) invert(1)
+            sepia(1) saturate(2.5) hue-rotate(230deg)
+            drop-shadow(0 0 14px rgba(192,132,252,0.95))
             drop-shadow(0 0 28px rgba(99,102,241,0.5))
             drop-shadow(0 0 6px rgba(6,182,212,0.3));
     transform: scale(1.08);
   }
 }
-
 @keyframes ai-icon-working-aurora {
-  0%   { filter: drop-shadow(0 0 10px rgba(192,132,252,1)) brightness(1.4); opacity: 1; }
-  50%  { filter: drop-shadow(0 0 3px rgba(192,132,252,0.3)) brightness(0.7); opacity: 0.55; }
-  100% { filter: drop-shadow(0 0 10px rgba(192,132,252,1)) brightness(1.4); opacity: 1; }
+  0%   { filter: brightness(0) invert(1) sepia(1) saturate(2.5) hue-rotate(230deg) drop-shadow(0 0 10px rgba(192,132,252,1));  opacity: 1; }
+  50%  { filter: brightness(0) invert(1) sepia(1) saturate(2.5) hue-rotate(230deg) drop-shadow(0 0 3px  rgba(192,132,252,0.3)); opacity: 0.55; }
+  100% { filter: brightness(0) invert(1) sepia(1) saturate(2.5) hue-rotate(230deg) drop-shadow(0 0 10px rgba(192,132,252,1));  opacity: 1; }
 }
 
 [data-theme="aurora"] .ai-header-dialog.visible {
@@ -295,7 +353,6 @@
     linear-gradient(90deg, #c084fc 0%, #6366f1 40%, #06b6d4 70%, #c084fc 100%) border-box;
   background-size: 100% 100%, 300% 100%;
 }
-
 [data-theme="aurora"] .ai-header-submit {
   background: linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
   box-shadow: 0 2px 10px rgba(192,132,252,0.4);
@@ -303,7 +360,6 @@
 [data-theme="aurora"] .ai-header-submit:hover {
   box-shadow: 0 4px 20px rgba(192,132,252,0.5), 0 0 28px rgba(99,102,241,0.3);
 }
-
 [data-theme="aurora"] .ask-ai-btn {
   background:
     linear-gradient(var(--surface, #07071a) 0 100%) padding-box,

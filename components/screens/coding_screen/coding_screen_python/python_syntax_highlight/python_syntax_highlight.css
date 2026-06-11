@@ -23,7 +23,7 @@
   padding: 10px;
   font-size: 0.84rem;
   line-height: 1.6;
-  overflow: visible; /* nb-editor expands height, no clipping needed */
+  overflow: hidden;
   height: auto;
   pointer-events: none;
 }
