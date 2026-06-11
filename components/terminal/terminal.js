@@ -79,8 +79,13 @@ function injectToggleBtn() {
     (state === 'closed' || !state) ? openTerminal() : closeTerminal();
   });
 
-  const fsBtn = header.querySelector('.dp-fullscreen-btn');
-  fsBtn ? header.insertBefore(_toggleBtn, fsBtn) : header.appendChild(_toggleBtn);
+  const startCodingBtn = header.querySelector('#start-coding-btn');
+  if (startCodingBtn) {
+    startCodingBtn.insertAdjacentElement('afterend', _toggleBtn);
+  } else {
+    const fsBtn = header.querySelector('.dp-fullscreen-btn');
+    fsBtn ? header.insertBefore(_toggleBtn, fsBtn) : header.appendChild(_toggleBtn);
+  }
 }
 
 // ── Resize handle ──────────────────────────────────────────
