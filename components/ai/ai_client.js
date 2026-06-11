@@ -1,9 +1,6 @@
-// ── Polar Bear (小梦) — Dreaming Polar AI client ─────────────
-// All requests go through the local proxy server to keep the API key off the browser.
-
 const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3001/api/ai'
-  : '/api/ai';   // production: same-origin proxy (set your deployed URL here when ready
+  : 'https://dreamingpolar-com.onrender.com/api/ai';
 
 // Default system identity — proxy also uses this as fallback
 export const SYSTEM_DEFAULT = `You are Polar Bear (小梦), the AI assistant built into Dreaming Polar (极梦) — an interactive mathematics and Python learning platform. Be helpful, concise, and encouraging.`;
