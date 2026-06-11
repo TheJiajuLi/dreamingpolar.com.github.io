@@ -1,0 +1,219 @@
+.compiling-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+  height: var(--screen-header-h, 65px);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.compiling-screen-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #94a3b8);
+}
+
+.compiling-screen-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 20px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border, #cbd5e1) transparent;
+}
+
+.compiling-screen-body::-webkit-scrollbar       { width: 4px; }
+.compiling-screen-body::-webkit-scrollbar-thumb { background: var(--border, #cbd5e1); border-radius: 4px; }
+
+/* ── Placeholder ─────────────────────────────────────────── */
+.output-placeholder {
+  color: var(--text-muted, #ffffff);
+  font-size: 0.82rem;
+  text-align: center;
+  margin-top: 48px;
+  font-style: italic;
+}
+
+/* ── Output block types ──────────────────────────────────── */
+.output-block { border-radius: 0; overflow: hidden; margin: 0; background: #ffffff; border-bottom: 1px solid var(--border, #e2e8f0); }
+.output-block:last-child { border-bottom: none; }
+
+
+.output-text {
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  padding: 10px 14px 10px 13px;
+  margin: 0;
+  font-family: var(--code-font, "JetBrains Mono", "Courier New", monospace);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text, #0f172a);
+}
+
+.output-error {
+  background: #fef2f2;
+  border: none;
+  border-left: 3px solid #fca5a5;
+  padding: 9px 12px;
+  margin: 0;
+  font-family: var(--code-font, "JetBrains Mono", "Courier New", monospace);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #991b1b;
+}
+
+.output-info {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  border: none;
+  background: var(--bg, #f3f5f8);
+  font-style: italic;
+}
+
+.output-image {
+  flex-shrink: 0;
+  padding: 10px 12px;
+}
+
+.output-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: none;
+  display: block;
+}
+
+.output-html {
+  line-height: 1.65;
+  font-size: 0.88rem;
+  color: var(--text, #0f172a);
+  padding: 0;
+  overflow-x: auto;
+}
+
+.output-html table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.77rem;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+}
+
+.output-html th,
+.output-html td {
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 5px 12px;
+  text-align: right;
+}
+
+.output-html th:first-child,
+.output-html td:first-child { text-align: left; }
+
+.output-html th {
+  background: var(--bg, #f1f5f9);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.output-html tr:nth-child(even) td { background: var(--bg, #f1f5f9); }
+.output-html tr:hover td { background: rgba(99,102,241,0.04); }
+
+.latex-para {
+  margin: 0.5em 0;
+  line-height: 1.8;
+  color: var(--text, #0f172a);
+}
+
+.output-latex {
+  padding: 6px 4px;
+  font-size: 1rem;
+  overflow-x: auto;
+  color: var(--text, #0f172a);
+}
+
+/* ── LaTeX rendered elements ─────────────────────────────── */
+.latex-heading {
+  margin: 0.8em 0 0.3em;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  padding-bottom: 3px;
+}
+
+.latex-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 0.8em;
+  color: var(--text, #0f172a);
+}
+
+.latex-quote {
+  border-left: 3px solid var(--border, #cbd5e1);
+  margin: 0.6em 0 0.6em 0;
+  padding: 6px 14px;
+  color: var(--text-muted, #425366);
+  font-style: italic;
+}
+
+.latex-center { text-align: center; margin: 0.5em 0; }
+
+.latex-list {
+  margin: 0.4em 0 0.4em 1.4em;
+  padding: 0;
+  line-height: 1.75;
+}
+.latex-list li { margin-bottom: 2px; }
+
+.latex-list dt { font-weight: 700; margin-top: 6px; }
+.latex-list dd { margin: 0 0 4px 16px; }
+
+.latex-theorem {
+  background: var(--bg, #f3f5f8);
+  border-left: 3px solid #2563eb;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin: 0.5em 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+.latex-proof  { border-left-color: #64748b; }
+.latex-remark { border-left-color: #d97706; }
+.latex-example { border-left-color: #16a34a; }
+.latex-definition { border-left-color: #7c3aed; }
+
+.latex-abstract {
+  background: var(--bg, #f3f5f8);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin: 0.5em 0;
+  line-height: 1.7;
+}
+
+.latex-verbatim {
+  background: var(--code-bg, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+  font-size: 0.8rem;
+  overflow-x: auto;
+  margin: 0.4em 0;
+}
+
+.latex-pagebreak { border: none; border-top: 1px dashed var(--border, #e2e8f0); margin: 8px 0; }
+
+/* Theme overrides live in theme_controller.css */

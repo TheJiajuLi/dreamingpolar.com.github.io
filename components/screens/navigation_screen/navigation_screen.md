@@ -1,0 +1,1 @@
+It displays the number of libraries the app (inside screen/content_pages) has to offer, click it will navigate to according htmls.

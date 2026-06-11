@@ -1,0 +1,198 @@
+{
+  "setup": "import sympy as sym\n\nx = sym.Symbol('x')",
+  "blocks": [
+    {
+      "label": "Find the solutions to an equation",
+      "examples": [
+        {
+          "code": "equation = x ** 2 - 3\nsym.solveset(equation, x)",
+          "result": "\\left\\{- \\sqrt{3}, \\sqrt{3}\\right\\}"
+        },
+        {
+          "code": "equation = x ** 2 - 3 * x + 1\nsym.solveset(equation, x, domain=sym.S.Complexes)",
+          "result": "\\left\\{\\frac{3 - \\sqrt{5}}{2}, \\frac{3 + \\sqrt{5}}{2}\\right\\}"
+        }
+      ]
+    },
+    {
+      "label": "Compute the derivative of a function",
+      "code": "f = sym.sin(x) * sym.exp(x)\nsym.diff(f, x)",
+      "result": "e^{x} \\sin{\\left(x \\right)} + e^{x} \\cos{\\left(x \\right)}"
+    },
+    {
+      "label": "Complete the square",
+      "code": "a, b, c = sym.symbols('a b c')\ncompleted_square = a * (x - b) ** 2 + c\ncompleted_square",
+      "result": "a \\left(x - b\\right)^{2} + c"
+    },
+    {
+      "label": "Expand an expression",
+      "code": "expr = (x + 1) ** 3\nsym.expand(expr)",
+      "result": "x^{3} + 3 x^{2} + 3 x + 1"
+    },
+    {
+      "label": "Factor an expression",
+      "code": "expr = x ** 3 - 6 * x ** 2 + 11 * x - 6\nsym.factor(expr)",
+      "result": "\\left(x - 1\\right) \\left(x - 2\\right) \\left(x - 3\\right)"
+    },
+    {
+      "label": "Integrate a function",
+      "code": "f = sym.exp(-x ** 2)\nsym.integrate(f, x)",
+      "result": "\\frac{\\sqrt{\\pi} \\operatorname{erf}{\\left(x \\right)}}{2}"
+    },
+    {
+      "label": "Evaluate a limit",
+      "code": "sym.limit(sym.sin(x) / x, x, 0)",
+      "result": "1"
+    },
+    {
+      "label": "Solve a system of equations",
+      "code": "y = sym.Symbol('y')\nequations = [sym.Eq(x + y, 3), sym.Eq(x - y, 1)]\nsym.solve(equations, (x, y))",
+      "result": "{x: 2, y: 1}"
+    },
+    {
+      "label": "Compute the Taylor series expansion of a function",
+      "code": "f = sym.exp(x)\ntaylor_series = sym.series(f, x, 0, 5).removeO()\ntaylor_series",
+      "result": "1 + x + \\frac{x^{2}}{2} + \\frac{x^{3}}{6} + \\frac{x^{4}}{24}"
+    },
+    {
+      "label": "Perform matrix operations",
+      "code": "A = sym.Matrix([[1, 2], [3, 4]])\nB = sym.Matrix([[5, 6], [7, 8]])\nA + B, A * B",
+      "result": "\\left[\\begin{matrix}6 & 8\\\\10 & 12\\end{matrix}\\right], \\left[\\begin{matrix}19 & 22\\\\43 & 50\\end{matrix}\\right]"
+    },
+    {
+      "label": "Compute eigenvalues and eigenvectors",
+      "code": "A = sym.Matrix([[2, 1], [1, 2]])\neigenvals = A.eigenvals()\neigenvects = A.eigenvects()\neigenvals, eigenvects",
+      "result": "{3: 1, 1: 1}, [(3, 1, [Matrix([[1], [1]])]), (1, 1, [Matrix([[-1], [1]])])]"
+    },
+    {
+      "label": "Perform symbolic summation",
+      "code": "n = sym.Symbol('n', integer=True)\nsym.summation(1 / n ** 2, (n, 1, sym.oo))",
+      "result": "\\frac{\\pi^{2}}{6}"
+    },
+    {
+      "label": "Perform symbolic product",
+      "code": "n = sym.Symbol('n', integer=True)\nsym.product(n, (n, 1, 5))",
+      "result": "120"
+    },
+    {
+      "label": "Compute the Fourier transform of a function",
+      "code": "f = sym.exp(-x ** 2)\nfourier_transform = sym.fourier_transform(f, x, sym.Symbol('k'))\nfourier_transform",
+      "result": "\\sqrt{\\pi} e^{- \\frac{\\pi^{2} k^{2}}{4}}"
+    },
+    {
+      "label": "Compute the Laplace transform of a function",
+      "code": "f = sym.exp(-x)\nlaplace_transform = sym.laplace_transform(f, x, sym.Symbol('s'))\nlaplace_transform",
+      "result": "\\frac{1}{s + 1}, 0, \\frac{1}{s + 1}"
+    },
+    {
+      "label": "Solve a differential equation",
+      "code": "y = sym.Function('y')\ndifferential_equation = sym.Eq(y(x).diff(x, 2) - y(x), 0)\nsym.dsolve(differential_equation, y(x))",
+      "result": "Eq(y(x), C1*exp(x) + C2*exp(-x))"
+    },
+    {
+      "label": "Compute the Jacobian matrix of a vector-valued function",
+      "code": "f = sym.Matrix([sym.sin(x), sym.cos(x)])\njacobian_matrix = f.jacobian([x])\njacobian_matrix",
+      "result": "\\left[\\begin{matrix}\\cos{\\left(x \\right)} & - \\sin{\\left(x \\right)}\\end{matrix}\\right]"
+    },
+    {
+      "label": "Compute the Hessian matrix of a scalar-valued function",
+      "code": "f = sym.sin(x) * sym.exp(x)\nhessian_matrix = sym.hessian(f, [x])\nhessian_matrix",
+      "result": "\\left[\\begin{matrix}2 e^{x} \\cos{\\left(x \\right)} - e^{x} \\sin{\\left(x \\right)}\\end{matrix}\\right]"
+    },
+    {
+      "label": "Perform symbolic differentiation",
+      "code": "f = sym.sin(x) * sym.exp(x)\nsym.diff(f, x)",
+      "result": "e^{x} \\sin{\\left(x \\right)} + e^{x} \\cos{\\left(x \\right)}"
+    },
+    {
+      "label": "Perform symbolic integration",
+      "code": "f = sym.exp(-x ** 2)\nsym.integrate(f, x)",
+      "result": "\\frac{\\sqrt{\\pi} \\operatorname{erf}{\\left(x \\right)}}{2}"
+    },
+    {
+      "label": "Perform symbolic limits",
+      "code": "sym.limit(sym.sin(x) / x, x, 0)",
+      "result": "1"
+    },
+    {
+      "label": "Perform symbolic summation",
+      "code": "n = sym.Symbol('n', integer=True)\nsym.summation(1 / n ** 2, (n, 1, sym.oo))",
+      "result": "\\frac{\\pi^{2}}{6}"
+    },
+    {
+      "label": "Perform symbolic products",
+      "code": "n = sym.Symbol('n', integer=True)\nsym.product(n, (n, 1, 5))",
+      "result": "120"
+    },
+    {
+      "label": "binomial distribution",
+      "code": "n, p, k = sym.symbols('n p k')\ndist = sym.binomial(n, p)\nprob = dist.pmf(k)\nprob",
+      "result": "\\binom{n}{k} p^{k} \\left(1 - p\\right)^{n - k}"
+    },
+    {
+      "label": "normal distribution",
+      "code": "mu, sigma, x = sym.symbols('mu sigma x')\ndist = sym.Normal(mu, sigma)\npdf = dist.pdf(x)\npdf",
+      "result": "\\frac{1}{\\sqrt{2 \\pi} \\sigma} e^{- \\frac{\\left(x - \\mu\\right)^{2}}{2 \\sigma^{2}}}"
+    },
+    {
+      "label": "poisson distribution",
+      "code": "lam, k = sym.symbols('lam k')\ndist = sym.Poisson(lam)\nprob = dist.pmf(k)\nprob",
+      "result": "\\frac{e^{- \\lambda} \\lambda^{k}}{k!}"
+    },
+    {
+      "label": "exponential distribution",
+      "code": "lam, x = sym.symbols('lam x')\ndist = sym.Exponential(lam)\npdf = dist.pdf(x)\npdf",
+      "result": "\\lambda e^{- \\lambda x}"
+    },
+    {
+      "label": "gamma distribution",
+      "code": "alpha, beta, x = sym.symbols('alpha beta x')\ndist = sym.Gamma(alpha, beta)\npdf = dist.pdf(x)\npdf",
+      "result": "\\frac{\\beta^{\\alpha} x^{\\alpha - 1} e^{- \\beta x}}{\\Gamma{\\left(\\alpha \\right)}}"
+    },
+    {
+      "label": "beta distribution",
+      "code": "alpha, beta, x = sym.symbols('alpha beta x')\ndist = sym.Beta(alpha, beta)\npdf = dist.pdf(x)\npdf",
+      "result": "\\frac{\\Gamma{\\left(\\alpha + \\beta \\right)} x^{\\alpha - 1} \\left(1 - x\\right)^{\\beta - 1}}{\\Gamma{\\left(\\alpha \\right)} \\Gamma{\\left(\\beta \\right)}}"
+    },
+    {
+      "label": "cauchy distribution",
+      "code": "x0, gamma, x = sym.symbols('x0 gamma x')\ndist = sym.Cauchy(x0, gamma)\npdf = dist.pdf(x)\npdf",
+      "result": "\\frac{1}{\\pi \\gamma \\left(1 + \\left(\\frac{x - x_{0}}{\\gamma}\\right)^{2}\\right)}"
+    },
+    {
+      "label": "chi-squared distribution",
+      "code": "k, x = sym.symbols('k x')\ndist = sym.ChiSquared(k)\npdf = dist.pdf(x)\npdf",
+      "result": "\\frac{1}{2^{\\frac{k}{2}} \\Gamma{\\left(\\frac{k}{2} \\right)}} x^{\\frac{k}{2} - 1} e^{- \\frac{x}{2}}"
+    },
+    {
+      "label": "sample mean and variance",
+      "code": "data = sym.symbols('data', cls=sym.IndexedBase)\nsample_mean = sym.Sum(data[i], (i, 1, sym.Symbol('n'))).doit() / sym.Symbol('n')\nsample_variance = sym.Sum((data[i] - sample_mean) ** 2, (i, 1, sym.Symbol('n'))).doit() / (sym.Symbol('n') - 1)\nsample_mean, sample_variance",
+      "result": "\\frac{\\sum_{i=1}^{n} data_{i}}{n}, \\frac{\\sum_{i=1}^{n}    \\left(data_{i} - \\frac{\\sum_{j=1}^{n} data_{j}}{n}\\right)^{2}}{n - 1}"
+    },
+    {
+      "label": "confidence interval for the mean",
+      "code": "sample_mean, sample_variance, n, confidence_level = sym.symbols('sample_mean sample_variance n confidence_level')\nalpha = 1 - confidence_level\nz_score = sym.stats.norm.ppf(1 - alpha / 2)\nmargin_of_error = z_score * sym.sqrt(sample_variance / n)\nconfidence_interval = (sample_mean - margin_of_error, sample_mean + margin_of_error)\nconfidence_interval",
+      "result": "\\left(sample\\_mean - z\\_score \\sqrt{\\frac{sample\\_variance}{n}}, sample\\_mean + z\\_score \\sqrt{\\frac{sample\\_variance}{n}}\\right)"
+    },
+    {
+      "label": "hypothesis testing for the mean",
+      "code": "sample_mean, sample_variance, n, hypothesized_mean = sym.symbols('sample_mean sample_variance n hypothesized_mean')\nt_statistic = (sample_mean - hypothesized_mean) / sym.sqrt(sample_variance / n)\np_value = 2 * (1 - sym.stats.norm.cdf(sym.Abs(t_statistic)))\nt_statistic, p_value",
+      "result": "\\frac{sample\\_mean - hypothesized\\_mean}{\\sqrt{\\frac{sample\\_variance}{n}}}, 2 \\left(1 - \\operatorname{norm} \\left(0, 1\\right).cdf{\\left|t\\_statistic\\right|}\\right)"
+    },
+    {
+      "label": "hypothesis testing for the difference of means",
+      "code": "sample_mean1, sample_variance1, n1, sample_mean2, sample_variance2, n2 = sym.symbols('sample_mean1 sample_variance1 n1 sample_mean2 sample_variance2 n2')\npooled_variance = ((n1 - 1) * sample_variance1 + (n2 - 1) * sample_variance2) / (n1 + n2 - 2)\nt_statistic = (sample_mean1 - sample_mean2) / sym.sqrt(pooled_variance * (1 / n1 + 1 / n2))\np_value = 2 * (1 - sym.stats.norm.cdf(sym.Abs(t_statistic)))\nt_statistic, p_value",
+      "result": "\\frac{sample\\_mean_{1} - sample\\_mean_{2}}{\\sqrt{pooled\\_variance \\left(\\frac{1}{n_{1}} + \\frac{1}{n_{2}}\\right)}}, 2 \\left(1 - \\operatorname{norm} \\left(0, 1\\right).cdf{\\left|t\\_statistic\\right|}\\right)"
+    },
+    {
+      "label": "hypothesis testing for the difference of proportions",
+      "code": "p1, n1, p2, n2 = sym.symbols('p1 n1 p2 n2')\npool_proportion = (p1 * n1 + p2 * n2) / (n1 + n2)\nz_statistic = (p1 - p2) / sym.sqrt(pool_proportion * (1 - pool_proportion) * (1 / n1 + 1 / n2))\np_value = 2 * (1 - sym.stats.norm.cdf(sym.Abs(z_statistic)))\nz_statistic, p_value",
+      "result": "\\frac{p_{1} - p_{2}}{\\sqrt{pool\\_proportion \\left(1 - pool\\_proportion\\right) \\left(\\frac{1}{n_{1}} + \\frac{1}{n_{2}}\\right)}}, 2 \\left(1 - \\operatorname{norm} \\left(0, 1\\right).cdf{\\left|z\\_statistic\\right|}\\right)"
+    },
+    {
+      "label": "ANOVA",
+      "code": "group_means = sym.symbols('group_mean1 group_mean2 group_mean3')\noverall_mean = sym.symbols('overall_mean')\nss_between = sum(n * (group_mean - overall_mean) ** 2 for group_mean in group_means)\nss_within = sum((n - 1) * sample_variance for sample_variance in [sym.symbols('sample_variance1'), sym.symbols('sample_variance2'), sym.symbols('sample_variance3')])\ndf_between = len(group_means) - 1\ndf_within = sum(n - 1 for n in [sym.symbols('n1'), sym.symbols('n2'), sym.symbols('n3')])\nms_between = ss_between / df_between\nms_within = ss_within / df_within\nf_statistic = ms_between / ms_within\np_value = 1 - sym.stats.f.cdf(f_statistic, df_between, df_within)\nf_statistic, p_value",
+      "result": "\\frac{\\frac{\\sum_{i=1}^{k} n_{i} \\left(group\\_mean_{i} - overall\\_mean\\right)^{2}}{k - 1}}{\\frac{\\sum_{i=1}^{k} \\left(n_{i} - 1\\right) sample\\_variance_{i}}{N - k}}, 1 - \\operatorname{F} \\left(df\\_between, df\\_within\\right).cdf{\\left(f\\_statistic\\right)}"
+    }
+  ]
+}

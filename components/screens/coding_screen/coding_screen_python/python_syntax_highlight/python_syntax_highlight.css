@@ -1,0 +1,101 @@
+/* ── Backdrop: sits behind the textarea, mirrors its layout ── */
+.psh-backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  font-family: var(--code-font, "JetBrains Mono", "Courier New", monospace);
+  font-size: 0.85rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--text, #102040);  /* base: plain identifiers get the default text color */
+  background: transparent;
+  z-index: 1;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+/* ── Notebook cell variant (nb-editor has different padding/font) ─ */
+.nb-body .psh-backdrop {
+  padding: 10px;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  overflow: visible; /* nb-editor expands height, no clipping needed */
+  height: auto;
+  pointer-events: none;
+}
+
+/* ── Textarea becomes a glass layer over the backdrop ─────── */
+.code-editor.psh-active,
+.nb-editor.psh-active {
+  position: relative;
+  z-index: 2;
+  color: transparent !important;
+  caret-color: var(--text, #102040);
+  background: transparent !important;
+}
+.code-editor.psh-active { position: absolute; } /* single-cell: absolute fill */
+
+/* ── Token colors — default (light) theme ─────────────────── */
+.psh-keyword    { color: #d73a49; font-weight: 600; }
+.psh-builtin    { color: #6f42c1; }
+.psh-string     { color: #032f62; }
+.psh-comment    { color: #6a737d; font-style: italic; }
+.psh-number     { color: #005cc5; }
+.psh-decorator  { color: #e36209; }
+.psh-funcdef    { color: #6f42c1; font-weight: 600; }
+.psh-classdef   { color: #22863a; font-weight: 600; }
+.psh-funcall    { color: #6f42c1; }
+.psh-op         { color: #d73a49; }
+.psh-punct      { color: #586069; }
+
+/* ── Dark theme ───────────────────────────────────────────── */
+[data-theme="dark"] .psh-backdrop                               { color: #e6edf3; }
+[data-theme="dark"] .code-editor.psh-active,
+[data-theme="dark"] .nb-editor.psh-active                       { caret-color: #e6edf3; }
+[data-theme="dark"] .psh-keyword   { color: #ff7b72; }
+[data-theme="dark"] .psh-builtin   { color: #ffa657; }
+[data-theme="dark"] .psh-string    { color: #a5d6ff; }
+[data-theme="dark"] .psh-comment   { color: #8b949e; }
+[data-theme="dark"] .psh-number    { color: #79c0ff; }
+[data-theme="dark"] .psh-decorator { color: #f0883e; }
+[data-theme="dark"] .psh-funcdef   { color: #d2a8ff; font-weight: 600; }
+[data-theme="dark"] .psh-classdef  { color: #7ee787; font-weight: 600; }
+[data-theme="dark"] .psh-funcall   { color: #d2a8ff; }
+[data-theme="dark"] .psh-op        { color: #ff7b72; }
+[data-theme="dark"] .psh-punct     { color: #8b949e; }
+
+/* ── Grey theme ───────────────────────────────────────────── */
+[data-theme="grey"] .psh-backdrop                               { color: #adbac7; }
+[data-theme="grey"] .code-editor.psh-active,
+[data-theme="grey"] .nb-editor.psh-active                       { caret-color: #adbac7; }
+[data-theme="grey"] .psh-keyword   { color: #f47067; }
+[data-theme="grey"] .psh-builtin   { color: #dcbdfb; }
+[data-theme="grey"] .psh-string    { color: #96d0ff; }
+[data-theme="grey"] .psh-comment   { color: #768390; }
+[data-theme="grey"] .psh-number    { color: #6cb6ff; }
+[data-theme="grey"] .psh-decorator { color: #f69d50; }
+[data-theme="grey"] .psh-funcdef   { color: #dcbdfb; font-weight: 600; }
+[data-theme="grey"] .psh-classdef  { color: #8ddb8c; font-weight: 600; }
+[data-theme="grey"] .psh-funcall   { color: #dcbdfb; }
+[data-theme="grey"] .psh-op        { color: #f47067; }
+[data-theme="grey"] .psh-punct     { color: #768390; }
+
+/* ── Aurora theme ─────────────────────────────────────────── */
+[data-theme="aurora"] .psh-backdrop                               { color: rgba(200,190,240,0.85); }
+[data-theme="aurora"] .code-editor.psh-active,
+[data-theme="aurora"] .nb-editor.psh-active                       { caret-color: rgba(200,190,240,0.9); }
+[data-theme="aurora"] .psh-keyword   { color: #f9a8d4; font-weight: 600; }
+[data-theme="aurora"] .psh-builtin   { color: #fbbf24; }
+[data-theme="aurora"] .psh-string    { color: #86efac; }
+[data-theme="aurora"] .psh-comment   { color: rgba(160,160,200,0.5); font-style: italic; }
+[data-theme="aurora"] .psh-number    { color: #93c5fd; }
+[data-theme="aurora"] .psh-decorator { color: #fb923c; }
+[data-theme="aurora"] .psh-funcdef   { color: #c084fc; font-weight: 600; }
+[data-theme="aurora"] .psh-classdef  { color: #34d399; font-weight: 600; }
+[data-theme="aurora"] .psh-funcall   { color: #c084fc; }
+[data-theme="aurora"] .psh-op        { color: #f9a8d4; }
+[data-theme="aurora"] .psh-punct     { color: rgba(160,160,200,0.55); }

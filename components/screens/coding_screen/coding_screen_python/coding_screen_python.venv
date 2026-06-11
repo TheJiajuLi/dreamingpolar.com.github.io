@@ -1,0 +1,5 @@
+{
+  "runtime": "pyodide",
+  "version": "314.0.0",
+  "indexURL": "https://cdn.jsdelivr.net/pyodide/v314.0.0/full/"
+}

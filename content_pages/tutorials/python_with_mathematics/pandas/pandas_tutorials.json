@@ -1,0 +1,244 @@
+{
+  "title": "Pandas",
+  "setup": "import pandas as pd\nimport numpy as np\nimport io",
+
+  "blocks": [
+
+    {
+      "label": "Pandas Series",
+      "examples": [
+        {
+          "code": "# A Series is a labelled 1-D array\ns = pd.Series([1, 7, 2, 3])\nprint(s)",
+          "resultType": "text",
+          "result": "0    1\n1    7\n2    2\n3    3\ndtype: int64"
+        },
+        {
+          "code": "# Custom index — works like a dict with order\ncalories = pd.Series(\n    [420, 380, 390],\n    index=[\"day1\", \"day2\", \"day3\"]\n)\nprint(calories)\nprint(\"Day 1:\", calories[\"day1\"])",
+          "resultType": "text",
+          "result": "day1    420\nday2    380\nday3    390\ndtype: int64\nDay 1: 420"
+        },
+        {
+          "code": "# Key attributes\nprint(\"dtype :\", s.dtype)\nprint(\"values:\", s.values)\nprint(\"index :\", s.index.tolist())\nprint(\"mean  :\", s.mean())",
+          "resultType": "text",
+          "result": "dtype : int64\nvalues: [1 7 2 3]\nindex : [0, 1, 2, 3]\nmean  : 3.25"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas DataFrames",
+      "examples": [
+        {
+          "code": "# A DataFrame is a 2-D table — like a spreadsheet\ndata = {\n    \"name\":  [\"Alice\", \"Bob\", \"Carol\"],\n    \"score\": [88, 92, 79],\n    \"grade\": [\"B\", \"A\", \"C\"],\n}\ndf = pd.DataFrame(data)\nprint(df)",
+          "resultType": "text",
+          "result": "    name  score grade\n0  Alice     88     B\n1    Bob     92     A\n2  Carol     79     C"
+        },
+        {
+          "code": "# Column → Series;  row → via iloc\nprint(df[\"score\"])\nprint()\nprint(df.iloc[1])",
+          "resultType": "text",
+          "result": "0    88\n1    92\n2    79\nName: score, dtype: int64\n\nname     Bob\nscore     92\ngrade      A\nName: 1, dtype: object"
+        },
+        {
+          "code": "# Filter rows; add a calculated column\nhigh = df[df[\"score\"] > 80]\nprint(high)\nprint()\ndf[\"passed\"] = df[\"score\"] >= 80\nprint(df)",
+          "resultType": "text",
+          "result": "    name  score grade\n0  Alice     88     B\n1    Bob     92     A\n\n    name  score grade  passed\n0  Alice     88     B    True\n1    Bob     92     A    True\n2  Carol     79     C   False"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Read CSV",
+      "examples": [
+        {
+          "code": "# Real project: df = pd.read_csv('data.csv')\n# Pyodide: feed a string via io.StringIO\ncsv_data = \"\"\"Duration,Pulse,Calories\n60,110,409\n60,117,479\n45,103,340\n45,109,282\n60,102,300\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(df)",
+          "resultType": "text",
+          "result": "   Duration  Pulse  Calories\n0        60    110       409\n1        60    117       479\n2        45    103       340\n3        45    109       282\n4        60    102       300"
+        },
+        {
+          "code": "# Load only selected columns\ndf2 = pd.read_csv(\n    io.StringIO(csv_data),\n    usecols=[\"Duration\", \"Calories\"]\n)\nprint(df2)",
+          "resultType": "text",
+          "result": "   Duration  Calories\n0        60       409\n1        60       479\n2        45       340\n3        45       282\n4        60       300"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Read JSON",
+      "examples": [
+        {
+          "code": "# Real project: df = pd.read_json('data.json')\njson_str = \"\"\"[\n  {\"name\": \"Alice\", \"age\": 25, \"city\": \"London\"},\n  {\"name\": \"Bob\",   \"age\": 30, \"city\": \"Paris\"},\n  {\"name\": \"Carol\", \"age\": 22, \"city\": \"Berlin\"}\n]\"\"\"\ndf = pd.read_json(io.StringIO(json_str))\nprint(df)",
+          "resultType": "text",
+          "result": "    name  age    city\n0  Alice   25  London\n1    Bob   30   Paris\n2  Carol   22  Berlin"
+        },
+        {
+          "code": "# Column types and value counts\nprint(df.dtypes)\nprint()\nprint(df[\"city\"].value_counts())",
+          "resultType": "text",
+          "result": "name    object\nage      int64\ncity    object\ndtype: object\n\ncity\nLondon    1\nParis     1\nBerlin    1\nName: count, dtype: int64"
+        }
+      ]
+    },
+
+    {
+      "label": "Analysing Data",
+      "examples": [
+        {
+          "code": "csv_data = \"\"\"Duration,Pulse,Calories\n60,110,409\n60,117,479\n45,103,340\n45,109,282\n60,102,300\n60,112,415\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(\"head:\")\nprint(df.head(3))\nprint(\"\\ntail:\")\nprint(df.tail(2))",
+          "resultType": "text",
+          "result": "head:\n   Duration  Pulse  Calories\n0        60    110       409\n1        60    117       479\n2        45    103       340\n\ntail:\n   Duration  Pulse  Calories\n4        60    102       300\n5        60    112       415"
+        },
+        {
+          "code": "# Schema, types, and null counts\ndf.info()",
+          "resultType": "text",
+          "result": "<class 'pandas.core.frame.DataFrame'>\nRangeIndex: 6 entries, 0 to 5\nData columns (total 3 columns):\n #   Column    Non-Null Count  Dtype\n---  ------    --------------  -----\n 0   Duration  6 non-null      int64\n 1   Pulse     6 non-null      int64\n 2   Calories  6 non-null      int64\ndtypes: int64(3)\nmemory usage: 272.0 bytes"
+        },
+        {
+          "code": "# Full statistical summary\nprint(df.describe())",
+          "resultType": "text",
+          "result": "         Duration       Pulse    Calories\ncount    6.000000    6.000000    6.000000\nmean    55.000000  108.833333  370.833333\nstd      7.745967    5.634546   76.109334\nmin     45.000000  102.000000  282.000000\n25%     48.750000  104.500000  310.000000\n50%     60.000000  109.500000  374.500000\n75%     60.000000  111.500000  413.500000\nmax     60.000000  117.000000  479.000000"
+        },
+        {
+          "code": "# Per-column aggregates\nprint(\"mean  :\", df[\"Calories\"].mean())\nprint(\"median:\", df[\"Calories\"].median())\nprint(\"max   :\", df[\"Calories\"].max())\nprint(\"min   :\", df[\"Calories\"].min())\nprint(\"std   :\", df[\"Calories\"].std().round(2))",
+          "resultType": "text",
+          "result": "mean  : 370.8333333333333\nmedian: 374.5\nmax   : 415\nmin   : 282\nstd   : 76.11"
+        }
+      ]
+    },
+
+    {
+      "label": "Cleaning Data",
+      "examples": [
+        {
+          "code": "# Inspect a dirty dataset\ncsv_data = \"\"\"Duration,Pulse,Calories\n60,110,409\n60,,479\n45,103,\n,109,282\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(df)\nprint()\nprint(\"Missing values per column:\")\nprint(df.isnull().sum())",
+          "resultType": "text",
+          "result": "   Duration  Pulse  Calories\n0      60.0  110.0     409.0\n1      60.0    NaN     479.0\n2      45.0  103.0       NaN\n3       NaN  109.0     282.0\n\nMissing values per column:\nDuration    1\nPulse       1\nCalories    1\ndtype: int64"
+        },
+        {
+          "code": "print(\"Shape:\", df.shape)\nprint(\"Complete rows:\", df.dropna().shape[0])",
+          "resultType": "text",
+          "result": "Shape: (4, 3)\nComplete rows: 1"
+        }
+      ]
+    },
+
+    {
+      "label": "Cleaning Empty Cells",
+      "examples": [
+        {
+          "code": "csv_data = \"\"\"Duration,Pulse,Calories\n60,110,409\n60,,479\n45,103,\n,109,282\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\n\n# Drop any row that contains at least one NaN\ndf_dropped = df.dropna()\nprint(df_dropped)",
+          "resultType": "text",
+          "result": "   Duration  Pulse  Calories\n0      60.0  110.0     409.0"
+        },
+        {
+          "code": "# Fill every NaN with a fixed value\ndf_filled = df.fillna(0)\nprint(df_filled)",
+          "resultType": "text",
+          "result": "   Duration  Pulse  Calories\n0      60.0  110.0     409.0\n1      60.0    0.0     479.0\n2      45.0  103.0       0.0\n3       0.0  109.0     282.0"
+        },
+        {
+          "code": "# Fill each column with its own mean (smarter)\ndf_smart = df.copy()\nfor col in df_smart.columns:\n    df_smart[col] = df_smart[col].fillna(df_smart[col].mean())\nprint(df_smart.round(1))",
+          "resultType": "text",
+          "result": "   Duration  Pulse  Calories\n0      60.0  110.0     409.0\n1      60.0  107.3     479.0\n2      45.0  103.0     390.0\n3      55.0  109.0     282.0"
+        }
+      ]
+    },
+
+    {
+      "label": "Cleaning Wrong Format",
+      "examples": [
+        {
+          "code": "# Fix inconsistent date strings → uniform datetime\ncsv_data = \"\"\"Date,Duration\n2020-12-01,60\n2020/12/02,45\n20201203,60\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(\"Before:\", df[\"Date\"].dtype)\ndf[\"Date\"] = pd.to_datetime(df[\"Date\"], format=\"mixed\")\nprint(\"After :\", df[\"Date\"].dtype)\nprint(df)",
+          "resultType": "text",
+          "result": "Before: object\nAfter : datetime64[us]\n        Date  Duration\n0 2020-12-01        60\n1 2020-12-02        45\n2 2020-12-03        60"
+        },
+        {
+          "code": "# Strip stray quotes and convert to numeric\ncsv_data = \"\"\"product,price\napple,\"1.50\"\nbanana,\"0.75\"\ncherry,\"2.00\"\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\ndf[\"price\"] = pd.to_numeric(df[\"price\"].str.replace('\"', ''))\nprint(df.dtypes)\nprint(df)",
+          "resultType": "text",
+          "result": "product    object\nprice     float64\ndtype: object\n  product  price\n0   apple   1.50\n1  banana   0.75\n2  cherry   2.00"
+        }
+      ]
+    },
+
+    {
+      "label": "Cleaning Wrong Data",
+      "examples": [
+        {
+          "code": "# Spot and fix obvious outliers\ncsv_data = \"\"\"Duration,Pulse\n450,110\n60,117\n45,103\n60,-5\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(\"Before:\")\nprint(df)\n\ndf.loc[df[\"Duration\"] > 120, \"Duration\"] = 120\ndf.loc[df[\"Pulse\"] < 40, \"Pulse\"] = np.nan\nprint(\"\\nAfter:\")\nprint(df)",
+          "resultType": "text",
+          "result": "Before:\n   Duration  Pulse\n0       450    110\n1        60    117\n2        45    103\n3        60     -5\n\nAfter:\n   Duration  Pulse\n0       120  110.0\n1        60  117.0\n2        45  103.0\n3        60    NaN"
+        },
+        {
+          "code": "# Replace impossible values with NaN using .where()\ncsv_data = \"\"\"name,age\nAlice,25\nBob,999\nCarol,22\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\ndf[\"age\"] = df[\"age\"].where(df[\"age\"] < 120, other=np.nan)\nprint(df)",
+          "resultType": "text",
+          "result": "    name   age\n0  Alice  25.0\n1    Bob   NaN\n2  Carol  22.0"
+        }
+      ]
+    },
+
+    {
+      "label": "Removing Duplicates",
+      "examples": [
+        {
+          "code": "csv_data = \"\"\"name,score\nAlice,88\nBob,92\nAlice,88\nCarol,79\nBob,92\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\nprint(\"Duplicated rows:\")\nprint(df.duplicated())\nprint(\"\\nTotal duplicates:\", df.duplicated().sum())",
+          "resultType": "text",
+          "result": "Duplicated rows:\n0    False\n1    False\n2     True\n3    False\n4     True\ndtype: bool\n\nTotal duplicates: 2"
+        },
+        {
+          "code": "# Remove duplicates — keeps first occurrence by default\ndf_unique = df.drop_duplicates()\nprint(df_unique)\nprint(\"Rows before:\", len(df), \"→ after:\", len(df_unique))",
+          "resultType": "text",
+          "result": "    name  score\n0  Alice     88\n1    Bob     92\n3  Carol     79\nRows before: 5 → after: 3"
+        },
+        {
+          "code": "# Deduplicate on a single column\ndf_by_name = df.drop_duplicates(subset=[\"name\"])\nprint(df_by_name)",
+          "resultType": "text",
+          "result": "    name  score\n0  Alice     88\n1    Bob     92\n3  Carol     79"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Correlations",
+      "examples": [
+        {
+          "code": "csv_data = \"\"\"Duration,Calories,Pulse\n60,409,110\n60,479,117\n45,340,103\n45,282,109\n60,300,102\n60,410,112\n30,190,98\n45,350,108\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\n\n# -1 = perfect negative, 0 = no relation, 1 = perfect positive\nprint(df.corr(numeric_only=True).round(2))",
+          "resultType": "text",
+          "result": "          Duration  Calories  Pulse\nDuration      1.00      0.80   0.66\nCalories      0.80      1.00   0.88\nPulse         0.66      0.88   1.00"
+        },
+        {
+          "code": "# Single-pair correlation with interpretation\nr = df[\"Duration\"].corr(df[\"Calories\"])\nprint(f\"Duration ↔ Calories: {r:.3f}\")\n\nif abs(r) > 0.7:\n    print(\"→ Strong correlation\")\nelif abs(r) > 0.4:\n    print(\"→ Moderate correlation\")\nelse:\n    print(\"→ Weak correlation\")",
+          "resultType": "text",
+          "result": "Duration ↔ Calories: 0.798\n→ Strong correlation"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Plotting — Scatter",
+      "examples": [
+        {
+          "code": "import matplotlib.pyplot as plt\n\ncsv_data = \"\"\"Duration,Calories\n60,409\n60,479\n45,340\n45,282\n60,300\n60,410\n30,190\n45,350\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\n\ndf.plot(\n    kind=\"scatter\",\n    x=\"Duration\",\n    y=\"Calories\",\n    title=\"Duration vs Calories\",\n    color=\"steelblue\"\n)\nplt.tight_layout()\nplt.show()"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Plotting — Histogram",
+      "examples": [
+        {
+          "code": "import matplotlib.pyplot as plt\n\ncsv_data = \"\"\"Duration,Calories\n60,409\n60,479\n45,340\n45,282\n60,300\n60,410\n30,190\n45,350\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\n\ndf[\"Calories\"].plot(\n    kind=\"hist\",\n    bins=5,\n    title=\"Calorie Distribution\",\n    color=\"coral\",\n    edgecolor=\"white\"\n)\nplt.xlabel(\"Calories\")\nplt.tight_layout()\nplt.show()"
+        }
+      ]
+    },
+
+    {
+      "label": "Pandas Plotting — Bar & Line",
+      "examples": [
+        {
+          "code": "import matplotlib.pyplot as plt\n\nscores = pd.Series(\n    {\"Alice\": 88, \"Bob\": 92, \"Carol\": 79, \"Dave\": 85}\n)\nscores.plot(kind=\"bar\", title=\"Student Scores\", color=\"mediumseagreen\")\nplt.ylabel(\"Score\")\nplt.xticks(rotation=0)\nplt.tight_layout()\nplt.show()"
+        },
+        {
+          "code": "import matplotlib.pyplot as plt\n\ncsv_data = \"\"\"week,sales\n1,120\n2,145\n3,132\n4,178\n5,160\n6,195\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_data))\n\ndf.plot(\n    x=\"week\",\n    y=\"sales\",\n    kind=\"line\",\n    title=\"Weekly Sales Trend\",\n    marker=\"o\",\n    color=\"mediumpurple\"\n)\nplt.tight_layout()\nplt.show()"
+        }
+      ]
+    }
+
+  ]
+}

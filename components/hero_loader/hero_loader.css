@@ -1,0 +1,164 @@
+/* ── Overlay fills main.hero ───────────────────────────── */
+main.hero { position: relative; }
+
+.hero-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: var(--bg, #f3f5f8);
+  overflow: hidden;           /* clips the shimmer sweep    */
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-loader.hero-loader--out { opacity: 0; }
+
+/* ── Shimmer sweep — transform only, zero repaint ──────── */
+.hero-loader::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -40%;
+  width: 50%;
+  height: 220%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.07),
+    transparent
+  );
+  transform: rotate(18deg) translateX(0);
+  animation: hl-sweep 3.6s ease-in-out infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+@keyframes hl-sweep {
+  0%   { transform: rotate(18deg) translateX(0); }
+  100% { transform: rotate(18deg) translateX(400%); }
+}
+
+/* ── Brand mark ─────────────────────────────────────────── */
+.hero-loader-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: hl-breathe 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.hero-loader-brand-icon {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+
+.hero-loader-brand-word {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #3fb950;
+  font-family: Inter, system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+@keyframes hl-breathe {
+  0%, 100% { transform: scale(1);     opacity: 0.82; }
+  50%       { transform: scale(1.022); opacity: 1;    }
+}
+
+/* ── Sub-text ──────────────────────────────────────────── */
+.hero-loader-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted, #94a3b8);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  margin: 0;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* Phase fade-out (JS-toggled) */
+.hero-loader-text.hl-phase-out {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+/* Idle: no text yet, hide dots */
+.hero-loader-text[data-phase="idle"] .hl-dots { display: none; }
+
+/* Done: hide dots, accent label in green */
+.hero-loader-text[data-phase="done"] .hl-dots { display: none; }
+.hero-loader-text[data-phase="done"] .hl-label { color: #3fb950; font-weight: 700; }
+[data-theme="aurora"] .hero-loader-text[data-phase="done"] .hl-label { color: #c084fc; }
+
+.hl-dots { display: inline-flex; gap: 1px; }
+
+.hl-dot {
+  display: inline-block;
+  opacity: 0;
+  animation: hl-dot-blink 1.5s ease-in-out infinite;
+}
+.hl-dot:nth-child(2) { animation-delay: 0.25s; }
+.hl-dot:nth-child(3) { animation-delay: 0.5s;  }
+
+@keyframes hl-dot-blink {
+  0%, 60%, 100% { opacity: 0; }
+  30%            { opacity: 1; }
+}
+
+/* ── Start-coding button badge ─────────────────────────── */
+.start-coding-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  pointer-events: none;
+}
+
+.start-coding-badge::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: inherit;
+  animation: hl-badge-ping 1.3s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes hl-badge-ping {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(2.6); opacity: 0;   }
+}
+
+/* ── Theme overrides ───────────────────────────────────── */
+[data-theme="dark"]   .hero-loader-brand-word,
+[data-theme="grey"]   .hero-loader-brand-word { color: #3fb950; }
+[data-theme="aurora"] .hero-loader-brand-word { color: #c084fc; }
+
+[data-theme="dark"]   .start-coding-badge,
+[data-theme="dark"]   .start-coding-badge::after { background: #3fb950; }
+[data-theme="grey"]   .start-coding-badge,
+[data-theme="grey"]   .start-coding-badge::after { background: #57ab5a; }
+[data-theme="aurora"] .start-coding-badge,
+[data-theme="aurora"] .start-coding-badge::after { background: #c084fc; }
+
+[data-theme="dark"]   .hero-loader-brand-icon,
+[data-theme="grey"]   .hero-loader-brand-icon,
+[data-theme="aurora"] .hero-loader-brand-icon {
+  filter: drop-shadow(0 0 8px rgba(120,200,255,0.6));
+}
+[data-theme="aurora"] .hero-loader-brand-icon {
+  filter: drop-shadow(0 0 8px rgba(192,132,252,0.55));
+}

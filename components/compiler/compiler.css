@@ -1,0 +1,32 @@
+/* Status indicator used by coding_screen */
+.compiler-status-bar {
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  color: var(--text-muted, #425366);
+  background: transparent;
+  flex-shrink: 0;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compiler-status-bar.loading { color: #2563eb; }
+.compiler-status-bar.running { color: #d97706; }
+.compiler-status-bar.ready   { color: #16a34a; }
+.compiler-status-bar.error   { color: #dc2626; }
+
+.status-spinner {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: compiler-spin 0.7s linear infinite;
+}
+
+@keyframes compiler-spin {
+  to { transform: rotate(360deg); }
+}
+;

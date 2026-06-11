@@ -1,0 +1,1 @@
+This component will look-ups contents across all files inside screen/content_pages, it will display relative tutorials that matches to the keywords by looking up the 'labels' inside the json files for quick search and user-friendly

@@ -1,0 +1,37 @@
+.start-coding-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.start-coding-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
+  transition: opacity 0.15s, filter 0.15s;
+}
+
+.start-coding-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.start-coding-btn.active {
+  background: transparent;
+}
+
+.start-coding-btn.active .start-coding-icon {
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5));
+}
+
+/* Theme overrides live in theme_controller.css */

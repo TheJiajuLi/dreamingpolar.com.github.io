@@ -1,0 +1,1 @@
+The screen is for displaying the chosen content on navigation screen

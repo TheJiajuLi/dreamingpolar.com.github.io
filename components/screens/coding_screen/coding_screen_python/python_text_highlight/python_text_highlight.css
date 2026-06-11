@@ -1,0 +1,26 @@
+/* ── Active-line gutter strip ─────────────────────────────── */
+.pth-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: top 40ms ease, opacity 120ms ease;
+  background: rgba(0, 0, 0, 0.035);
+  border-left: 2px solid transparent;
+}
+
+/* ── Per-theme line colors ─────────────────────────────────── */
+[data-theme="dark"]   .pth-line {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: rgba(63, 185, 80, 0.5);
+}
+[data-theme="grey"]   .pth-line {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: rgba(87, 171, 90, 0.45);
+}
+[data-theme="aurora"] .pth-line {
+  background: rgba(192, 132, 252, 0.06);
+  border-left-color: rgba(192, 132, 252, 0.45);
+}

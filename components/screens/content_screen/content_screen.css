@@ -1,0 +1,227 @@
+.content-screen {
+  display: none;
+  flex-direction: column;
+  place-items: unset;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.content-screen.cs-active {
+  display: flex;
+  animation: cs-fadein 0.2s ease;
+}
+
+@keyframes cs-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.content-screen-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.content-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+  height: var(--screen-header-h, 65px);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.content-screen-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 16px 24px;
+  background: var(--bg, #f3f5f8);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border, #cbd5e1) transparent;
+}
+
+/* ── Panel-scoped card layout ─────────────────────────────
+   Override the global card/math-block centering styles so
+   content fits the narrow panel rather than a landing page. */
+.content-screen-body .content-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #94a3b8);
+  margin: 0 0 10px;
+  padding: 0;
+}
+
+.content-screen-body .card,
+.content-screen-body .math-block {
+  max-width: none;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  background: var(--bg, #f3f5f8);
+  box-shadow: none;
+  border: none;
+}
+
+.content-screen-body .card:last-child,
+.content-screen-body .math-block:last-child { margin-bottom: 0; }
+
+.content-screen-body .card h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--text, #102040);
+}
+
+/* ── Code block copy wrapper ─────────────────────────────── */
+.cs-code-wrap {
+  position: relative;
+}
+
+.cs-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.cs-code-wrap:hover .cs-copy-btn { opacity: 1; }
+
+/* ── Example pair (code + result grouped together) ─────── */
+.example-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border, #e2e8f0);
+  margin-bottom: 16px;
+}
+
+.example-pair:last-child { margin-bottom: 0; }
+
+.example-pair .code-block {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  margin: 0;
+}
+
+.example-pair .expression {
+  background: var(--bg, #f8fafc);
+  border-radius: 0;
+  border: none;
+  padding: 16px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Text output preview (resultType: "text") ───────────── */
+.example-pair .output-preview {
+  background: var(--bg, #f3f5f8);
+  border: none;
+  border-top: 1px solid var(--border, #e2e8f0);
+  border-radius: 0;
+  padding: 10px 14px;
+  margin: 0;
+  font-family: var(--code-font, "JetBrains Mono", "Courier New", monospace);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text-muted, #64748b);
+}
+
+/* ── Plot output (resultType: "plot") ────────────────────── */
+.example-pair .output-plot {
+  background: var(--bg, #f8fafc);
+  border-top: 1px solid var(--border, #e2e8f0);
+  padding: 9px 12px;
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-pair .output-plot::before {
+  content: '◈';
+  font-size: 0.85rem;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+  color: #6366f1;
+  flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(99,102,241,0.45);
+}
+
+.output-plot-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.output-plot-run {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 0.68rem;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: #6366f1;
+  line-height: 1.6;
+  transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.output-plot-run::before { content: '['; opacity: 0.55; margin-right: 3px; transition: opacity 0.15s; }
+.output-plot-run::after  { content: ']'; opacity: 0.55; margin-left: 3px;  transition: opacity 0.15s; }
+.output-plot-run:hover {
+  color: #4f46e5;
+  background: rgba(99,102,241,0.08);
+  box-shadow: 0 0 14px rgba(99,102,241,0.32);
+}
+.output-plot-run:hover::before,
+.output-plot-run:hover::after { opacity: 1; }
+.output-plot-run:disabled { opacity: 0.4; cursor: default; background: none; box-shadow: none; }
+
+/* Rendered state — image fills the box */
+.example-pair .output-plot--rendered {
+  padding: 0;
+  display: block;
+  background: #fff;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+.example-pair .output-plot--rendered::before { display: none; }
+.output-plot-img {
+  width: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+/* Math expressions scroll horizontally instead of clipping */
+.expression {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content-screen-body::-webkit-scrollbar       { width: 4px; }
+.content-screen-body::-webkit-scrollbar-thumb {
+  background: var(--border, #cbd5e1);
+  border-radius: 4px;
+}
+
+/* Theme overrides live in theme_controller.css */

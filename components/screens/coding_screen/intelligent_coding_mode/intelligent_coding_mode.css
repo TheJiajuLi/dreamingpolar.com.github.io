@@ -1,0 +1,46 @@
+/* ── ICM toggle button ────────────────────────────────────── */
+.icm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms, border-color 150ms, background 150ms, box-shadow 150ms;
+  font-family: inherit;
+}
+
+.icm-btn:hover {
+  color: var(--text, #102040);
+  border-color: var(--text-muted, #94a3b8);
+  background: var(--bg, #f3f5f8);
+}
+
+.icm-icon { flex-shrink: 0; transition: transform 300ms ease; }
+
+.icm-btn.icm-on { animation: icm-appear 200ms ease both; }
+
+@keyframes icm-appear {
+  from { opacity: 0.4; transform: scale(0.94); }
+  to   { opacity: 1;   transform: scale(1); }
+}
+
+/* ── Light (default) active state ────────────────────────── */
+.icm-btn.icm-on {
+  color: #2563eb;
+  border-color: rgba(37,99,235,0.5);
+  background: rgba(37,99,235,0.07);
+  box-shadow: 0 0 8px rgba(37,99,235,0.15), inset 0 0 6px rgba(37,99,235,0.05);
+}
+.icm-btn.icm-on .icm-icon {
+  filter: drop-shadow(0 0 3px rgba(37,99,235,0.5));
+  transform: rotate(22.5deg);
+}

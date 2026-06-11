@@ -1,0 +1,52 @@
+
+.font-switcher-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.font-switcher-btn:hover {
+  background: rgba(16, 32, 64, 0.07);
+}
+
+.font-switcher-btn:active {
+  background: rgba(16, 32, 64, 0.12);
+  transform: scale(0.92);
+}
+
+/* Toast notification */
+.font-switcher-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #102040;
+  color: #fff;
+  font-size: 0.85rem;
+  font-family: inherit;
+  padding: 8px 18px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+.font-switcher-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

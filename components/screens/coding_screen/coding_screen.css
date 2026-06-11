@@ -1,0 +1,93 @@
+/* ── Coding screen shell ───────────────────────────────── */
+.coding-screen-header {
+  display: flex;
+  flex-direction: column;
+  height: var(--screen-header-h, 65px);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.cds-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+  flex: 1;
+  gap: 8px;
+}
+
+.cds-header-bottom {
+  display: flex;
+  align-items: center;
+  padding: 0 8px 6px 10px;
+  flex-shrink: 0;
+}
+
+.cds-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.coding-screen-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #94a3b8);
+}
+
+.cds-runall-slot {
+  align-items: center;
+  gap: 8px;
+}
+
+.cds-icm-slot {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.coding-screen-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#cds-single-view {
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#cds-notebook-view {
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Danger toolbar button (clear all cells) ────────────── */
+.sc-btn--danger                { color: #ef4444; }
+.sc-btn--danger:hover          { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+[data-theme="dark"] .sc-btn--danger       { color: #f87171; }
+[data-theme="dark"] .sc-btn--danger:hover { background: rgba(248, 113, 113, 0.12); color: #fca5a5; }
+
+[data-theme="grey"] .sc-btn--danger       { color: #e05252; }
+[data-theme="grey"] .sc-btn--danger:hover { background: rgba(224, 82, 82, 0.12); color: #f87171; }
+
+[data-theme="aurora"] .sc-btn--danger       { color: rgba(248,113,113,0.7); }
+[data-theme="aurora"] .sc-btn--danger:hover { background: rgba(248,81,73,0.12); color: #f85149; }
+
+[data-theme="dark"] .coding-screen-header  { border-bottom-color: rgba(255, 255, 255, 0.06); }
+[data-theme="dark"] .coding-screen-label   { color: #3fb950; }
+
+[data-theme="grey"] .coding-screen-header  { border-bottom-color: rgba(255, 255, 255, 0.06); }
+

@@ -1,0 +1,276 @@
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f5f8;
+  color: #102040;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--header-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 0 24px;
+  background: #ffffffee;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #d7e1eb;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.app-logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  user-select: none;
+  transition: filter 0.3s ease;
+}
+
+[data-theme="dark"]   .app-logo,
+[data-theme="aurora"] .app-logo,
+[data-theme="grey"]   .app-logo {
+  filter: drop-shadow(0 0 6px rgba(120, 200, 255, 1))
+          drop-shadow(0 0 16px rgba(80, 160, 255, 0.85))
+          drop-shadow(0 0 32px rgba(60, 130, 255, 0.5));
+}
+
+.menu-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Page layout row (sidebar + main) ─────────────────── */
+#page-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: calc(100dvh - var(--header-height));
+}
+
+main.hero {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: calc(100dvh - var(--header-height, 76px));
+}
+
+.hero-screens-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* ── Hero screens ─────────────────────────────────────── */
+.hero-screen {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  border-right: 1px solid var(--border, #e2e8f0);
+  background: var(--surface, #ffffff);
+}
+
+.hero-screen:last-child { border-right: none; }
+
+[data-theme="dark"] .page-header { background: rgba(1,4,9,0.88); backdrop-filter: blur(12px); border-bottom-color: #30363d; }
+[data-theme="grey"] .page-header { background: rgba(13,17,23,0.88); backdrop-filter: blur(12px); border-bottom-color: #444c56; }
+
+[data-theme="dark"] .hero-screen { background: var(--bg); border-right-color: rgba(255,255,255,0.05); }
+[data-theme="grey"] .hero-screen { background: var(--bg); border-right-color: rgba(255,255,255,0.05); }
+[data-theme="grey"] .app-logo {
+  filter: drop-shadow(0 0 6px rgba(87,171,90,0.55))
+          drop-shadow(0 0 16px rgba(87,171,90,0.35));
+}
+
+.hero-copy {
+  max-width: 760px;
+  margin: 24px auto 0;
+  padding: 0 24px 32px;
+  text-align: center;
+}
+
+.hero-copy h2 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.hero-copy p {
+  margin: 0;
+  color: #425366;
+  font-size: 1rem;
+}
+
+/* ── Prose & cards ────────────────────────────────────── */
+p {
+  max-width: 760px;
+  margin: 20px auto;
+  padding: 0 24px;
+  line-height: 1.75;
+}
+
+.card,
+.math-block {
+  max-width: 760px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #d7e1eb;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(15, 32, 64, 0.07);
+}
+
+.code-block {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 0;
+}
+
+/* ── Mobile ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 0 12px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .card,
+  .math-block {
+    margin: 12px 0;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(15, 32, 64, 0.06);
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .content-title {
+    font-size: 1.4rem;
+    margin: 0 0 16px;
+  }
+
+  .code-block {
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+}
+
+.math-block .expression {
+  font-size: 1.1rem;
+  line-height: 1.9;
+}
+
+:root {
+  --header-height: 76px;
+  --screen-header-h: 65px;
+}
+
+/* ── Fullscreen toggle button ─────────────────────────── */
+/* ── Fullscreen toggle button (lives in .page-header) ─── */
+.dp-fullscreen-btn {
+  margin-left: auto;       /* absorbs the gap, pushes theme-ctrl right */
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.dp-fullscreen-btn:hover  { background: rgba(0,0,0,0.055); color: var(--text, #102040); transform: scale(1.08); }
+
+/* theme-controller no longer needs its own auto-margin once the sibling is present */
+.dp-fullscreen-btn ~ .theme-controller { margin-left: 0; }
+
+/* ── Fullscreen exit hint toast ───────────────────────── */
+.dp-fs-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  z-index: 9999;
+  background: rgba(18, 18, 22, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(230, 230, 240, 0.92);
+  font-size: 0.72rem;
+  font-family: var(--code-font, "JetBrains Mono", monospace);
+  letter-spacing: 0.02em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: dp-toast-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.dp-fs-toast kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-bottom-width: 2.5px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+.dp-fs-toast--out {
+  animation: dp-toast-out 0.38s ease forwards;
+}
+@keyframes dp-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes dp-toast-out {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+}
+
+/* ── Fullscreen mode ──────────────────────────────────── */
+body.dp-fullscreen { --header-height: 0px; }
+body.dp-fullscreen .page-header {
+  height: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+body.dp-fullscreen .nav-sidebar {
+  width: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
