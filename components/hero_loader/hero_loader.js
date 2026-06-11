@@ -8,7 +8,7 @@ function setupHeroLoader() {
   loader.innerHTML = `
     <div class="hero-loader-brand">
       <span class="hero-loader-brand-word">Dreaming</span>
-      <img src="/assets/app_logo/dreaming_polar.png" alt="" class="hero-loader-brand-icon">
+      <img src="${window.BASE}/assets/app_logo/dreaming_polar.png" alt="" class="hero-loader-brand-icon">
       <span class="hero-loader-brand-word">Polar</span>
     </div>
     <p class="hero-loader-text" data-phase="idle">

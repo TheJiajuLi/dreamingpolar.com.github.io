@@ -1,9 +1,9 @@
 function setupThemeController() {
   const themes = [
-    { key: 'light',    label: 'Light',    icon: '/assets/icons/theme_controller/light_theme.png'    },
-    { key: 'dark',     label: 'Dark',     icon: '/assets/icons/theme_controller/dark_theme.png'     },
-    { key: 'grey',     label: 'Grey',     icon: '/assets/icons/theme_controller/grey_theme.svg'     },
-    { key: 'aurora', label: 'Aurora', icon: '/assets/icons/theme_controller/aurora_theme.png' },
+    { key: 'light',  label: 'Light',  icon: `${window.BASE}/assets/icons/theme_controller/light_theme.png`  },
+    { key: 'dark',   label: 'Dark',   icon: `${window.BASE}/assets/icons/theme_controller/dark_theme.png`   },
+    { key: 'grey',   label: 'Grey',   icon: `${window.BASE}/assets/icons/theme_controller/grey_theme.svg`   },
+    { key: 'aurora', label: 'Aurora', icon: `${window.BASE}/assets/icons/theme_controller/aurora_theme.png` },
   ];
 
   const saved = localStorage.getItem('theme') || 'light';

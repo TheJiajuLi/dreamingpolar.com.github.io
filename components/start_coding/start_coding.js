@@ -7,7 +7,7 @@ function setupStartCodingBtn() {
   btn.id = 'start-coding-btn';
   btn.title = 'Open code editor';
   btn.setAttribute('aria-label', 'Toggle code editor');
-  btn.innerHTML = `<img src="/assets/icons/start_coding/start_coding.svg" alt="" class="start-coding-icon" aria-hidden="true">`;
+  btn.innerHTML = `<img src="${window.BASE}/assets/icons/start_coding/start_coding.svg" alt="" class="start-coding-icon" aria-hidden="true">`;
 
   // Insert before theme controller if present, otherwise append
   const themeController = header.querySelector('.theme-controller');

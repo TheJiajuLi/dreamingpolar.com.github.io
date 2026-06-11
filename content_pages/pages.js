@@ -5,9 +5,9 @@ export const PAGES = [
       {
         title: 'Python for Mathematics',
         children: [
-          { title: 'SymPy',      dataFile: '/content_pages/tutorials/python_with_mathematics/sympy/sympy_tutorials.json' },
-          { title: 'Pandas',     dataFile: '/content_pages/tutorials/python_with_mathematics/pandas/pandas_tutorials.json' },
-          { title: 'Matplotlib', dataFile: '/content_pages/tutorials/python_with_mathematics/matplotlib/matplotlib_tutorials.json' },
+          { title: 'SymPy',      dataFile: `${window.BASE}/content_pages/tutorials/python_with_mathematics/sympy/sympy_tutorials.json` },
+          { title: 'Pandas',     dataFile: `${window.BASE}/content_pages/tutorials/python_with_mathematics/pandas/pandas_tutorials.json` },
+          { title: 'Matplotlib', dataFile: `${window.BASE}/content_pages/tutorials/python_with_mathematics/matplotlib/matplotlib_tutorials.json` },
         ],
       },
     ],
