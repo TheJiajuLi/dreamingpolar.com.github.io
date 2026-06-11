@@ -9,12 +9,12 @@ function setupStartCodingBtn() {
   btn.setAttribute('aria-label', 'Toggle code editor');
   btn.innerHTML = `<img src="${window.BASE}/assets/icons/start_coding/start_coding.svg" alt="" class="start-coding-icon" aria-hidden="true">`;
 
-  // Insert before theme controller if present, otherwise append
-  const themeController = header.querySelector('.theme-controller');
-  if (themeController) {
-    header.insertBefore(btn, themeController);
+  const fsBtn = header.querySelector('.dp-fullscreen-btn');
+  if (fsBtn) {
+    header.insertBefore(btn, fsBtn);
   } else {
-    header.appendChild(btn);
+    const themeController = header.querySelector('.theme-controller');
+    themeController ? header.insertBefore(btn, themeController) : header.appendChild(btn);
   }
 
   function syncActiveState() {
