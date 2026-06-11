@@ -30,8 +30,8 @@
 }
 
 @keyframes ai-dialog-in {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from { opacity: 0; transform: translate(-50%, -21px) scale(0.88); }
+  to   { opacity: 1; transform: translate(-50%, -21px) scale(1); }
 }
 
 @keyframes ai-glow-pulse {
@@ -85,16 +85,14 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-  align-items: center;
-  gap: 8px;
-  padding: 0 6px 0 14px;
-  height: 42px;
-  min-width: 460px;
+  transform: translate(-50%, -21px);
+  flex-direction: column;
+  min-width: 340px;
+  max-width: 420px;
   border-radius: 14px;
   z-index: 50;
+  overflow: hidden;
 
-  /* flowing gradient border via background-clip trick */
   background:
     linear-gradient(var(--ai-dialog-bg, rgba(255,255,255,0.96)) 0 100%) padding-box,
     linear-gradient(90deg, #16a34a 0%, #7c3aed 40%, #06b6d4 70%, #16a34a 100%) border-box;
@@ -113,9 +111,85 @@
     ai-glow-pulse  3s ease-in-out infinite;
 }
 
-.ai-header-input {
+/* ── Main input row ───────────────────────────────────────── */
+.ai-dialog-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 14px;
+  height: 42px;
+}
+
+/* ── Chips row — hidden until dialog hover ────────────────── */
+.ai-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 10px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  border-top: 1px solid transparent;
+  transition: max-height 0.22s ease, opacity 0.18s ease, padding 0.22s ease, border-color 0.18s ease;
+}
+
+.ai-header-dialog:hover .ai-chips-row {
+  max-height: 120px;
+  opacity: 1;
+  padding: 7px 10px 9px;
+  border-top-color: rgba(128,128,128,0.12);
+}
+
+.ai-chip {
+  padding: 3px 11px;
+  border-radius: 20px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-size: 0.71rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+.ai-chip:hover {
+  background: rgba(22,163,74,0.07);
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+/* ── Input wrapper + ghost text ───────────────────────────── */
+.ai-input-wrap {
   flex: 1;
   min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ai-ghost-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.ai-ghost-typed { color: transparent; white-space: pre; }
+.ai-ghost-rest  { color: var(--text-muted, #94a3b8); opacity: 0.5; white-space: pre; }
+
+.ai-header-input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
   height: 28px;
   padding: 0 8px;
   border: none;
@@ -125,7 +199,7 @@
   letter-spacing: 0.01em;
   outline: none;
 }
-.ai-header-input::placeholder { color: var(--text-muted, #94a3b8); }
+.ai-header-input::placeholder { color: var(--text-muted, #94a3b8); opacity: 0.6; }
 
 .ai-header-submit {
   height: 28px;

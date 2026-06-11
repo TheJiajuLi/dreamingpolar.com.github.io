@@ -24,17 +24,7 @@ export function mount(container) {
   btn.className = `icm-btn${_enabled ? ' icm-on' : ''}`;
   btn.title     = 'Intelligent Coding Mode (syntax, text highlight, auto-complete)';
   btn.innerHTML = `
-    <svg class="icm-icon" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="6.5" cy="6.5" r="2.2" stroke="currentColor" stroke-width="1.15"/>
-      <line x1="6.5" y1="0.5" x2="6.5" y2="3.3" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="6.5" y1="9.7" x2="6.5" y2="12.5" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="0.5" y1="6.5" x2="3.3" y2="6.5" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="9.7" y1="6.5" x2="12.5" y2="6.5" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="2.09" y1="2.09" x2="4.06" y2="4.06" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="8.94" y1="8.94" x2="10.91" y2="10.91" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="2.09" y1="10.91" x2="4.06" y2="8.94" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-      <line x1="8.94" y1="4.06" x2="10.91" y2="2.09" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/>
-    </svg>
+    <img class="icm-icon" src="${window.BASE}/assets/icons/intelligent_code_mode/ai-technology.png" alt="" aria-hidden="true">
     <span class="icm-label">ICM</span>
   `;
 
