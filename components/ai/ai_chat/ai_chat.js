@@ -5,6 +5,7 @@
 
 import { chat } from '../ai_client.js';
 import { SYSTEM_DEFAULT } from '../ai_personalities.js';
+import { calibrate } from './ai_chat_brain.js';
 import {
   getHistory,
   appendMessage,
@@ -20,7 +21,8 @@ export async function sendMessage(userText) {
     throw new Error('今日对话额度已用完，明天再来找波比我吧~ 🐻');
   }
   appendMessage('user', userText);
-  const content = await chat(getHistory(), SYSTEM_DEFAULT, 1024);
+  const { system: styleGuide, maxTokens } = calibrate(userText);
+  const content = await chat(getHistory(), SYSTEM_DEFAULT + '\n\n' + styleGuide, maxTokens);
   appendMessage('assistant', content);
   return content;
 }
