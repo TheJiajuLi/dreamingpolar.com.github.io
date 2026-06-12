@@ -117,11 +117,7 @@ function setup() {
     if (!prompt) return;
 
     const currentMode = getCurrentMode?.() ?? 'python';
-    let   targetLang  = detectLang(prompt, currentMode);
-
-    // In customise notebook, prompts with no explicit language keyword still
-    // intend code generation (e.g. "draw a heart curve") — default to python.
-    if (targetLang === 'ai_chat' && currentMode === 'customise') targetLang = 'python';
+    const targetLang  = detectLang(prompt, currentMode);
 
     // ── Conversational → route to chat screen, skip code generation ──────
     if (targetLang === 'ai_chat') {
