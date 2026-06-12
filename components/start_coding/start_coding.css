@@ -74,6 +74,7 @@
   background-size: 220% 100%;
   background-position: 220% 0;
   pointer-events: none;
+  opacity: 0;
 }
 
 /* ── Hover ──────────────────────────────────────────────── */
@@ -88,6 +89,7 @@
 }
 
 .start-coding-btn:hover::after {
+  opacity: 1;
   animation: sc-shimmer 0.55s ease forwards;
 }
 

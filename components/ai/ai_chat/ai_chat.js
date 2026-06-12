@@ -4,8 +4,7 @@
 //  ai_client.js. Storage & token budget live in ai_chat_saving.js.
 
 import { chat, streamChat } from '../ai_client.js';
-import { SYSTEM_DEFAULT } from '../ai_personalities.js';
-import { PREFERENCES_CONTEXT } from '../ai_preferences.js';
+import { getActivePersona } from '../ai_persona_switch.js';
 import { calibrate } from './ai_chat_brain.js';
 import {
   getHistory,
@@ -25,12 +24,13 @@ export { getHistory, clearHistory, getRemainingTokens, canSend };
  */
 export async function sendMessage(userText, { onChunk } = {}) {
   if (!canSend()) {
-    throw new Error('今日对话额度已用完，明天再来找波比我吧~ 🐻');
+    throw new Error('今日对话额度已用完，明天再来找小梦吧~ 🐻');
   }
   appendMessage('user', userText);
 
-  const { prefix, maxTokens } = calibrate(userText);
-  const system = `${prefix}\n\n${SYSTEM_DEFAULT}\n\n${PREFERENCES_CONTEXT}`;
+  const persona = getActivePersona();
+  const { prefix, maxTokens } = calibrate(userText, persona.EXAMPLES);
+  const system = `${prefix}\n\n${persona.buildSystemPrompt()}`;
 
   let full = '';
   if (onChunk) {

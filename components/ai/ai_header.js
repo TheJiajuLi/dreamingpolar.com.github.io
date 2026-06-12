@@ -101,6 +101,16 @@ function setup() {
     btn.disabled = false;
   }
 
+  function syncGlow() {
+    const state  = window.screenController?.getState('ai-chat');
+    const isOpen = state === 'normal' || state === 'maximized';
+    btn.classList.toggle('active', isOpen);
+  }
+  document.addEventListener('screen-opened',    ({ detail }) => { if (detail.id === 'ai-chat') syncGlow(); });
+  document.addEventListener('screen-closed',    ({ detail }) => { if (detail.id === 'ai-chat') syncGlow(); });
+  document.addEventListener('screen-minimized', ({ detail }) => { if (detail.id === 'ai-chat') syncGlow(); });
+  requestAnimationFrame(() => requestAnimationFrame(syncGlow));
+
   btn.addEventListener('click', () => dialog.classList.contains('visible') ? close() : open());
   cancel.addEventListener('click', close);
   input.addEventListener('input', updateGhost);

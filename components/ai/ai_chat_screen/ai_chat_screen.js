@@ -5,8 +5,9 @@
 //  Also listens to the 'ai-chat-send' event dispatched by ai_header.js
 //  when input_filter routes a prompt as conversational.
 
-import { sendMessage, getHistory, clearHistory, getRemainingTokens } from './ai_chat.js';
+import { sendMessage, getHistory, clearHistory, getRemainingTokens } from '../ai_chat/ai_chat.js';
 import { getCurrentMode } from '../../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
+import { getActivePersona, cyclePersona } from '../ai_persona_switch.js';
 
 const SCREEN_ID = 'ai-chat';
 
@@ -33,7 +34,8 @@ function setupAiChatScreen() {
 
   screen.innerHTML = `
     <div class="aic-header">
-      <span class="aic-label">Chat · 小梦</span>
+      <span class="aic-label">CHAT</span>
+      <button class="aic-persona-btn" id="aic-persona-btn" title="切换 AI 角色"></button>
       <div class="sc-toolbar">
         <button class="sc-btn" id="aic-clear-btn" title="Clear chat">⊘</button>
         <button class="sc-btn" id="aic-max-btn"   title="Maximize">⤢</button>
@@ -59,13 +61,29 @@ function setupAiChatScreen() {
     </div>
   `;
 
-  const messagesEl = document.getElementById('aic-messages');
-  const textarea   = document.getElementById('aic-textarea');
-  const sendBtn    = document.getElementById('aic-send');
-  const clearBtn   = document.getElementById('aic-clear-btn');
-  const maxBtn     = document.getElementById('aic-max-btn');
-  const minBtn     = document.getElementById('aic-min-btn');
-  const tokensEl   = document.getElementById('aic-tokens');
+  const messagesEl  = document.getElementById('aic-messages');
+  const textarea    = document.getElementById('aic-textarea');
+  const sendBtn     = document.getElementById('aic-send');
+  const clearBtn    = document.getElementById('aic-clear-btn');
+  const maxBtn      = document.getElementById('aic-max-btn');
+  const minBtn      = document.getElementById('aic-min-btn');
+  const tokensEl    = document.getElementById('aic-tokens');
+  const personaBtn  = document.getElementById('aic-persona-btn');
+
+  // ── Persona selector ──────────────────────────────────────────────────────
+  function syncPersonaBtn() {
+    const p = getActivePersona();
+    personaBtn.textContent = p.label;
+    personaBtn.dataset.personaId = p.id;
+  }
+  syncPersonaBtn();
+
+  personaBtn.addEventListener('click', () => {
+    cyclePersona();
+    syncPersonaBtn();
+  });
+
+  document.addEventListener('ai-persona-changed', syncPersonaBtn);
 
   // ── screenController wiring ──────────────────────────────────────────────
   function syncMaxBtn(state) {

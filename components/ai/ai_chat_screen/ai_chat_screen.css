@@ -32,6 +32,42 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted, #94a3b8);
+  flex-shrink: 0;
+}
+
+/* ── Persona selector button ─────────────────────────────────────────────────── */
+
+.aic-persona-btn {
+  flex: 1;
+  text-align: left;
+  padding: 2px 8px;
+  margin-left: 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #94a3b8);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.aic-persona-btn:hover {
+  border-color: var(--border, #e2e8f0);
+  background: var(--bg-2, rgba(0,0,0,0.04));
+  color: var(--text, #1e293b);
+}
+
+.aic-persona-btn[data-persona-id="boby"] {
+  color: #a78bfa;
+}
+
+.aic-persona-btn[data-persona-id="boby"]:hover {
+  border-color: rgba(167, 139, 250, 0.3);
+  background: rgba(167, 139, 250, 0.08);
+  color: #a78bfa;
 }
 
 /* ── Messages area ──────────────────────────────────────────────────────────── */

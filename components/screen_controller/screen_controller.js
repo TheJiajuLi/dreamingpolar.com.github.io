@@ -77,6 +77,8 @@ const screenController = {
     applyState(id);
     if (wasMaximized) screenController._clearMax(id);
     showRestoreChip(id);
+    _persist(id, 'closed');
+    document.dispatchEvent(new CustomEvent('screen-minimized', { detail: { id } }));
   },
 
   restore(id) {

@@ -2,7 +2,7 @@ const PROXY_URL = window.location.hostname === 'localhost' || window.location.ho
   ? 'http://localhost:3001/api/ai'
   : 'https://dreamingpolar-com.onrender.com/api/ai';
 
-// All personas live in ai_personalities.js — edit there for prompt engineering.
+// All personas live in ai_without_personalities.js — edit there for prompt engineering.
 export {
   SYSTEM_DEFAULT,
   SYSTEM_PYTHON,
@@ -14,6 +14,7 @@ export {
   SYSTEM_MARKDOWN,
   SYSTEM_BY_MODE,
   systemExplainForLang,
+  systemRefactorForLang,
 } from './ai_personalities.js';
 
 function stripFences(raw) {
@@ -57,7 +58,7 @@ export async function ask(userMessage, systemPrompt = SYSTEM_DEFAULT, maxTokens 
  * @param {Array<{role:'user'|'assistant', content:string}>} messages
  * @param {string} [systemPrompt]
  */
-export async function chat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 2048) {
+export async function chat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 1024) {
   let res;
   try {
     res = await fetch(PROXY_URL, {
@@ -89,7 +90,7 @@ export async function chat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 
  * @param {number} [maxTokens]
  * @yields {string} text chunk
  */
-export async function* streamChat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 2048) {
+export async function* streamChat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 1024) {
   let res;
   try {
     res = await fetch(PROXY_URL, {
