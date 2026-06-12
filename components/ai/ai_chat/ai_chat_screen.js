@@ -87,7 +87,7 @@ function setupAiChatScreen() {
   }
 
   function scrollBottom() {
-    requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
   function renderHistory() {
@@ -113,23 +113,53 @@ function setupAiChatScreen() {
 
     messagesEl.appendChild(makeBubble('user', text));
 
-    // Streaming: create bubble immediately, fill character by character
+    // Bubble with blinking cursor — visible immediately while waiting for first chunk
     const replyBubble = makeBubble('assistant', '');
     const replyInner  = replyBubble.querySelector('.aic-bubble-inner');
-    replyBubble.classList.add('aic-thinking');
+    const textNode    = document.createElement('span');
+    const cursor      = document.createElement('span');
+    cursor.className  = 'aic-cursor';
+    replyInner.append(textNode, cursor);
     messagesEl.appendChild(replyBubble);
     scrollBottom();
 
+    // Typewriter drip queue — smooths out bursty network chunks
+    const queue = [];
+    let streamDone = false;
+    let dripping   = false;
+
+    function drip() {
+      if (queue.length === 0) {
+        dripping = false;
+        if (streamDone) cursor.remove();
+        return;
+      }
+      // Stream finished — drain remaining chars instantly so user isn't waiting
+      if (streamDone) {
+        textNode.textContent += queue.join('');
+        queue.length = 0;
+        cursor.remove();
+        scrollBottom();
+        dripping = false;
+        return;
+      }
+      textNode.textContent += queue.shift();
+      scrollBottom();
+      setTimeout(drip, 18); // ~55 chars/sec — matches Claude's typing feel
+    }
+
     try {
-      let accumulated = '';
       await sendMessage(text, {
         onChunk(chunk) {
-          accumulated += chunk;
-          replyInner.textContent = accumulated;
-          scrollBottom();
+          for (const ch of chunk) queue.push(ch);
+          if (!dripping) { dripping = true; drip(); }
         },
       });
-      replyBubble.classList.remove('aic-thinking');
+      streamDone = true;
+      if (!dripping) {
+        if (queue.length) { dripping = true; drip(); }
+        else cursor.remove();
+      }
     } catch (e) {
       replyBubble.remove();
       const err = makeBubble('assistant', `⚠ ${e.message}`);

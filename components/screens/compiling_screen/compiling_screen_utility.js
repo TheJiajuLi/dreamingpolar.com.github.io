@@ -36,7 +36,7 @@ export function renderBlocks(outputs, container, { onAskAI } = {}) {
         if (onAskAI) {
           const btn = document.createElement('button');
           btn.className = 'ask-ai-btn';
-          btn.textContent = '✨ Ask 小梦';
+          btn.textContent = 'AI debug';
           btn.addEventListener('click', () => onAskAI(o.content, block, btn));
           block.appendChild(btn);
         }

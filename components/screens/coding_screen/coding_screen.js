@@ -218,7 +218,7 @@ function setupCodingScreen() {
     const spinning = detail.status === 'loading' || detail.status === 'running';
     statusBar.className = `compiler-status-bar ${detail.status}`;
     statusBar.innerHTML = spinning
-      ? `<span class="status-spinner"></span>${detail.message}`
+      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}`
       : detail.message;
   });
 
@@ -252,6 +252,14 @@ function setupCodingScreen() {
     localStorage.setItem(CODE_KEY, code);
     editor.dispatchEvent(new Event('input'));
     run();
+  });
+
+  // Handle refactor-code for standalone cell only
+  document.addEventListener('refactor-code', ({ detail: { code, cellId } }) => {
+    if (cellId !== '__standalone__') return;
+    editor.value = code;
+    localStorage.setItem(CODE_KEY, code);
+    editor.dispatchEvent(new Event('input'));
   });
 
   requestIdleCallback

@@ -102,6 +102,24 @@
   color: #991b1b;
 }
 
+/* ── Typewriter cursor ──────────────────────────────────────────────────────── */
+
+.aic-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.85em;
+  background: var(--text-muted, #94a3b8);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: aic-blink 0.65s step-end infinite;
+}
+
+@keyframes aic-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 /* ── Input bar ──────────────────────────────────────────────────────────────── */
 
 .aic-input-bar {

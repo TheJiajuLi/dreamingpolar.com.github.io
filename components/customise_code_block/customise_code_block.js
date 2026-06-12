@@ -322,6 +322,10 @@ export function init(container, externalTopbar) {
     addImportedCell(lang ?? 'python', code, { autoRun: true });
   });
 
+  document.addEventListener('refactor-code', ({ detail: { code, cellId } }) => {
+    setCellCode(cellId, code);
+  });
+
   container.appendChild(nb);
 
   requestIdleCallback
@@ -331,6 +335,16 @@ export function init(container, externalTopbar) {
 
 export function getCellOrder() {
   return _cells.map(c => c.id);
+}
+
+export function setCellCode(cellId, code) {
+  const cell = _cells.find(c => c.id === cellId);
+  if (!cell) return false;
+  cell.editor.value = code;
+  autoResize(cell.editor);
+  cell.editor.dispatchEvent(new Event('input'));
+  saveAll();
+  return true;
 }
 
 export function addImportedCell(lang, code, { autoRun = false } = {}) {

@@ -2,6 +2,11 @@
 // Execution engine: Python (Pyodide), LaTeX, MathJax, Markdown.
 // Dispatches 'compiler-status' events for UI status bars.
 
+import {
+  parseError,
+  preflightWarnings,
+} from '../screens/coding_screen/coding_screen_python/pyodide_error_handling.js';
+
 const PYODIDE_VERSION = '314.0.0';
 const PYODIDE_INDEX   = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 const PACKAGES        = ['numpy', 'sympy', 'matplotlib', 'pandas'];
@@ -88,7 +93,7 @@ sys.stderr = _err
 
 _rich = []
 _exc  = None
-_ns   = {}
+_ns   = {'__name__': '__main__'}
 
 try:
     exec(_user_code, _ns)
@@ -133,8 +138,11 @@ _j.dumps({'stdout': _out.getvalue(), 'stderr': _err.getvalue(), 'error': _exc, '
 async function _runPython(code) {
   try {
     _dispatch('running', 'Running…');
+
+    // Pre-flight: warn about Pyodide-specific pitfalls before execution
+    const preflight = preflightWarnings(code);
+
     const py  = await _getPyodide();
-    // Auto-load any Pyodide-supported packages the user imports (e.g. scipy)
     await py.loadPackagesFromImports(code, { messageCallback: () => {} });
     py.globals.set('_user_code', code);
     const raw = await py.runPythonAsync(RUNNER);
@@ -142,11 +150,20 @@ async function _runPython(code) {
     _dispatch('ready', 'Done');
 
     const out = [];
-    if (d.stdout)        out.push({ type: 'text',  content: d.stdout });
-    for (const o of d.rich) out.push(o);
-    if (d.error)         out.push({ type: 'error', content: d.error });
-    else if (d.stderr)   out.push({ type: 'error', content: d.stderr });
-    if (!out.length)     out.push({ type: 'info',  content: 'Executed (no output).' });
+    for (const w of preflight) out.push({ type: 'info', content: w });
+    if (d.stdout)              out.push({ type: 'text',  content: d.stdout });
+    for (const o of d.rich)    out.push(o);
+
+    if (d.error) {
+      const parsed = parseError(d.error, code);
+      let body = parsed.message;
+      if (parsed.suggestion) body += `\n\n💡 ${parsed.title}: ${parsed.suggestion}`;
+      out.push({ type: 'error', content: body });
+    } else if (d.stderr) {
+      out.push({ type: 'error', content: d.stderr });
+    }
+
+    if (!out.length) out.push({ type: 'info', content: 'Executed (no output).' });
     return out;
   } catch (e) {
     _dispatch('error', e.message);

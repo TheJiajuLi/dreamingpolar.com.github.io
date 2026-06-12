@@ -1,0 +1,68 @@
+/* ── Refactor button — sits inside .ai-explanation-label ─────── */
+.refactor-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  font-size: 0.61rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: color 0.2s, box-shadow 0.2s, transform 0.15s;
+  background:
+    linear-gradient(var(--surface, #fff) 0 100%) padding-box,
+    linear-gradient(90deg, #7c3aed, #16a34a) border-box;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.refactor-btn:hover {
+  color: #6d28d9;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.25), 0 0 20px rgba(22, 163, 74, 0.1);
+  transform: translateY(-1px);
+}
+
+.refactor-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Label row: make room for the button ─────────────────────── */
+.ai-explanation-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Scope gradient text to the label span only (button must not inherit it) */
+.ai-explanation-label-text {
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  background: linear-gradient(90deg, #16a34a, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Theme: aurora ────────────────────────────────────────────── */
+[data-theme="aurora"] .refactor-btn {
+  background:
+    linear-gradient(var(--surface, #0d1b2e) 0 100%) padding-box,
+    linear-gradient(90deg, #a78bfa, #34d399) border-box;
+  color: #a78bfa;
+}
+
+[data-theme="aurora"] .refactor-btn:hover {
+  color: #c4b5fd;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.3), 0 0 20px rgba(52, 211, 153, 0.12);
+}

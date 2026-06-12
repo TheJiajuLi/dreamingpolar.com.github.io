@@ -116,7 +116,7 @@ export function attachNotebookHooks({ runAllBtn, statusBar, runAll, getCells, au
     const spin = detail.status === 'loading' || detail.status === 'running';
     statusBar.className = `compiler-status-bar ${detail.status}`;
     statusBar.innerHTML = spin
-      ? `<span class="status-spinner"></span>${detail.message}`
+      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}`
       : detail.message;
   });
 

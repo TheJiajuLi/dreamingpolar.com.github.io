@@ -17,16 +17,29 @@
 .compiler-status-bar.error   { color: #dc2626; }
 
 .status-spinner {
-  width: 10px;
-  height: 10px;
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  vertical-align: middle;
   flex-shrink: 0;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: compiler-spin 0.7s linear infinite;
+  margin-right: 2px;
 }
 
-@keyframes compiler-spin {
-  to { transform: rotate(360deg); }
+.status-spinner i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  font-style: normal;
+  animation: dot-wave 1s ease-in-out infinite;
+}
+
+.status-spinner i:nth-child(2) { animation-delay: 0.15s; }
+.status-spinner i:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes dot-wave {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.3; }
+  30%           { transform: translateY(-4px); opacity: 1;   }
 }
 ;

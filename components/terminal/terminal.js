@@ -1,4 +1,4 @@
-import { executeCommand } from './terminal_commands.js';
+import { executeCommand, consumeAiPending } from './terminal_commands.js';
 
 const ICON_TERMINAL = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`;
 const ICON_CLEAR    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4h8v2"/></svg>`;
@@ -43,6 +43,18 @@ export function clearOutput() {
   if (_output) _output.innerHTML = '';
 }
 
+// ── Command history ────────────────────────────────────────
+const _history = [];
+let   _histIdx  = -1;
+let   _draft    = '';
+
+// ── Status dot helpers ─────────────────────────────────────
+function dotSet(cls) {
+  const dot = document.getElementById('term-status-dot');
+  if (!dot) return;
+  dot.className = `terminal-status-dot${cls ? ' ' + cls : ''}`;
+}
+
 // ── Input handler ──────────────────────────────────────────
 async function handleEnter() {
   const raw = _input?.value ?? '';
@@ -50,17 +62,28 @@ async function handleEnter() {
   const line = raw.trim();
   if (!line) return;
 
+  if (_history[_history.length - 1] !== line) _history.push(line);
+  _histIdx = -1;
+  _draft   = '';
+
   const echo = document.createElement('div');
   echo.className = 'term-line term-echo';
   echo.innerHTML = `<span class="term-prompt-inline">›</span> ${line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}`;
   _output?.appendChild(echo);
 
+  dotSet('running');
   try {
-    await executeCommand(line, printLine);
+    if (!consumeAiPending(line, printLine)) {
+      await executeCommand(line, printLine);
+    }
   } catch (e) {
-    if (String(e) === '__CLEAR__') { clearOutput(); return; }
+    if (String(e) === '__CLEAR__') { clearOutput(); dotSet(''); return; }
     printLine(`\x1b[31m${String(e)}\x1b[0m`);
   }
+
+  // Brief green pulse on completion, then back to idle
+  dotSet('waiting');
+  setTimeout(() => dotSet(''), 800);
 
   _output && (_output.scrollTop = _output.scrollHeight);
 }
@@ -157,7 +180,26 @@ function setup() {
   printLine('');
 
   _input?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); handleEnter(); }
+    if (e.key === 'Enter') { e.preventDefault(); handleEnter(); return; }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!_history.length) return;
+      if (_histIdx === -1) { _draft = _input.value; _histIdx = _history.length - 1; }
+      else if (_histIdx > 0) _histIdx--;
+      _input.value = _history[_histIdx];
+      _input.setSelectionRange(_input.value.length, _input.value.length);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (_histIdx === -1) return;
+      _histIdx++;
+      if (_histIdx >= _history.length) { _histIdx = -1; _input.value = _draft; }
+      else _input.value = _history[_histIdx];
+      _input.setSelectionRange(_input.value.length, _input.value.length);
+      return;
+    }
   });
 
   panel.querySelector('.term-clear-btn')?.addEventListener('click', clearOutput);

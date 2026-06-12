@@ -3,6 +3,7 @@ import { renderBlocks, escHtml } from './compiling_screen_utility.js';
 import { persistOutputs, recoverOutputs, wipeOutputs } from './compiling_screen_hook.js';
 import { getCellOrder } from '../../customise_code_block/customise_code_block.js';
 import { ask, systemExplainForLang } from '../../ai/ai_client.js';
+import { createRefactorBtn } from './refactorization_button/refactorization_button.js';
 
 function parseAIResponse(text) {
   const blocks = [];
@@ -221,19 +222,40 @@ export function setupCompilingScreen() {
     renderBlocks(outputs, sec.bodyEl, {
       onAskAI: async (errorText, block, btn) => {
         btn.disabled = true;
-        btn.textContent = '小梦 thinking…';
+        btn.textContent = 'Thinking…';
         try {
           const context = sec.sourceCode
             ? `Code (${sec.sourceLang ?? 'unknown'}):\n${sec.sourceCode}\n\nError:\n${errorText}`
             : errorText;
           const explanation = await ask(context, systemExplainForLang(sec.sourceLang), 512);
+
           const explDiv = document.createElement('div');
           explDiv.className = 'output-ai-explanation';
-          explDiv.innerHTML = `<div class="ai-explanation-label">✨ 小梦 says</div>`;
+
+          // Label row: text + refactor button side by side
+          const labelEl = document.createElement('div');
+          labelEl.className = 'ai-explanation-label';
+
+          const labelText = document.createElement('span');
+          labelText.className = 'ai-explanation-label-text';
+          labelText.textContent = 'AI suggestion';
+          labelEl.appendChild(labelText);
+
+          if (sec.sourceCode) {
+            const refactorBtn = createRefactorBtn({
+              sourceCode: sec.sourceCode,
+              sourceLang: sec.sourceLang,
+              cellId: id,
+              explanation,
+            });
+            labelEl.appendChild(refactorBtn);
+          }
+
           const bodyEl = document.createElement('div');
           bodyEl.className = 'ai-explanation-body';
           renderBlocks(parseAIResponse(explanation), bodyEl);
-          explDiv.appendChild(bodyEl);
+
+          explDiv.append(labelEl, bodyEl);
           block.appendChild(explDiv);
           btn.remove();
         } catch (e) {
