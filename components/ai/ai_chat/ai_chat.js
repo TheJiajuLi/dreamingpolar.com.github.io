@@ -5,6 +5,7 @@
 
 import { chat } from '../ai_client.js';
 import { SYSTEM_DEFAULT } from '../ai_personalities.js';
+import { PREFERENCES_CONTEXT } from '../ai_preferences.js';
 import { calibrate } from './ai_chat_brain.js';
 import {
   getHistory,
@@ -21,8 +22,10 @@ export async function sendMessage(userText) {
     throw new Error('今日对话额度已用完，明天再来找波比我吧~ 🐻');
   }
   appendMessage('user', userText);
-  const { system: styleGuide, maxTokens } = calibrate(userText);
-  const content = await chat(getHistory(), SYSTEM_DEFAULT + '\n\n' + styleGuide, maxTokens);
+  // Length prefix comes FIRST so the model sees it before the personality
+  const { prefix, maxTokens } = calibrate(userText);
+  const system = `${prefix}\n\n${SYSTEM_DEFAULT}\n\n${PREFERENCES_CONTEXT}`;
+  const content = await chat(getHistory(), system, maxTokens);
   appendMessage('assistant', content);
   return content;
 }
