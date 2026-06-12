@@ -81,3 +81,55 @@ export async function chat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 
   const { content } = await res.json();
   return content;
 }
+
+/**
+ * Streaming multi-turn chat. Yields text chunks as they arrive.
+ * @param {Array<{role:'user'|'assistant', content:string}>} messages
+ * @param {string} [systemPrompt]
+ * @param {number} [maxTokens]
+ * @yields {string} text chunk
+ */
+export async function* streamChat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 2048) {
+  let res;
+  try {
+    res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        system:     systemPrompt,
+        max_tokens: maxTokens,
+        stream:     true,
+      }),
+    });
+  } catch {
+    throw new Error('Cannot reach Polar Bear proxy. Is the backend running? (cd backend && npm start)');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? `Request failed (${res.status})`);
+  }
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let   buf     = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();           // keep incomplete last line in buffer
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const raw = line.slice(6).trim();
+      if (raw === '[DONE]') return;
+      try {
+        const json  = JSON.parse(raw);
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) yield delta;
+      } catch { /* partial JSON — skip */ }
+    }
+  }
+}

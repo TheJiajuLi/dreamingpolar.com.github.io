@@ -113,17 +113,25 @@ function setupAiChatScreen() {
 
     messagesEl.appendChild(makeBubble('user', text));
 
-    const thinking = makeBubble('assistant', '…');
-    thinking.classList.add('aic-thinking');
-    messagesEl.appendChild(thinking);
+    // Streaming: create bubble immediately, fill character by character
+    const replyBubble = makeBubble('assistant', '');
+    const replyInner  = replyBubble.querySelector('.aic-bubble-inner');
+    replyBubble.classList.add('aic-thinking');
+    messagesEl.appendChild(replyBubble);
     scrollBottom();
 
     try {
-      const reply = await sendMessage(text);
-      thinking.remove();
-      messagesEl.appendChild(makeBubble('assistant', reply));
+      let accumulated = '';
+      await sendMessage(text, {
+        onChunk(chunk) {
+          accumulated += chunk;
+          replyInner.textContent = accumulated;
+          scrollBottom();
+        },
+      });
+      replyBubble.classList.remove('aic-thinking');
     } catch (e) {
-      thinking.remove();
+      replyBubble.remove();
       const err = makeBubble('assistant', `⚠ ${e.message}`);
       err.classList.add('aic-bubble--error');
       messagesEl.appendChild(err);

@@ -38,6 +38,7 @@ app.post('/api/ai', async (req, res) => {
     messages,
     system     = POLAR_BEAR_SYSTEM,
     max_tokens = 1024,
+    stream     = false,
   } = req.body;
 
   if (!Array.isArray(messages) || !messages.length) {
@@ -48,7 +49,7 @@ app.post('/api/ai', async (req, res) => {
   const fullMessages = [{ role: 'system', content: system }, ...messages];
 
   const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), 60_000); // 60s timeout
+  const timer = setTimeout(() => abort.abort(), 60_000);
 
   try {
     const upstream = await fetch(MOYU_URL, {
@@ -58,19 +59,30 @@ app.post('/api/ai', async (req, res) => {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ model: MODEL, max_tokens, messages: fullMessages }),
+      body: JSON.stringify({ model: MODEL, max_tokens, messages: fullMessages, stream }),
     });
     clearTimeout(timer);
 
-    const data = await upstream.json();
-    console.log(`[ai] ${upstream.status}`, JSON.stringify(data).slice(0, 200));
-
     if (!upstream.ok) {
-      return res.status(upstream.status).json({
-        error: data.error?.message ?? JSON.stringify(data),
-      });
+      const err = await upstream.json().catch(() => ({}));
+      return res.status(upstream.status).json({ error: err.error?.message ?? JSON.stringify(err) });
     }
 
+    // ── Streaming path ─────────────────────────────────────
+    if (stream) {
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no'); // disable nginx buffering on Render
+      for await (const chunk of upstream.body) {
+        res.write(chunk);
+      }
+      return res.end();
+    }
+
+    // ── Non-streaming path ─────────────────────────────────
+    const data = await upstream.json();
+    console.log(`[ai] ${upstream.status}`, JSON.stringify(data).slice(0, 200));
     const msg = data.choices[0].message;
     const content = (msg.content ?? '').trim() || (msg.reasoning_content ?? '').trim();
     res.json({ content });
