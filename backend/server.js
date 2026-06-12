@@ -71,7 +71,9 @@ app.post('/api/ai', async (req, res) => {
       });
     }
 
-    res.json({ content: data.choices[0].message.content });
+    const msg = data.choices[0].message;
+    const content = (msg.content ?? '').trim() || (msg.reasoning_content ?? '').trim();
+    res.json({ content });
 
   } catch (e) {
     clearTimeout(timer);

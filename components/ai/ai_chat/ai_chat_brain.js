@@ -19,10 +19,10 @@ function measureWeight(text) {
 }
 
 const MAX_TOKENS = {
-  micro:    120,
-  brief:    260,
-  normal:   520,
-  detailed: 900,
+  micro:    400,   // reasoning model needs headroom even for short replies
+  brief:    600,
+  normal:   900,
+  detailed: 1400,
 };
 
 const LENGTH_DIRECTIVE = {
