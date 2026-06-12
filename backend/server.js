@@ -7,7 +7,7 @@ const PORT = process.env.PORT ?? 3001;
 
 // 魔芋AI — OpenAI-compatible endpoint
 const MOYU_URL = 'https://www.moyu.info/v1/chat/completions';
-const MODEL    = 'deepseek-reasoner';
+const MODEL    = 'deepseek-chat';
 
 const POLAR_BEAR_SYSTEM = `You are Polar Bear (小梦), the AI assistant built into Dreaming Polar (极梦) — an interactive mathematics and Python learning platform. You help students learn math, generate Python code for visualization and computation, explain errors, and answer questions about mathematics. You are friendly, encouraging, and precise. When asked to generate code, return ONLY the Python code with no markdown fences and no explanation unless the user asks for one.`;
 
