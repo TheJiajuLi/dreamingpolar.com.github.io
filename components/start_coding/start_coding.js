@@ -7,7 +7,16 @@ function setupStartCodingBtn() {
   btn.id = 'start-coding-btn';
   btn.title = 'Open code editor';
   btn.setAttribute('aria-label', 'Toggle code editor');
-  btn.innerHTML = `<img src="${window.BASE}/assets/icons/start_coding/start_coding.svg" alt="" class="start-coding-icon" aria-hidden="true">`;
+  btn.innerHTML = `
+    <svg class="start-coding-icon" xmlns="http://www.w3.org/2000/svg"
+         width="20" height="20" viewBox="0 0 20 20"
+         fill="none" stroke="currentColor"
+         stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <path d="M7 5.5L2.5 10 7 14.5"/>
+      <path d="M13 5.5L17.5 10 13 14.5"/>
+      <line x1="11.5" y1="4.5" x2="8.5" y2="15.5"/>
+    </svg>`;
 
   const fsBtn = header.querySelector('.dp-fullscreen-btn');
   if (fsBtn) {
@@ -48,4 +57,23 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupStartCodingBtn);
 } else {
   setupStartCodingBtn();
+}
+
+// Inject @property only after Pyodide is ready so it doesn't run during load
+function injectCometProperty() {
+  if (document.getElementById('sc-property')) return;
+  const s = document.createElement('style');
+  s.id = 'sc-property';
+  s.textContent = `@property --sc-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}`;
+  document.head.appendChild(s);
+}
+
+if (document.body.classList.contains('dp-ready')) {
+  injectCometProperty();
+} else {
+  document.body.addEventListener('dp-ready-event', injectCometProperty, { once: true });
 }

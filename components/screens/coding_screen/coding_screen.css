@@ -91,3 +91,17 @@
 
 [data-theme="grey"] .coding-screen-header  { border-bottom-color: rgba(255, 255, 255, 0.06); }
 
+
+/* ── Chat-mode placeholder (shown when mode = ai_chat) ───── */
+.cds-chat-placeholder {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  color: var(--text-muted, #94a3b8);
+  user-select: none;
+}
+.cds-chat-placeholder-icon { font-size: 2rem; }
+.cds-chat-placeholder-text { font-size: 0.82rem; font-style: italic; }

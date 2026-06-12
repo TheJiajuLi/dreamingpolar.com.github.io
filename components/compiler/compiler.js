@@ -60,6 +60,8 @@ _mpl.rcParams['font.family'] = 'Noto Sans SC'
 
     _dispatch('ready', 'Python ready');
     _pyodide = py;
+    document.body.classList.add('dp-ready');
+    document.body.dispatchEvent(new Event('dp-ready-event'));
     return py;
   })();
 

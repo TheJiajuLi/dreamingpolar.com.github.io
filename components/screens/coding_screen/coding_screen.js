@@ -172,14 +172,24 @@ function setupCodingScreen() {
   const runAllSlot = document.getElementById('cds-runall-slot');
   initNotebook(notebookView, runAllSlot);
 
+  // ── Chat-mode placeholder ─────────────────────────────
+  const chatPlaceholder = document.createElement('div');
+  chatPlaceholder.className = 'cds-chat-placeholder';
+  chatPlaceholder.innerHTML =
+    '<span class="cds-chat-placeholder-icon">💬</span>' +
+    '<span class="cds-chat-placeholder-text">Chat 模式 — 小梦在右侧面板等你~</span>';
+  document.getElementById('coding-screen-body').appendChild(chatPlaceholder);
+
   // ── Switch between views ──────────────────────────────
   function applyMode(mode) {
     const isCustomise = mode === 'customise';
-    singleView.style.display        = isCustomise ? 'none'  : 'flex';
-    notebookView.style.display      = isCustomise ? 'flex'  : 'none';
-    runAllSlot.style.display        = isCustomise ? 'flex'  : 'none';
-    clearCellsBtn.style.display     = isCustomise ? ''      : 'none';
-    editor.placeholder = PLACEHOLDERS[mode] ?? PLACEHOLDERS.python;
+    const isChat      = mode === 'ai_chat';
+    singleView.style.display        = (isCustomise || isChat) ? 'none'  : 'flex';
+    notebookView.style.display      = isCustomise             ? 'flex'  : 'none';
+    runAllSlot.style.display        = isCustomise             ? 'flex'  : 'none';
+    clearCellsBtn.style.display     = isCustomise             ? ''      : 'none';
+    chatPlaceholder.style.display   = isChat                  ? 'flex'  : 'none';
+    if (!isChat) editor.placeholder = PLACEHOLDERS[mode] ?? PLACEHOLDERS.python;
   }
 
   applyMode(getCurrentMode());
@@ -233,8 +243,11 @@ function setupCodingScreen() {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
   });
 
-  // Handle ai-insert-and-run events from terminal and header AI button
+  // Handle ai-insert-and-run for single-cell modes only
   document.addEventListener('ai-insert-and-run', ({ detail: { code } }) => {
+    const m = getCurrentMode();
+    if (m === 'customise') return; // notebook handles its own
+    if (m === 'ai_chat')   return; // chat screen handles its own
     editor.value = code;
     localStorage.setItem(CODE_KEY, code);
     editor.dispatchEvent(new Event('input'));

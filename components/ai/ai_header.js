@@ -1,5 +1,6 @@
-import { ask, SYSTEM_PYTHON, SYSTEM_LATEX, SYSTEM_MATHJAX, SYSTEM_MARKDOWN } from './ai_client.js';
+import { ask, SYSTEM_PYTHON, SYSTEM_BY_MODE } from './ai_client.js';
 import { getCurrentMode, setMode } from '../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
+import { detectLang } from './input_filter/input_filter.js';
 
 const SUGGESTIONS = [
   'Plot a sine wave from 0 to 2π',
@@ -111,34 +112,39 @@ function setup() {
     chip.addEventListener('click', () => fillInput(chip.dataset.value));
   });
 
-  function detectMode(prompt) {
-    const low = prompt.toLowerCase();
-    if (/\blatex\b/.test(low))                                      return 'latex';
-    if (/\bmathjax\b|公式|formula|方程式|equation|数学表达式/.test(low)) return 'mathjax';
-    if (/\bmarkdown\b|readme/.test(low))                            return 'markdown';
-    if (/python|plot|图表|图像|画图|代码|程序|编程/.test(low))           return 'python';
-    return getCurrentMode?.() ?? 'python';
-  }
-
   async function generate() {
     const prompt = input.value.trim();
     if (!prompt) return;
+
+    const currentMode = getCurrentMode?.() ?? 'python';
+    let   targetLang  = detectLang(prompt, currentMode);
+
+    // In customise notebook, prompts with no explicit language keyword still
+    // intend code generation (e.g. "draw a heart curve") — default to python.
+    if (targetLang === 'ai_chat' && currentMode === 'customise') targetLang = 'python';
+
+    // ── Conversational → route to chat screen, skip code generation ──────
+    if (targetLang === 'ai_chat') {
+      document.dispatchEvent(new CustomEvent('ai-chat-send', { detail: { text: prompt } }));
+      close();
+      return;
+    }
+
+    // ── Engineering → generate code and send to compiler ─────────────────
     btn.disabled    = true;
     submit.disabled = true;
     submit.textContent = '…';
 
     try {
-      const targetMode = detectMode(prompt);
-      const SYSTEM_MAP = {
-        python:   SYSTEM_PYTHON,
-        latex:    SYSTEM_LATEX,
-        mathjax:  SYSTEM_MATHJAX,
-        markdown: SYSTEM_MARKDOWN,
-      };
-      const system = SYSTEM_MAP[targetMode] ?? SYSTEM_PYTHON;
-      const code = await ask(prompt, system);
-      setMode(targetMode);   // switch the tab BEFORE inserting
-      document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code } }));
+      const system = SYSTEM_BY_MODE[targetLang] ?? SYSTEM_PYTHON;
+      const code   = await ask(prompt, system);
+
+      if (currentMode === 'customise') {
+        document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code, lang: targetLang } }));
+      } else {
+        setMode(targetLang);
+        document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code } }));
+      }
       close();
     } catch (e) {
       submit.textContent = 'Error';

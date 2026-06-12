@@ -275,31 +275,58 @@ code, pre           { font-size: var(--font-sz-code, 0.84rem); }
 [data-theme="aurora"] .sc-btn:hover { background: rgba(192,132,252,0.1); color: #c084fc; }
 
 /* ── .start-coding-btn — per-theme glow vars ─────────────── */
+
+/* Light: sky blue — crisp on white header */
+[data-theme="light"] {
+  --sc-glow:   rgba(56, 189, 248, 1);
+  --sc-glow-a: rgba(56, 189, 248, 0.45);
+  --sc-glow-b: rgba(56, 189, 248, 0.16);
+  --sc-glow-c: rgba(56, 189, 248, 0.06);
+}
+
+/* Dark: GitHub green */
 [data-theme="dark"] {
-  --sc-glow:   rgba(63,185,80, 1);
-  --sc-glow-a: rgba(63,185,80, 0.6);
-  --sc-glow-b: rgba(63,185,80, 0.22);
-  --sc-glow-c: rgba(63,185,80, 0.08);
+  --sc-glow:   rgba(63, 185, 80, 1);
+  --sc-glow-a: rgba(63, 185, 80, 0.6);
+  --sc-glow-b: rgba(63, 185, 80, 0.22);
+  --sc-glow-c: rgba(63, 185, 80, 0.08);
 }
+
+/* Grey: sage green */
 [data-theme="grey"] {
-  --sc-glow:   rgba(87,171,90, 1);
-  --sc-glow-a: rgba(87,171,90, 0.6);
-  --sc-glow-b: rgba(87,171,90, 0.22);
-  --sc-glow-c: rgba(87,171,90, 0.08);
+  --sc-glow:   rgba(87, 171, 90, 1);
+  --sc-glow-a: rgba(87, 171, 90, 0.6);
+  --sc-glow-b: rgba(87, 171, 90, 0.22);
+  --sc-glow-c: rgba(87, 171, 90, 0.08);
 }
+
+/* Aurora: lavender purple */
 [data-theme="aurora"] {
-  --sc-glow:   rgba(192,132,252, 1);
-  --sc-glow-a: rgba(192,132,252, 0.6);
-  --sc-glow-b: rgba(192,132,252, 0.24);
-  --sc-glow-c: rgba(192,132,252, 0.09);
+  --sc-glow:   rgba(192, 132, 252, 1);
+  --sc-glow-a: rgba(192, 132, 252, 0.6);
+  --sc-glow-b: rgba(192, 132, 252, 0.24);
+  --sc-glow-c: rgba(192, 132, 252, 0.09);
 }
 
-/* Icon colour on dark backgrounds */
-[data-theme="dark"]   .start-coding-icon,
-[data-theme="grey"]   .start-coding-icon,
-[data-theme="aurora"] .start-coding-icon { filter: invert(0.88) brightness(0.9); }
+/* Icon colour — inherits via currentColor from .start-coding-btn */
+[data-theme="light"]  .start-coding-btn { color: rgba(14, 165, 233, 0.65); }
+[data-theme="dark"]   .start-coding-btn { color: rgba(63, 185, 80,  0.65); }
+[data-theme="grey"]   .start-coding-btn { color: rgba(87, 171, 90,  0.65); }
+[data-theme="aurora"] .start-coding-btn { color: rgba(192,132,252,  0.65); }
 
-/* Active icon glow — override the generic animation filter */
+/* Brighten icon on hover */
+[data-theme="light"]  .start-coding-btn:hover { color: rgba(14, 165, 233, 1); }
+[data-theme="dark"]   .start-coding-btn:hover { color: rgba(63, 185, 80,  1); }
+[data-theme="grey"]   .start-coding-btn:hover { color: rgba(87, 171, 90,  1); }
+[data-theme="aurora"] .start-coding-btn:hover { color: rgba(192,132,252,  1); }
+
+/* Active icon: full colour + pulsing glow */
+[data-theme="light"]  .start-coding-btn.active { color: rgba(14, 165, 233, 1); }
+[data-theme="dark"]   .start-coding-btn.active { color: rgba(63, 185, 80,  1); }
+[data-theme="grey"]   .start-coding-btn.active { color: rgba(87, 171, 90,  1); }
+[data-theme="aurora"] .start-coding-btn.active { color: rgba(192,132,252,  1); }
+
+[data-theme="light"]  .start-coding-btn.active .start-coding-icon,
 [data-theme="dark"]   .start-coding-btn.active .start-coding-icon,
 [data-theme="grey"]   .start-coding-btn.active .start-coding-icon,
 [data-theme="aurora"] .start-coding-btn.active .start-coding-icon {

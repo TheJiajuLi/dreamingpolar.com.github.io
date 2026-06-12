@@ -2,41 +2,30 @@ const PROXY_URL = window.location.hostname === 'localhost' || window.location.ho
   ? 'http://localhost:3001/api/ai'
   : 'https://dreamingpolar-com.onrender.com/api/ai';
 
-// Default system identity — proxy also uses this as fallback
-export const SYSTEM_DEFAULT = `You are Polar Bear (小梦), the AI assistant built into Dreaming Polar (极梦) — an interactive mathematics and Python learning platform. Be helpful, concise, and encouraging.`;
+// All personas live in ai_personalities.js — edit there for prompt engineering.
+export {
+  SYSTEM_DEFAULT,
+  SYSTEM_PYTHON,
+  SYSTEM_EXPLAIN,
+  SYSTEM_TERMINAL,
+  SYSTEM_CONTENT,
+  SYSTEM_LATEX,
+  SYSTEM_MATHJAX,
+  SYSTEM_MARKDOWN,
+  SYSTEM_BY_MODE,
+  systemExplainForLang,
+} from './ai_personalities.js';
 
-// Specialised system prompts used by each integration point
-export const SYSTEM_PYTHON = `You are Polar Bear (小梦), the Python code assistant inside Dreaming Polar. Available libraries: numpy, matplotlib, sympy, scipy, pandas. Generate clean, working Python code. Return ONLY the Python code — no explanation, no markdown fences.`;
-
-export const SYSTEM_EXPLAIN = `You are Polar Bear (小梦), a friendly coding assistant inside Dreaming Polar. The user encountered an error or issue with their code. Explain what went wrong in 2–3 sentences and suggest one specific fix. Be concise and encouraging. Respond in the same language the user used (Chinese or English).`;
-
-export function systemExplainForLang(lang) {
-  const hints = {
-    python:   'Python (available: numpy, matplotlib, sympy, scipy, pandas)',
-    latex:    'LaTeX (rendered via KaTeX/MathJax)',
-    mathjax:  'MathJax/LaTeX math expressions',
-    markdown: 'Markdown',
-  };
-  const langHint = hints[lang?.toLowerCase()] ?? lang ?? 'code';
-  return `You are Polar Bear (小梦), a friendly coding assistant inside Dreaming Polar. The user wrote ${langHint} and encountered an issue. Explain what went wrong in 2–3 sentences and suggest one specific fix. Be concise and encouraging. Respond in the same language the user used (Chinese or English).`;
+function stripFences(raw) {
+  return raw.replace(/^```[a-zA-Z]*\r?\n?/, '').replace(/\r?\n?```\s*$/, '').trim();
 }
-
-export const SYSTEM_TERMINAL = `You are Polar Bear (小梦) inside the Dreaming Polar terminal. The user will describe a mathematical or computational task. Generate self-contained Python code using numpy, matplotlib, and sympy as needed. The code will execute immediately. Return ONLY the Python code — no fences, no explanation.`;
-
-export const SYSTEM_CONTENT = `You are Polar Bear (小梦), the content assistant inside Dreaming Polar. Help the user understand mathematics, create outlines, explain concepts, and answer questions about math topics. Respond in the same language the user uses (Chinese or English).`;
-
-export const SYSTEM_LATEX = `You are Polar Bear (小梦). The user wants a LaTeX document. Return ONLY valid LaTeX — a complete \\documentclass…\\end{document} document, no explanation, no markdown fences.`;
-
-export const SYSTEM_MATHJAX = `You are Polar Bear (小梦) inside Dreaming Polar. The user wants a math expression rendered with MathJax. Return ONLY the raw LaTeX math — no $$, no \\[\\], no explanation, no fences. Example output: \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}`;
-
-export const SYSTEM_MARKDOWN = `You are Polar Bear (小梦) inside Dreaming Polar. The user wants Markdown content. Return ONLY valid Markdown — no surrounding explanation, no triple-backtick wrapper around the whole response.`;
 
 /**
  * Send a message to Polar Bear.
  * @param {string} userMessage
  * @param {string} [systemPrompt] — override system prompt
  * @param {number} [maxTokens]
- * @returns {Promise<string>} — AI response text
+ * @returns {Promise<string>} — AI response text (code fences stripped)
  */
 export async function ask(userMessage, systemPrompt = SYSTEM_DEFAULT, maxTokens = 1024) {
   let res;
@@ -60,7 +49,7 @@ export async function ask(userMessage, systemPrompt = SYSTEM_DEFAULT, maxTokens 
   }
 
   const { content } = await res.json();
-  return content;
+  return stripFences(content);
 }
 
 /**

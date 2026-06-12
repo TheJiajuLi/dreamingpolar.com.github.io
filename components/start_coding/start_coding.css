@@ -1,10 +1,12 @@
-/* ── Start Coding Button — Futuristic Edition ───────────── */
+/* ── Start Coding Button ─────────────────────────────────── */
 :root {
-  --sc-glow: rgba(99, 102, 241, 1);
-  --sc-glow-a: rgba(99, 102, 241, 0.55);
-  --sc-glow-b: rgba(99, 102, 241, 0.18);
-  --sc-glow-c: rgba(99, 102, 241, 0.07);
+  --sc-glow:   rgba(56, 189, 248, 1);
+  --sc-glow-a: rgba(56, 189, 248, 0.45);
+  --sc-glow-b: rgba(56, 189, 248, 0.16);
+  --sc-glow-c: rgba(56, 189, 248, 0.06);
 }
+
+/* @property --sc-angle is injected by start_coding.js after dp-ready */
 
 .start-coding-btn {
   display: inline-flex;
@@ -20,20 +22,41 @@
   position: relative;
   background: transparent;
   overflow: visible;
-  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, color 0.3s;
 }
 
-/* ── Outer pulse ring ───────────────────────────────────── */
+/* ── Comet layer — gradient clipped to border-width zone ─── */
+/* Only the travelling light point moves; the border shape is still. */
 .start-coding-btn::before {
   content: '';
   position: absolute;
-  inset: -5px;
-  border-radius: 12px;
-  border: 1.5px solid var(--sc-glow-a);
+  inset: -2px;
+  padding: 1.5px;          /* border thickness */
+  border-radius: 10px;
+  background: conic-gradient(
+    from var(--sc-angle),
+    transparent      0%,
+    var(--sc-glow-c) 4%,
+    var(--sc-glow-b) 9%,
+    var(--sc-glow-a) 13%,
+    var(--sc-glow)   14%,
+    var(--sc-glow-a) 15%,
+    var(--sc-glow-b) 19%,
+    var(--sc-glow-c) 24%,
+    transparent      28%,
+    transparent      100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
   opacity: 0;
-  transform: scale(0.8);
   pointer-events: none;
-  transition: opacity 0.25s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 0.35s;
 }
 
 /* ── Shimmer sweep ──────────────────────────────────────── */
@@ -45,7 +68,7 @@
   background: linear-gradient(
     108deg,
     transparent 35%,
-    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.14) 50%,
     transparent 65%
   );
   background-size: 220% 100%;
@@ -53,18 +76,15 @@
   pointer-events: none;
 }
 
-/* ── Hover state ────────────────────────────────────────── */
+/* ── Hover ──────────────────────────────────────────────── */
 .start-coding-btn:hover {
-  border-color: var(--sc-glow-a);
+  border-color: var(--sc-glow-b);
   background: var(--sc-glow-c);
-  box-shadow:
-    0 0 6px var(--sc-glow-b),
-    0 0 14px var(--sc-glow-c);
+  box-shadow: 0 0 8px var(--sc-glow-b), 0 0 18px var(--sc-glow-c);
 }
 
-.start-coding-btn:hover::before {
-  opacity: 1;
-  transform: scale(1);
+.start-coding-btn:not(.active):hover::before {
+  opacity: 0.3;
 }
 
 .start-coding-btn:hover::after {
@@ -72,36 +92,34 @@
 }
 
 .start-coding-btn:hover .start-coding-icon {
-  transform: scale(1.12);
+  transform: scale(1.1);
 }
 
 /* ── Active (coding screen open) ───────────────────────── */
+/* Breathing atmospheric glow — the ambient star-feel */
 .start-coding-btn.active {
-  border-color: var(--sc-glow-a);
+  border-color: var(--sc-glow-b);
   background: var(--sc-glow-c);
-  box-shadow:
-    0 0 8px  var(--sc-glow-b),
-    0 0 18px var(--sc-glow-c),
-    inset 0 0 6px var(--sc-glow-c);
+  animation: sc-breathe 3s ease-in-out infinite;
 }
 
-.start-coding-btn.active::before {
-  opacity: 0.6;
-  transform: scale(1);
-  animation: sc-pulse 2.4s ease-in-out infinite;
+/* Comet only starts after Pyodide is ready — avoids GPU load during init */
+body.dp-ready .start-coding-btn.active::before {
+  opacity: 1;
+  animation: sc-comet 3s linear infinite;
 }
 
 .start-coding-btn.active .start-coding-icon {
-  animation: sc-icon-glow 2s ease-in-out infinite alternate;
+  animation: sc-icon-glow 2.5s ease-in-out infinite alternate;
 }
 
-/* ── Icon base ──────────────────────────────────────────── */
+/* ── Icon ────────────────────────────────────────────────── */
 .start-coding-icon {
   width: 20px;
   height: 20px;
   display: block;
-  object-fit: contain;
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s;
+  flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s;
 }
 
 /* ── Animations ─────────────────────────────────────────── */
@@ -110,14 +128,32 @@
   to   { background-position: -220% 0; }
 }
 
-@keyframes sc-pulse {
-  0%, 100% { opacity: 0.55; transform: scale(1);    }
-  50%       { opacity: 0.12; transform: scale(1.25); }
+/* Comet: only the start angle advances — border stays perfectly still */
+@keyframes sc-comet {
+  to { --sc-angle: 360deg; }
 }
 
+/* Atmospheric glow: multi-layer box-shadow breathes softly */
+@keyframes sc-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0  4px var(--sc-glow-b),
+      0 0 12px var(--sc-glow-b),
+      0 0 24px var(--sc-glow-c);
+  }
+  50% {
+    box-shadow:
+      0 0  7px var(--sc-glow-a),
+      0 0 18px var(--sc-glow-b),
+      0 0 38px var(--sc-glow-b),
+      0 0 56px var(--sc-glow-c);
+  }
+}
+
+/* Icon glow breathes in sync with the aura */
 @keyframes sc-icon-glow {
-  from { filter: drop-shadow(0 0 3px var(--sc-glow-b)); }
-  to   { filter: drop-shadow(0 0 7px var(--sc-glow-a)); }
+  from { filter: drop-shadow(0 0 2px var(--sc-glow-b)); }
+  to   { filter: drop-shadow(0 0 6px var(--sc-glow-a)); }
 }
 
 /* Theme overrides live in theme_controller.css */

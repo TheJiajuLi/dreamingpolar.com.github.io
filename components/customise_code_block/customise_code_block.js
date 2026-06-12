@@ -4,6 +4,7 @@ import { isEnabled as icmEnabled, onChange as icmOnChange, mount as mountICM } f
 import { create as createSyntaxHL } from '../screens/coding_screen/coding_screen_python/python_syntax_highlight/python_syntax_highlight.js';
 import { create as createTextHL }   from '../screens/coding_screen/coding_screen_python/python_text_highlight/python_text_highlight.js';
 import { create as createCompletion } from '../screens/coding_screen/coding_screen_python/python_code-completion/python_code_completion.js';
+import { getCurrentMode } from '../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
 
 const ICON_COPY  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const ICON_CHECK = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -314,6 +315,13 @@ export function init(container, externalTopbar) {
 
   attachNotebookHooks({ runAllBtn, statusBar, runAll, getCells, autoResize, saveAll });
 
+  // When AI generates code while the Customise tab is active, the notebook
+  // owns this event — no other component needs to know about it.
+  document.addEventListener('ai-insert-and-run', ({ detail: { code, lang } }) => {
+    if (getCurrentMode() !== 'customise') return;
+    addImportedCell(lang ?? 'python', code, { autoRun: true });
+  });
+
   container.appendChild(nb);
 
   requestIdleCallback
@@ -325,7 +333,7 @@ export function getCellOrder() {
   return _cells.map(c => c.id);
 }
 
-export function addImportedCell(lang, code) {
+export function addImportedCell(lang, code, { autoRun = false } = {}) {
   if (!_cellsEl) return;
   const cell = makeCell(lang, code, uid());
   _cells.push(cell);
@@ -344,6 +352,7 @@ export function addImportedCell(lang, code) {
     requestAnimationFrame(() => {
       cell._icmSync?.();
       cell.el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (autoRun) cell.el.querySelector('.nb-run')?.click();
     });
   });
 }
