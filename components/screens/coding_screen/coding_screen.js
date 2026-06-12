@@ -225,7 +225,7 @@ function setupCodingScreen() {
     runBtn.disabled = true;
     const outputs = await compile(code, mode);
     runBtn.disabled = false;
-    document.dispatchEvent(new CustomEvent('compile-result', { detail: { outputs } }));
+    document.dispatchEvent(new CustomEvent('compile-result', { detail: { outputs, sourceCode: code, sourceLang: mode } }));
   }
 
   runBtn.addEventListener('click', run);

@@ -275,3 +275,27 @@ body.dp-fullscreen .nav-sidebar {
   opacity: 0;
   pointer-events: none;
 }
+
+/* ── Fullscreen: float exit button at top-center ─────────── */
+body.dp-fullscreen .dp-fullscreen-btn {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 9998;
+  opacity: 0.28;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+  transition: opacity 0.2s, background 0.2s, transform 0.18s;
+}
+body.dp-fullscreen .dp-fullscreen-btn:hover {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.62) !important;
+  color: #fff !important;
+  transform: translateX(-50%) scale(1.1);
+}

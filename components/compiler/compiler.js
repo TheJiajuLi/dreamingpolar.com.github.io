@@ -43,6 +43,21 @@ async function _getPyodide() {
 
     await py.runPythonAsync(`import matplotlib; matplotlib.use('agg')`);
 
+    // Load a CJK font via JS fetch → Pyodide FS so matplotlib can render Chinese text
+    try {
+      const fontResp = await fetch(`${window.BASE || ''}/assets/fonts/NotoSansSC-Regular.ttf`);
+      if (fontResp.ok) {
+        const buf = await fontResp.arrayBuffer();
+        py.FS.writeFile('/tmp/NotoSansSC.ttf', new Uint8Array(buf));
+        await py.runPythonAsync(`
+import matplotlib.font_manager as _fm
+_fm.fontManager.addfont('/tmp/NotoSansSC.ttf')
+import matplotlib as _mpl
+_mpl.rcParams['font.family'] = 'Noto Sans SC'
+`);
+      }
+    } catch (_) {}
+
     _dispatch('ready', 'Python ready');
     _pyodide = py;
     return py;
@@ -95,8 +110,12 @@ try:
                     from sympy import latex as _ltx, Basic as _SB
                     if isinstance(_v, _SB):
                         _rich.append({'type': 'latex', 'content': _ltx(_v)})
+                    elif isinstance(_v, (list, tuple, set)) and _v and all(isinstance(i, _SB) for i in _v):
+                        _rich.append({'type': 'latex', 'content': _ltx(list(_v))})
+                    else:
+                        _out.write(repr(_v))
                 except ImportError:
-                    pass
+                    _out.write(repr(_v))
     except Exception:
         pass
 
@@ -113,6 +132,8 @@ async function _runPython(code) {
   try {
     _dispatch('running', 'Running…');
     const py  = await _getPyodide();
+    // Auto-load any Pyodide-supported packages the user imports (e.g. scipy)
+    await py.loadPackagesFromImports(code, { messageCallback: () => {} });
     py.globals.set('_user_code', code);
     const raw = await py.runPythonAsync(RUNNER);
     const d   = JSON.parse(raw);

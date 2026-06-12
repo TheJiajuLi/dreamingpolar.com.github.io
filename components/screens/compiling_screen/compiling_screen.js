@@ -1,8 +1,31 @@
 import { createSourceWidget } from '../../look_up_source/look_up_source.js';
-import { renderBlocks } from './compiling_screen_utility.js';
+import { renderBlocks, escHtml } from './compiling_screen_utility.js';
 import { persistOutputs, recoverOutputs, wipeOutputs } from './compiling_screen_hook.js';
 import { getCellOrder } from '../../customise_code_block/customise_code_block.js';
-import { ask, SYSTEM_EXPLAIN } from '../../ai/ai_client.js';
+import { ask, systemExplainForLang } from '../../ai/ai_client.js';
+
+function parseAIResponse(text) {
+  const blocks = [];
+  // Split on ```lang\ncode\n``` fences
+  const parts = text.split(/(```[\w]*\n[\s\S]*?```)/g);
+  for (const part of parts) {
+    const fenceMatch = part.match(/^```([\w]*)\n([\s\S]*?)```$/);
+    if (fenceMatch) {
+      const lang = fenceMatch[1].toLowerCase();
+      const code = fenceMatch[2].trimEnd();
+      if (lang === 'latex' || lang === 'mathjax') {
+        blocks.push({ type: 'latex', content: code });
+      } else {
+        blocks.push({ type: 'text', content: code });
+      }
+    } else if (part.trim()) {
+      // Plain prose — may contain inline LaTeX; output as html with escaping
+      const html = escHtml(part.trim()).replace(/\n/g, '<br>');
+      blocks.push({ type: 'html', content: `<span class="ai-prose">${html}</span>` });
+    }
+  }
+  return blocks.length ? blocks : [{ type: 'html', content: `<span class="ai-prose">${escHtml(text).replace(/\n/g,'<br>')}</span>` }];
+}
 
 // ── Per-cell section map ──────────────────────────────
 // cellId → { sectionEl, labelEl, bodyEl, outputs, sourceWidget }
@@ -201,12 +224,16 @@ export function setupCompilingScreen() {
         btn.textContent = '小梦 thinking…';
         try {
           const context = sec.sourceCode
-            ? `Code:\n${sec.sourceCode}\n\nError:\n${errorText}`
+            ? `Code (${sec.sourceLang ?? 'unknown'}):\n${sec.sourceCode}\n\nError:\n${errorText}`
             : errorText;
-          const explanation = await ask(context, SYSTEM_EXPLAIN, 512);
+          const explanation = await ask(context, systemExplainForLang(sec.sourceLang), 512);
           const explDiv = document.createElement('div');
           explDiv.className = 'output-ai-explanation';
-          explDiv.innerHTML = `<div class="ai-explanation-label">✨ 小梦 says</div>${explanation.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}`;
+          explDiv.innerHTML = `<div class="ai-explanation-label">✨ 小梦 says</div>`;
+          const bodyEl = document.createElement('div');
+          bodyEl.className = 'ai-explanation-body';
+          renderBlocks(parseAIResponse(explanation), bodyEl);
+          explDiv.appendChild(bodyEl);
           block.appendChild(explDiv);
           btn.remove();
         } catch (e) {

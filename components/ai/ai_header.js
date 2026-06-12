@@ -1,5 +1,5 @@
-import { ask, SYSTEM_PYTHON, SYSTEM_LATEX } from './ai_client.js';
-import { getCurrentMode } from '../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
+import { ask, SYSTEM_PYTHON, SYSTEM_LATEX, SYSTEM_MATHJAX, SYSTEM_MARKDOWN } from './ai_client.js';
+import { getCurrentMode, setMode } from '../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
 
 const SUGGESTIONS = [
   'Plot a sine wave from 0 to 2π',
@@ -111,6 +111,15 @@ function setup() {
     chip.addEventListener('click', () => fillInput(chip.dataset.value));
   });
 
+  function detectMode(prompt) {
+    const low = prompt.toLowerCase();
+    if (/\blatex\b/.test(low))                                      return 'latex';
+    if (/\bmathjax\b|公式|formula|方程式|equation|数学表达式/.test(low)) return 'mathjax';
+    if (/\bmarkdown\b|readme/.test(low))                            return 'markdown';
+    if (/python|plot|图表|图像|画图|代码|程序|编程/.test(low))           return 'python';
+    return getCurrentMode?.() ?? 'python';
+  }
+
   async function generate() {
     const prompt = input.value.trim();
     if (!prompt) return;
@@ -119,9 +128,16 @@ function setup() {
     submit.textContent = '…';
 
     try {
-      const mode   = getCurrentMode?.() ?? 'python';
-      const system = mode === 'latex' ? SYSTEM_LATEX : SYSTEM_PYTHON;
-      const code   = await ask(prompt, system);
+      const targetMode = detectMode(prompt);
+      const SYSTEM_MAP = {
+        python:   SYSTEM_PYTHON,
+        latex:    SYSTEM_LATEX,
+        mathjax:  SYSTEM_MATHJAX,
+        markdown: SYSTEM_MARKDOWN,
+      };
+      const system = SYSTEM_MAP[targetMode] ?? SYSTEM_PYTHON;
+      const code = await ask(prompt, system);
+      setMode(targetMode);   // switch the tab BEFORE inserting
       document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code } }));
       close();
     } catch (e) {

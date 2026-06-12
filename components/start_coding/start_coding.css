@@ -1,37 +1,123 @@
+/* ── Start Coding Button — Futuristic Edition ───────────── */
+:root {
+  --sc-glow: rgba(99, 102, 241, 1);
+  --sc-glow-a: rgba(99, 102, 241, 0.55);
+  --sc-glow-b: rgba(99, 102, 241, 0.18);
+  --sc-glow-c: rgba(99, 102, 241, 0.07);
+}
+
 .start-coding-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: transparent;
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  transition: background 0.15s, box-shadow 0.15s;
   position: relative;
+  background: transparent;
+  overflow: visible;
+  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
 }
 
+/* ── Outer pulse ring ───────────────────────────────────── */
+.start-coding-btn::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 12px;
+  border: 1.5px solid var(--sc-glow-a);
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Shimmer sweep ──────────────────────────────────────── */
+.start-coding-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 7px;
+  background: linear-gradient(
+    108deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 65%
+  );
+  background-size: 220% 100%;
+  background-position: 220% 0;
+  pointer-events: none;
+}
+
+/* ── Hover state ────────────────────────────────────────── */
+.start-coding-btn:hover {
+  border-color: var(--sc-glow-a);
+  background: var(--sc-glow-c);
+  box-shadow:
+    0 0 6px var(--sc-glow-b),
+    0 0 14px var(--sc-glow-c);
+}
+
+.start-coding-btn:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.start-coding-btn:hover::after {
+  animation: sc-shimmer 0.55s ease forwards;
+}
+
+.start-coding-btn:hover .start-coding-icon {
+  transform: scale(1.12);
+}
+
+/* ── Active (coding screen open) ───────────────────────── */
+.start-coding-btn.active {
+  border-color: var(--sc-glow-a);
+  background: var(--sc-glow-c);
+  box-shadow:
+    0 0 8px  var(--sc-glow-b),
+    0 0 18px var(--sc-glow-c),
+    inset 0 0 6px var(--sc-glow-c);
+}
+
+.start-coding-btn.active::before {
+  opacity: 0.6;
+  transform: scale(1);
+  animation: sc-pulse 2.4s ease-in-out infinite;
+}
+
+.start-coding-btn.active .start-coding-icon {
+  animation: sc-icon-glow 2s ease-in-out infinite alternate;
+}
+
+/* ── Icon base ──────────────────────────────────────────── */
 .start-coding-icon {
   width: 20px;
   height: 20px;
   display: block;
   object-fit: contain;
-  transition: opacity 0.15s, filter 0.15s;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s;
 }
 
-.start-coding-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes sc-shimmer {
+  from { background-position:  220% 0; }
+  to   { background-position: -220% 0; }
 }
 
-.start-coding-btn.active {
-  background: transparent;
+@keyframes sc-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1);    }
+  50%       { opacity: 0.12; transform: scale(1.25); }
 }
 
-.start-coding-btn.active .start-coding-icon {
-  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5));
+@keyframes sc-icon-glow {
+  from { filter: drop-shadow(0 0 3px var(--sc-glow-b)); }
+  to   { filter: drop-shadow(0 0 7px var(--sc-glow-a)); }
 }
 
 /* Theme overrides live in theme_controller.css */

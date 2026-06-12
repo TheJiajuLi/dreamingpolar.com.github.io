@@ -4,6 +4,13 @@ export function escHtml(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function looksLikeLatex(s) {
+  if (!s || s.length > 500) return false;
+  const t = s.trim();
+  if (/^(\$\$|\\begin\{|\\\[|\\\()/.test(t)) return true;
+  return /\\(frac|sqrt|sum|int|prod|lim|alpha|beta|gamma|delta|sigma|mu|pi|tau|theta|phi|psi|omega|partial|nabla|infty|cdot|times|text|mathbb|mathbf|mathrm)\b/.test(t);
+}
+
 export function renderBlocks(outputs, container, { onAskAI } = {}) {
   const mathBlocks = [];
 
@@ -12,9 +19,18 @@ export function renderBlocks(outputs, container, { onAskAI } = {}) {
     block.className = 'output-block';
 
     switch (o.type) {
-      case 'text':
-        block.innerHTML = `<pre class="output-text">${escHtml(o.content)}</pre>`;
+      case 'text': {
+        const t = o.content.trim();
+        if (looksLikeLatex(t)) {
+          block.className += ' output-latex';
+          const wrapped = /^(\\\[|\\\(|\$\$|\\begin\{)/.test(t) ? t : `\\[${t}\\]`;
+          block.textContent = wrapped;
+          mathBlocks.push(block);
+        } else {
+          block.innerHTML = `<pre class="output-text">${escHtml(o.content)}</pre>`;
+        }
         break;
+      }
       case 'error': {
         block.innerHTML = `<pre class="output-error">${escHtml(o.content)}</pre>`;
         if (onAskAI) {

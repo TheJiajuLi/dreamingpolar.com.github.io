@@ -16,6 +16,16 @@ let _currentMode = (MODES.some(m => m.id === _saved) ? _saved : 'python');
 
 export function getCurrentMode() { return _currentMode; }
 
+export function setMode(id) {
+  if (!MODES.some(m => m.id === id) || id === _currentMode) return;
+  _currentMode = id;
+  localStorage.setItem(MODE_KEY, _currentMode);
+  document.querySelector('.compiler-mode-switcher')
+    ?.querySelectorAll('.mode-btn')
+    .forEach(b => b.classList.toggle('active', b.dataset.mode === id));
+  document.dispatchEvent(new CustomEvent('compiler-mode-change', { detail: { mode: id } }));
+}
+
 export function mountModeSwitcher(container) {
   const pill = document.createElement('div');
   pill.className = 'compiler-mode-switcher';
