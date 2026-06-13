@@ -6,7 +6,7 @@ function setupHeroLoader() {
 
   const loader = document.createElement('div');
   loader.className = 'hero-loader';
-  loader.innerHTML = `<img src="${window.BASE}/assets/home_page/imgs/content_loading.png" alt="" class="hero-loader-splash" width="543" height="460">`;
+  loader.innerHTML = `<img src="${window.BASE}/assets/home_page/imgs/dp_logo.png" alt="" class="hero-loader-splash" width="543" height="160">`;
   hero.appendChild(loader);
 
   function dismiss() {

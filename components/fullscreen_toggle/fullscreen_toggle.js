@@ -54,9 +54,8 @@ function setFullscreen(on) {
 
 // ── Mount into header ────────────────────────────────────
 function mount() {
-  const header    = document.querySelector('.page-header');
-  const themeCtrl = header?.querySelector('.theme-controller');
-  if (!header || !themeCtrl) return;
+  const header = document.querySelector('.page-header');
+  if (!header) return;
 
   _btn = document.createElement('button');
   _btn.className = 'dp-fullscreen-btn';
@@ -65,7 +64,14 @@ function mount() {
   _btn.innerHTML = SVG_EXPAND;
   _btn.addEventListener('click', () => setFullscreen(!_active));
 
-  header.insertBefore(_btn, themeCtrl);
+  // mob-hdr-btns-wrapper wraps theme/lang/font on mobile — insert before it.
+  // Fall back to appending if the wrapper isn't present.
+  const anchor = header.querySelector('.mob-hdr-btns-wrapper');
+  if (anchor) {
+    header.insertBefore(_btn, anchor);
+  } else {
+    header.appendChild(_btn);
+  }
 }
 
 function setup() {
