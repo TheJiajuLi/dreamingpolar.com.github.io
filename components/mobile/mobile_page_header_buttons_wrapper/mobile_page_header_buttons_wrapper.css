@@ -1,0 +1,189 @@
+/* ── Mobile Header Buttons Wrapper ────────────────────────────────────────── */
+/* Groups theme / language / font controls behind a grid-trigger on mobile.  */
+/* On desktop the trigger is hidden and the row is always visible.           */
+
+.mob-hdr-btns-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── Desktop: trigger hidden, dropdown always visible as inline row ───────── */
+.mob-hdr-btns-trigger {
+  display: none;
+}
+
+.mob-hdr-btns-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mob-hdr-btn-cell {
+  display: contents; /* cells are transparent on desktop */
+}
+
+.mob-hdr-btn-label {
+  display: none;     /* labels only appear inside the mobile panel */
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* ── Trigger button ──── */
+  .mob-hdr-btns-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid rgba(34, 211, 238, 0.30);
+    background: rgba(12, 22, 44, 0.55);
+    color: #7dd3f0;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, border-color 0.2s, box-shadow 0.2s, color 0.15s;
+    flex-shrink: 0;
+  }
+
+  .mob-hdr-btns-trigger:active {
+    background: rgba(34, 211, 238, 0.14);
+    transform: scale(0.93);
+  }
+
+  .mob-hdr-btns-wrapper.open .mob-hdr-btns-trigger {
+    background: rgba(34, 211, 238, 0.10);
+    border-color: rgba(34, 211, 238, 0.65);
+    color: #22d3ee;
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.28);
+  }
+
+  /* ── Dropdown panel ──── */
+  .mob-hdr-btns-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 300;
+
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    padding: 14px 10px 10px;
+
+    background: rgba(7, 12, 26, 0.96);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    border-radius: 14px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(34, 211, 238, 0.07) inset,
+      0 0 28px rgba(34, 211, 238, 0.05);
+
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.96);
+    transform-origin: top right;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mob-hdr-btns-wrapper.open .mob-hdr-btns-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Thin separator between cells */
+  .mob-hdr-btn-cell + .mob-hdr-btn-cell {
+    border-left: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  /* ── Each button cell ──── */
+  .mob-hdr-btn-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 0 14px;
+  }
+
+  .mob-hdr-btn-label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(34, 211, 238, 0.55);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  /* ── Override button colours for the dark panel ──── */
+  .mob-hdr-btns-dropdown .theme-controller {
+    margin-left: 0; /* theme_controller.css sets margin-left:auto as a header fallback */
+  }
+
+  .mob-hdr-btns-dropdown .theme-controller,
+  .mob-hdr-btns-dropdown .lang-btn,
+  .mob-hdr-btns-dropdown .font-switcher-btn {
+    color: #a8c8e0;
+    background: transparent;
+    border-radius: 8px;
+    margin: 0;
+  }
+
+  .mob-hdr-btns-dropdown .theme-controller:hover,
+  .mob-hdr-btns-dropdown .lang-btn:hover,
+  .mob-hdr-btns-dropdown .font-switcher-btn:hover,
+  .mob-hdr-btns-dropdown .lang-btn.open {
+    background: rgba(34, 211, 238, 0.10);
+    color: #22d3ee;
+  }
+
+  .mob-hdr-btns-dropdown .theme-controller:active,
+  .mob-hdr-btns-dropdown .lang-btn:active,
+  .mob-hdr-btns-dropdown .font-switcher-btn:active {
+    background: rgba(34, 211, 238, 0.16);
+    transform: scale(0.91);
+  }
+
+  /* Language sub-dropdown: dark to match the panel */
+  .mob-hdr-btns-dropdown .lang-dropdown {
+    background: rgba(9, 15, 32, 0.98);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 211, 238, 0.06);
+    border-radius: 10px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% + 8px);
+  }
+
+  .mob-hdr-btns-dropdown .lang-option {
+    color: #a8c8e0;
+  }
+
+  .mob-hdr-btns-dropdown .lang-option:hover {
+    background: rgba(34, 211, 238, 0.10);
+    color: #22d3ee;
+  }
+
+  .mob-hdr-btns-dropdown .lang-option.active {
+    background: rgba(34, 211, 238, 0.12);
+    color: #22d3ee;
+  }
+
+  .mob-hdr-btns-dropdown .lang-option-short {
+    color: rgba(34, 211, 238, 0.6);
+  }
+
+  .mob-hdr-btns-dropdown .lang-option.active .lang-option-short {
+    color: #22d3ee;
+  }
+}
