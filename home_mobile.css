@@ -152,25 +152,14 @@
   [data-theme="grey"]   .mob-tab.active { color: #57ab5a; }
   [data-theme="aurora"] .mob-tab.active { color: #c084fc; }
 
-  /* ── AI button in tab bar: blend with other tabs ─────────── */
-  .mob-tab-bar .ai-header-btn {
-    flex: 1;
-    width: auto;
-    height: 100%;
-    border-radius: 0;
-    border: none;
-    background: transparent !important;
-    box-shadow: none !important;
-    animation: none !important;
-    padding: 0;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+  /* ── AI icon in tab bar ─────────────────────────────────── */
+  .mob-tab-icon .ai-header-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    object-fit: contain;
+    display: block;
   }
-  /* hide the comet-border ::before — it renders as a square outline in the bar */
-  .mob-tab-bar .ai-header-btn::before { display: none !important; }
-  /* active: scale the icon like the other tab icons do */
-  .mob-tab-bar .ai-header-btn.active .ai-header-icon {
-    transform: scale(1.18) translateY(-1px);
+  [data-theme="aurora"] .mob-tab.active .ai-header-icon {
     filter: drop-shadow(0 0 6px rgba(192,132,252,0.7));
   }
 

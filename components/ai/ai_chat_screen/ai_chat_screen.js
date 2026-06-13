@@ -140,7 +140,8 @@ function setupAiChatScreen() {
     const replyInner  = replyBubble.querySelector('.aic-bubble-inner');
     const textNode    = document.createElement('span');
     const cursor      = document.createElement('span');
-    cursor.className  = 'aic-cursor';
+    cursor.className  = 'aic-typing';
+    cursor.innerHTML  = '<i></i><i></i><i></i>';
     replyInner.append(textNode, cursor);
     messagesEl.appendChild(replyBubble);
     scrollBottom();

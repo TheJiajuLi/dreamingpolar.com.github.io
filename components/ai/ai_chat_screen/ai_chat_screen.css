@@ -156,22 +156,41 @@
   color: #f87171;
 }
 
-/* ── Typewriter cursor ───────────────────────────────────────────────────── */
+/* ── Typing indicator (three-dot wave + shimmer) ─────────────────────────── */
 
-.aic-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 0.85em;
-  background: var(--text-muted, #94a3b8);
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  border-radius: 1px;
-  animation: aic-blink 0.65s step-end infinite;
+.aic-typing {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 6px;
 }
 
-@keyframes aic-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+.aic-typing i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  font-style: normal;
+  animation:
+    aic-wave    0.9s ease-in-out infinite,
+    aic-shimmer 2.7s ease-in-out infinite;
+}
+
+/* stagger wave + colour independently so all 3 dots are always different colours */
+.aic-typing i:nth-child(2) { animation-delay: 0.15s, -0.9s; }
+.aic-typing i:nth-child(3) { animation-delay: 0.30s, -1.8s; }
+
+@keyframes aic-wave {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.65; }
+  30%           { transform: translateY(-5px); opacity: 1;   }
+}
+
+@keyframes aic-shimmer {
+  0%   { background: #818cf8; box-shadow: 0 0 6px rgba(99,102,241,0.75); }
+  33%  { background: #22d3ee; box-shadow: 0 0 7px rgba(34,211,238,0.80); }
+  66%  { background: #e879f9; box-shadow: 0 0 7px rgba(232,121,249,0.75); }
+  100% { background: #818cf8; box-shadow: 0 0 6px rgba(99,102,241,0.75); }
 }
 
 /* ── Input bar ───────────────────────────────────────────────────────────── */
@@ -248,8 +267,6 @@
   background-size: 100% 100%, 300% 100%;
 }
 
-[data-theme="dark"]  .aic-cursor,
-[data-theme="grey"]  .aic-cursor { background: rgba(99,102,241,0.8); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    AURORA OVERRIDES
@@ -294,7 +311,6 @@
   border-color: transparent;
 }
 
-[data-theme="aurora"] .aic-cursor { background: rgba(192,132,252,0.9); }
 
 [data-theme="aurora"] .aic-bubble--error .aic-bubble-inner {
   background: rgba(239,68,68,0.08);

@@ -38,15 +38,13 @@ function init() {
 
   const tabEls = TABS.map(({ id, icon, label }, i) => {
     let btn;
+    btn = document.createElement('button');
     if (id === 'ai-chat') {
-      btn = document.createElement('button');
-      btn.className = 'ai-header-btn';
+      btn.className = 'mob-tab';
       btn.id        = 'ai-header-btn';
-      btn.title     = 'Open AI chat';
-      btn.setAttribute('aria-label', 'Toggle AI chat');
-      btn.innerHTML = `<img src="/assets/buttons/ai.png" alt="AI" class="ai-header-icon">`;
+      btn.setAttribute('aria-label', 'AI Chat');
+      btn.innerHTML = `<span class="mob-tab-icon"><img src="/assets/buttons/ai.png" alt="" class="ai-header-icon"></span><span>AI Chat</span>`;
     } else {
-      btn = document.createElement('button');
       btn.className = 'mob-tab' + (i === 0 ? ' active' : '');
       btn.setAttribute('aria-label', label);
       btn.innerHTML = `<span class="mob-tab-icon">${icon}</span><span>${label}</span>`;
