@@ -154,39 +154,7 @@
 }
 
 
-/* ── AI Header Dialog ─────────────────────────────────────── */
-.ai-header-dialog {
-  display: none;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -21px);
-  flex-direction: column;
-  min-width: 340px;
-  max-width: 420px;
-  border-radius: 14px;
-  z-index: 50;
-  overflow: hidden;
-
-  background:
-    linear-gradient(var(--ai-dialog-bg, rgba(255,255,255,0.96)) 0 100%) padding-box,
-    linear-gradient(90deg, #16a34a 0%, #7c3aed 40%, #06b6d4 70%, #16a34a 100%) border-box;
-  background-size: 100% 100%, 300% 100%;
-  border: 1.5px solid transparent;
-
-  backdrop-filter: blur(18px) saturate(170%);
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-.ai-header-dialog.visible {
-  display: flex;
-  animation:
-    ai-dialog-in  0.28s cubic-bezier(0.34,1.56,0.64,1) forwards,
-    ai-border-flow 4s ease infinite,
-    ai-glow-pulse  3s ease-in-out infinite;
-}
-
-/* ── Main input row ───────────────────────────────────────── */
+/* ── AI chat input row (used inside ai-chat-screen) ──────── */
 .ai-dialog-main {
   display: flex;
   align-items: center;
@@ -195,45 +163,6 @@
   height: 42px;
 }
 
-/* ── Chips row — hidden until dialog hover ────────────────── */
-.ai-chips-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 0 10px;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  border-top: 1px solid transparent;
-  transition: max-height 0.22s ease, opacity 0.18s ease, padding 0.22s ease, border-color 0.18s ease;
-}
-
-.ai-header-dialog:hover .ai-chips-row {
-  max-height: 120px;
-  opacity: 1;
-  padding: 7px 10px 9px;
-  border-top-color: rgba(128,128,128,0.12);
-}
-
-.ai-chip {
-  padding: 3px 11px;
-  border-radius: 20px;
-  border: 1px solid var(--border, #e2e8f0);
-  background: transparent;
-  color: var(--text-muted, #64748b);
-  font-size: 0.71rem;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.13s, border-color 0.13s, color 0.13s;
-}
-.ai-chip:hover {
-  background: rgba(22,163,74,0.07);
-  border-color: #16a34a;
-  color: #16a34a;
-}
-
-/* ── Input wrapper + ghost text ───────────────────────────── */
 .ai-input-wrap {
   flex: 1;
   min-width: 0;
@@ -243,27 +172,7 @@
   overflow: hidden;
 }
 
-.ai-ghost-overlay {
-  position: absolute;
-  inset: 0;
-  padding: 0 8px;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  font-size: 0.83rem;
-  letter-spacing: 0.01em;
-  font-family: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.ai-ghost-typed { color: transparent; white-space: pre; }
-.ai-ghost-rest  { color: var(--text-muted, #94a3b8); opacity: 0.5; white-space: pre; }
-
 .ai-header-input {
-  position: relative;
-  z-index: 1;
   width: 100%;
   height: 28px;
   padding: 0 8px;
@@ -299,7 +208,7 @@
   box-shadow: 0 4px 18px rgba(14,165,233,0.45), 0 0 24px rgba(22,163,74,0.25);
   transform: translateY(-1px);
 }
-.ai-header-submit:active  { transform: translateY(0); box-shadow: none; }
+.ai-header-submit:active   { transform: translateY(0); box-shadow: none; }
 .ai-header-submit:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
 
 .ai-header-cancel {
@@ -398,12 +307,6 @@
   box-shadow: 0 0 8px rgba(100,116,139,0.15);
 }
 
-
-/* ── Dark / Grey / Aurora theme overrides ─────────────────── */
-[data-theme="dark"]   { --ai-dialog-bg: rgba(13,17,23,0.94); }
-[data-theme="grey"]   { --ai-dialog-bg: rgba(22,27,34,0.94); }
-[data-theme="aurora"] { --ai-dialog-bg: rgba(7,7,26,0.94);   }
-
 /* ── Dark theme icon — invert to white + green glow ─────── */
 [data-theme="dark"] .ai-header-icon {
   animation: ai-icon-breathe-dark 3.2s ease-in-out infinite;
@@ -489,12 +392,6 @@
   100% { filter: brightness(0) invert(1) sepia(1) saturate(2.5) hue-rotate(230deg) drop-shadow(0 0 10px rgba(192,132,252,1));  opacity: 1; }
 }
 
-[data-theme="aurora"] .ai-header-dialog.visible {
-  background:
-    linear-gradient(var(--ai-dialog-bg) 0 100%) padding-box,
-    linear-gradient(90deg, #c084fc 0%, #6366f1 40%, #06b6d4 70%, #c084fc 100%) border-box;
-  background-size: 100% 100%, 300% 100%;
-}
 [data-theme="aurora"] .ai-header-submit {
   background: linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
   box-shadow: 0 2px 10px rgba(192,132,252,0.4);

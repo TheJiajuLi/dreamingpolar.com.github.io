@@ -47,24 +47,30 @@ function setupAiChatScreen() {
       <div class="aic-token-row">
         每日额度剩余：<span id="aic-tokens">—</span> tokens
       </div>
-      <div class="aic-input-row">
-        <textarea
-          id="aic-textarea"
-          class="aic-textarea"
-          rows="2"
-          placeholder="和小梦聊聊… (Enter 发送，Shift+Enter 换行)"
-          spellcheck="false"
-          autocomplete="off"
-        ></textarea>
-        <button class="aic-send-btn" id="aic-send">→</button>
+      <div class="aic-dialog-wrap">
+        <div class="ai-dialog-main">
+          <div class="ai-input-wrap">
+            <input
+              id="aic-input"
+              class="ai-header-input"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="和小梦聊聊… (Enter 发送，Shift+Enter 换行)"
+            >
+          </div>
+          <button class="ai-header-submit" id="aic-send">go</button>
+          <button class="ai-header-cancel" id="aic-cancel-input">✕</button>
+        </div>
       </div>
     </div>
   `;
 
-  const messagesEl  = document.getElementById('aic-messages');
-  const textarea    = document.getElementById('aic-textarea');
-  const sendBtn     = document.getElementById('aic-send');
-  const clearBtn    = document.getElementById('aic-clear-btn');
+  const messagesEl    = document.getElementById('aic-messages');
+  const inputEl       = document.getElementById('aic-input');
+  const sendBtn       = document.getElementById('aic-send');
+  const cancelInputBtn = document.getElementById('aic-cancel-input');
+  const clearBtn      = document.getElementById('aic-clear-btn');
   const maxBtn      = document.getElementById('aic-max-btn');
   const minBtn      = document.getElementById('aic-min-btn');
   const tokensEl    = document.getElementById('aic-tokens');
@@ -125,7 +131,7 @@ function setupAiChatScreen() {
   async function doSend(text) {
     text = text.trim();
     if (!text) return;
-    textarea.value = '';
+    inputEl.value = '';
     sendBtn.disabled = true;
     sendBtn.textContent = '…';
 
@@ -188,12 +194,13 @@ function setupAiChatScreen() {
     refreshTokens();
     scrollBottom();
     sendBtn.disabled = false;
-    sendBtn.textContent = '→';
+    sendBtn.textContent = '->';
   }
 
-  sendBtn.addEventListener('click', () => doSend(textarea.value));
-  textarea.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(textarea.value); }
+  sendBtn.addEventListener('click', () => doSend(inputEl.value));
+  cancelInputBtn.addEventListener('click', () => { inputEl.value = ''; inputEl.focus(); });
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); doSend(inputEl.value); }
   });
 
   clearBtn?.addEventListener('click', () => {
@@ -208,7 +215,7 @@ function setupAiChatScreen() {
     if (mode === 'ai_chat') {
       sc?.close('compiling');
       sc?.open(SCREEN_ID);
-      textarea?.focus();
+      inputEl?.focus();
     } else {
       sc?.close(SCREEN_ID);
       sc?.open('compiling');
