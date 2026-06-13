@@ -111,6 +111,10 @@ function setupNavigationScreen() {
         tree.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         a.classList.add('active');
         window.contentScreen?.renderFromJson(a.dataset.file);
+        if (window.innerWidth <= 768) {
+          close();
+          document.dispatchEvent(new CustomEvent('mob-switch-to-content'));
+        }
       });
     });
 

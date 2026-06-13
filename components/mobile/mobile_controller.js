@@ -79,6 +79,9 @@ function init() {
   /* ── Auto-switch to Output tab when code runs ──────── */
   document.addEventListener('compile-result', () => switchTo(2));
 
+  /* ── Auto-switch to Content tab when a nav item is tapped ── */
+  document.addEventListener('mob-switch-to-content', () => switchTo(0));
+
   /* ── Tear down if resized to desktop ────────────────── */
   window.matchMedia('(max-width: 768px)').addEventListener('change', e => {
     if (!e.matches) {
