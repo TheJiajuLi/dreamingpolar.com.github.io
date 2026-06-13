@@ -19,6 +19,7 @@ function setupHeroLoader() {
     </p>
   `;
   hero.appendChild(loader);
+  document.getElementById('dp-veil')?.remove();
 
   const textEl  = loader.querySelector('.hero-loader-text');
   const labelEl = loader.querySelector('.hl-label');
@@ -34,6 +35,10 @@ function setupHeroLoader() {
       textEl.classList.remove('hl-phase-out');
     }, 180);
   }
+
+  // Show status immediately — don't wait for compiler events.
+  // On mobile, Pyodide can take 30-60 s to signal; users need feedback now.
+  setPhase('Loading', 'loading');
 
   // ── Badge on the </> button ──────────────────────────
   let badge = null;
@@ -82,8 +87,11 @@ function setupHeroLoader() {
     }
   });
 
-  // Fallback: clear if Python never signals ready within 45s
-  const _fallback = setTimeout(dismiss, 45_000);
+  // Fallback: dismiss if compiler never signals ready.
+  // Touch devices get a shorter cap — Pyodide may not load at all on some mobile browsers.
+  const _isTouch   = window.matchMedia('(pointer: coarse)').matches;
+  const _fallbackMs = _isTouch ? 12_000 : 45_000;
+  const _fallback   = setTimeout(dismiss, _fallbackMs);
   document.addEventListener('compiler-status', ({ detail }) => {
     if (detail.status === 'ready') clearTimeout(_fallback);
   }, { once: true });

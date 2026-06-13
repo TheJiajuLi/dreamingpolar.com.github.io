@@ -35,9 +35,24 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     window.BASE = window.location.hostname === 'thejiajuli.github.io' ? '/dreamingpolar.com' : '';
+    // Sync: apply saved theme before first paint so the veil matches the user's palette.
+    // Runs during HTML parse — before any element is rendered.
+    try { var _t = localStorage.getItem('theme'); if (_t) document.documentElement.setAttribute('data-theme', _t); } catch (_) {}
   </script>
+  <style>
+    /* Full-viewport veil — appears before any JS runs. hero_loader.js removes it. */
+    #dp-veil {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #f3f5f8;          /* light default */
+    }
+    [data-theme="dark"]   #dp-veil { background: #0d1117; }
+    [data-theme="grey"]   #dp-veil { background: #22272e; }
+    [data-theme="aurora"] #dp-veil { background: #07071a; }
+  </style>
 </head>
 <body>
+
+  <div id="dp-veil"></div>
 
   <header class="page-header">
     <button id="menu-button" class="menu-button" aria-label="Open navigation" aria-expanded="false">
