@@ -131,24 +131,32 @@
 
   .mob-hdr-btns-dropdown .theme-controller,
   .mob-hdr-btns-dropdown .lang-btn,
-  .mob-hdr-btns-dropdown .font-switcher-btn {
+  .mob-hdr-btns-dropdown .font-switcher-btn,
+  .mob-hdr-btns-dropdown .mob-hdr-terminal-btn {
     color: #a8c8e0;
     background: transparent;
+    border: none;
     border-radius: 8px;
+    box-shadow: none;
     margin: 0;
+    padding: 6px 10px;
+    height: auto;
   }
 
   .mob-hdr-btns-dropdown .theme-controller:hover,
   .mob-hdr-btns-dropdown .lang-btn:hover,
   .mob-hdr-btns-dropdown .font-switcher-btn:hover,
-  .mob-hdr-btns-dropdown .lang-btn.open {
+  .mob-hdr-btns-dropdown .mob-hdr-terminal-btn:hover,
+  .mob-hdr-btns-dropdown .lang-btn.open,
+  .mob-hdr-btns-dropdown .mob-hdr-terminal-btn.active {
     background: rgba(34, 211, 238, 0.10);
     color: #22d3ee;
   }
 
   .mob-hdr-btns-dropdown .theme-controller:active,
   .mob-hdr-btns-dropdown .lang-btn:active,
-  .mob-hdr-btns-dropdown .font-switcher-btn:active {
+  .mob-hdr-btns-dropdown .font-switcher-btn:active,
+  .mob-hdr-btns-dropdown .mob-hdr-terminal-btn:active {
     background: rgba(34, 211, 238, 0.16);
     transform: scale(0.91);
   }

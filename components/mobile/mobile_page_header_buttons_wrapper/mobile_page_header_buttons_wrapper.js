@@ -16,6 +16,8 @@ const GRID_ICON = `<svg width="15" height="15" viewBox="0 0 15 15" fill="current
   <rect x="10.5" y="10.5" width="4" height="4" rx="1"/>
 </svg>`;
 
+const ICON_TERMINAL = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`;
+
 function setupMobHeaderWrapper() {
   const header = document.querySelector('header.page-header');
   if (!header) return;
@@ -39,11 +41,31 @@ function setupMobHeaderWrapper() {
   dropdown.className = 'mob-hdr-btns-dropdown';
   dropdown.setAttribute('aria-hidden', 'true');
 
+  // ── Terminal cell (mobile only) ───────────────────────────────────────────
+  const termBtn = document.createElement('button');
+  termBtn.className = 'dp-terminal-toolbar-btn mob-hdr-terminal-btn';
+  termBtn.setAttribute('aria-label', '终端');
+  termBtn.innerHTML = ICON_TERMINAL;
+  termBtn.addEventListener('click', () => {
+    const state = window.screenController?.getState('terminal');
+    if (state === 'closed' || !state) {
+      window.screenController?.open('terminal');
+    } else {
+      window.screenController?.close('terminal');
+    }
+    close();
+  });
+
+  // Sync active state when terminal opens/closes
+  document.addEventListener('screen-opened',  ({ detail }) => { if (detail?.id === 'terminal') termBtn.classList.add('active');    });
+  document.addEventListener('screen-closed',  ({ detail }) => { if (detail?.id === 'terminal') termBtn.classList.remove('active'); });
+
   // Wrap each button in a labelled cell
   const CELL_DEFS = [
     { el: themeBtn, label: '主题' },
     { el: langWrap, label: '语言' },
     { el: fontBtn,  label: '字体' },
+    { el: termBtn,  label: '终端' },
   ];
 
   CELL_DEFS.forEach(({ el, label }) => {
