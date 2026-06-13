@@ -308,6 +308,18 @@ export function init(container, externalTopbar) {
   // initial ICM activation after DOM is mounted
   requestAnimationFrame(() => _cells.forEach(c => c._icmSync?.()));
 
+  // On mobile the coding screen starts as display:none, so scrollHeight=0
+  // during rebuildCells and cells stay at min-height. Re-run autoResize
+  // whenever the container width changes (hidden→visible, or viewport resize).
+  let _cellsWidth = 0;
+  new ResizeObserver(() => {
+    const w = cellsEl.offsetWidth;
+    if (w !== _cellsWidth) {
+      _cellsWidth = w;
+      requestAnimationFrame(() => _cells.forEach(c => autoResize(c.editor)));
+    }
+  }).observe(cellsEl);
+
   const statusBar = document.createElement('div');
   statusBar.className = 'compiler-status-bar';
   statusBar.textContent = 'Idle — Python loads on first run.';
