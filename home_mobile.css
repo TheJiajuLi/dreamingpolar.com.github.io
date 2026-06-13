@@ -69,6 +69,13 @@
   #aic-max-btn,
   #aic-min-btn { display: none !important; }
 
+  /* ── Prevent iOS auto-zoom when focusing the code editor ── */
+  /* iOS zooms in whenever a focused input has font-size < 16px.
+     Setting exactly 16px stops the zoom without disabling user pinch-zoom. */
+  .code-editor {
+    font-size: 16px;
+  }
+
   /* ── Make coding toolbar touch-friendly on iOS ─────────── */
   /* touch-action prevents 300ms delay; cursor:pointer is required
      by iOS Safari to propagate touch events through overflow:hidden ancestors */
