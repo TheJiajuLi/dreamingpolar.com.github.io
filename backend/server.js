@@ -18,6 +18,7 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3000',
   'https://dreamingpolar.com',
   'https://www.dreamingpolar.com',
+  'https://api.dreamingpolar.com',
   /^https:\/\/thejiajuli\.github\.io$/,
   /^https:\/\/.*\.onrender\.com$/,
 ];

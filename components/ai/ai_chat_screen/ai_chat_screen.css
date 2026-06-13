@@ -133,9 +133,9 @@
 }
 
 .aic-bubble--error .aic-bubble-inner {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
 /* ── Typewriter cursor ──────────────────────────────────────────────────────── */

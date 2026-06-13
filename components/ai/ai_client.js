@@ -1,6 +1,10 @@
-const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const _isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const PROXY_URL = _isLocal
   ? 'http://localhost:3001/api/ai'
-  : 'https://dp-ai-proxy.onrender.com/api/ai'; // rename Render service to match
+  : 'https://api.dreamingpolar.com/api/ai';
+const _NETWORK_ERR = _isLocal
+  ? 'Cannot reach Polar Bear proxy. Is the backend running? (cd backend && npm start)'
+  : '小梦暂时离线，请稍后再试 🌙';
 
 // All personas live in ai_without_personalities.js — edit there for prompt engineering.
 export {
@@ -41,7 +45,7 @@ export async function ask(userMessage, systemPrompt = SYSTEM_DEFAULT, maxTokens 
       }),
     });
   } catch {
-    throw new Error('Cannot reach Polar Bear proxy. Is the backend running? (cd backend && npm start)');
+    throw new Error(_NETWORK_ERR);
   }
 
   if (!res.ok) {
@@ -71,7 +75,7 @@ export async function chat(messages, systemPrompt = SYSTEM_DEFAULT, maxTokens = 
       }),
     });
   } catch {
-    throw new Error('Cannot reach Polar Bear proxy. Is the backend running? (cd backend && npm start)');
+    throw new Error(_NETWORK_ERR);
   }
 
   if (!res.ok) {
@@ -104,7 +108,7 @@ export async function* streamChat(messages, systemPrompt = SYSTEM_DEFAULT, maxTo
       }),
     });
   } catch {
-    throw new Error('Cannot reach Polar Bear proxy. Is the backend running? (cd backend && npm start)');
+    throw new Error(_NETWORK_ERR);
   }
 
   if (!res.ok) {
