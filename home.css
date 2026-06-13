@@ -343,13 +343,6 @@ body.dp-fullscreen .dp-fullscreen-btn:hover {
    FUTURISTIC PANEL SYSTEM — dark / grey / aurora themes
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Dot grid on the main app area */
-[data-theme="dark"]   main.hero,
-[data-theme="grey"]   main.hero,
-[data-theme="aurora"] main.hero {
-  background-image: radial-gradient(circle, rgba(99,102,241,0.09) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
 
 /* Panel borders: subtle neon glow */
 [data-theme="dark"]   .hero-screen { border-right-color: rgba(99,102,241,0.14); }

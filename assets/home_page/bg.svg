@@ -1,0 +1,104 @@
+<svg viewBox="0 0 1440 810" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#050d1a"/>
+      <stop offset="45%"  stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#0d2137"/>
+    </linearGradient>
+    <radialGradient id="g1" cx="80%" cy="20%" r="50%">
+      <stop offset="0%"   stop-color="#00ff9d" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#00ff9d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="15%" cy="85%" r="45%">
+      <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g3" cx="50%" cy="50%" r="40%">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.5"/></filter>
+  </defs>
+
+  <rect width="1440" height="810" fill="url(#bg)"/>
+  <rect width="1440" height="810" fill="url(#g1)"/>
+  <rect width="1440" height="810" fill="url(#g2)"/>
+  <rect width="1440" height="810" fill="url(#g3)"/>
+
+  <!-- Aurora streaks -->
+  <ellipse cx="1100" cy="80"  rx="400" ry="60" fill="#00ff9d" opacity="0.05" transform="rotate(-8 1100 80)"/>
+  <ellipse cx="900"  cy="60"  rx="300" ry="40" fill="#3b82f6" opacity="0.05" transform="rotate(-5 900 60)"/>
+  <ellipse cx="300"  cy="730" rx="350" ry="50" fill="#7c3aed" opacity="0.04" transform="rotate(6 300 730)"/>
+
+  <!-- Constellation lines -->
+  <g stroke="#3b82f6" stroke-width="0.6" opacity="0.1">
+    <line x1="200"  y1="150" x2="450"  y2="300"/>
+    <line x1="450"  y1="300" x2="700"  y2="200"/>
+    <line x1="700"  y1="200" x2="900"  y2="400"/>
+    <line x1="900"  y1="400" x2="1100" y2="250"/>
+    <line x1="1100" y1="250" x2="1300" y2="450"/>
+    <line x1="200"  y1="150" x2="100"  y2="400"/>
+    <line x1="100"  y1="400" x2="300"  y2="600"/>
+    <line x1="300"  y1="600" x2="600"  y2="500"/>
+    <line x1="600"  y1="500" x2="900"  y2="600"/>
+    <line x1="900"  y1="600" x2="1200" y2="650"/>
+    <line x1="450"  y1="300" x2="300"  y2="600"/>
+    <line x1="700"  y1="200" x2="600"  y2="500"/>
+    <line x1="1100" y1="250" x2="1200" y2="650"/>
+    <line x1="1300" y1="450" x2="1200" y2="650"/>
+  </g>
+
+  <!-- Constellation nodes -->
+  <g fill="#60a5fa" opacity="0.25">
+    <circle cx="200"  cy="150" r="3"/>
+    <circle cx="450"  cy="300" r="2"/>
+    <circle cx="700"  cy="200" r="3"/>
+    <circle cx="900"  cy="400" r="2"/>
+    <circle cx="1100" cy="250" r="3"/>
+    <circle cx="1300" cy="450" r="2"/>
+    <circle cx="100"  cy="400" r="2"/>
+    <circle cx="300"  cy="600" r="3"/>
+    <circle cx="600"  cy="500" r="2"/>
+    <circle cx="900"  cy="600" r="3"/>
+    <circle cx="1200" cy="650" r="2"/>
+  </g>
+
+  <!-- Math formulas -->
+  <g font-family="Georgia,serif" fill="#4a9eff" opacity="0.1" filter="url(#soft)">
+    <text x="80"   y="200" font-size="22">∇²ψ + k²ψ = 0</text>
+    <text x="1100" y="150" font-size="18">e^(iπ) + 1 = 0</text>
+    <text x="920"  y="320" font-size="15">∫₋∞^∞ e^(-x²) dx = √π</text>
+    <text x="60"   y="480" font-size="20">f(x) = Σ aₙxⁿ</text>
+    <text x="1050" y="560" font-size="16">∂²u/∂t² = c²∇²u</text>
+    <text x="280"  y="690" font-size="14">P(A|B) = P(B|A)·P(A) / P(B)</text>
+    <text x="720"  y="730" font-size="19">λ = h / mv</text>
+    <text x="1180" y="710" font-size="13">det(A) = Σ(-1)^(i+j) aᵢⱼ Mᵢⱼ</text>
+  </g>
+
+  <!-- Code snippets -->
+  <g font-family="'Courier New',monospace" opacity="0.09" filter="url(#soft)">
+    <text x="900"  y="195" font-size="13" fill="#00ff9d">import numpy as np</text>
+    <text x="900"  y="213" font-size="13" fill="#82aaff">def gradient(f, x):</text>
+    <text x="916"  y="231" font-size="13" fill="#c3e88d">    return np.grad(f(x))</text>
+    <text x="100"  y="600" font-size="13" fill="#00ff9d">for x in range(∞):</text>
+    <text x="116"  y="618" font-size="13" fill="#f78c6c">    dream(x)</text>
+    <text x="530"  y="138" font-size="13" fill="#c792ea">class PolarDream:</text>
+    <text x="546"  y="156" font-size="13" fill="#82aaff">    def __init__(self):</text>
+    <text x="562"  y="174" font-size="13" fill="#c3e88d">        self.limit = ∞</text>
+  </g>
+
+  <!-- Dot grid -->
+  <g fill="#5a9abf" opacity="0.12">
+    <circle r="1" cx="36" cy="36"/><circle r="1" cx="108" cy="36"/><circle r="1" cx="180" cy="36"/><circle r="1" cx="252" cy="36"/><circle r="1" cx="324" cy="36"/><circle r="1" cx="396" cy="36"/><circle r="1" cx="468" cy="36"/><circle r="1" cx="540" cy="36"/><circle r="1" cx="612" cy="36"/><circle r="1" cx="684" cy="36"/><circle r="1" cx="756" cy="36"/><circle r="1" cx="828" cy="36"/><circle r="1" cx="900" cy="36"/><circle r="1" cx="972" cy="36"/><circle r="1" cx="1044" cy="36"/><circle r="1" cx="1116" cy="36"/><circle r="1" cx="1188" cy="36"/><circle r="1" cx="1260" cy="36"/><circle r="1" cx="1332" cy="36"/><circle r="1" cx="1404" cy="36"/>
+    <circle r="1" cx="36" cy="108"/><circle r="1" cx="108" cy="108"/><circle r="1" cx="180" cy="108"/><circle r="1" cx="252" cy="108"/><circle r="1" cx="324" cy="108"/><circle r="1" cx="396" cy="108"/><circle r="1" cx="468" cy="108"/><circle r="1" cx="540" cy="108"/><circle r="1" cx="612" cy="108"/><circle r="1" cx="684" cy="108"/><circle r="1" cx="756" cy="108"/><circle r="1" cx="828" cy="108"/><circle r="1" cx="900" cy="108"/><circle r="1" cx="972" cy="108"/><circle r="1" cx="1044" cy="108"/><circle r="1" cx="1116" cy="108"/><circle r="1" cx="1188" cy="108"/><circle r="1" cx="1260" cy="108"/><circle r="1" cx="1332" cy="108"/><circle r="1" cx="1404" cy="108"/>
+    <circle r="1" cx="36" cy="180"/><circle r="1" cx="108" cy="180"/><circle r="1" cx="180" cy="180"/><circle r="1" cx="252" cy="180"/><circle r="1" cx="324" cy="180"/><circle r="1" cx="396" cy="180"/><circle r="1" cx="468" cy="180"/><circle r="1" cx="540" cy="180"/><circle r="1" cx="612" cy="180"/><circle r="1" cx="684" cy="180"/><circle r="1" cx="756" cy="180"/><circle r="1" cx="828" cy="180"/><circle r="1" cx="900" cy="180"/><circle r="1" cx="972" cy="180"/><circle r="1" cx="1044" cy="180"/><circle r="1" cx="1116" cy="180"/><circle r="1" cx="1188" cy="180"/><circle r="1" cx="1260" cy="180"/><circle r="1" cx="1332" cy="180"/><circle r="1" cx="1404" cy="180"/>
+    <circle r="1" cx="36" cy="252"/><circle r="1" cx="108" cy="252"/><circle r="1" cx="180" cy="252"/><circle r="1" cx="252" cy="252"/><circle r="1" cx="324" cy="252"/><circle r="1" cx="396" cy="252"/><circle r="1" cx="468" cy="252"/><circle r="1" cx="540" cy="252"/><circle r="1" cx="612" cy="252"/><circle r="1" cx="684" cy="252"/><circle r="1" cx="756" cy="252"/><circle r="1" cx="828" cy="252"/><circle r="1" cx="900" cy="252"/><circle r="1" cx="972" cy="252"/><circle r="1" cx="1044" cy="252"/><circle r="1" cx="1116" cy="252"/><circle r="1" cx="1188" cy="252"/><circle r="1" cx="1260" cy="252"/><circle r="1" cx="1332" cy="252"/><circle r="1" cx="1404" cy="252"/>
+    <circle r="1" cx="36" cy="324"/><circle r="1" cx="108" cy="324"/><circle r="1" cx="180" cy="324"/><circle r="1" cx="252" cy="324"/><circle r="1" cx="324" cy="324"/><circle r="1" cx="396" cy="324"/><circle r="1" cx="468" cy="324"/><circle r="1" cx="540" cy="324"/><circle r="1" cx="612" cy="324"/><circle r="1" cx="684" cy="324"/><circle r="1" cx="756" cy="324"/><circle r="1" cx="828" cy="324"/><circle r="1" cx="900" cy="324"/><circle r="1" cx="972" cy="324"/><circle r="1" cx="1044" cy="324"/><circle r="1" cx="1116" cy="324"/><circle r="1" cx="1188" cy="324"/><circle r="1" cx="1260" cy="324"/><circle r="1" cx="1332" cy="324"/><circle r="1" cx="1404" cy="324"/>
+    <circle r="1" cx="36" cy="396"/><circle r="1" cx="108" cy="396"/><circle r="1" cx="180" cy="396"/><circle r="1" cx="252" cy="396"/><circle r="1" cx="324" cy="396"/><circle r="1" cx="396" cy="396"/><circle r="1" cx="468" cy="396"/><circle r="1" cx="540" cy="396"/><circle r="1" cx="612" cy="396"/><circle r="1" cx="684" cy="396"/><circle r="1" cx="756" cy="396"/><circle r="1" cx="828" cy="396"/><circle r="1" cx="900" cy="396"/><circle r="1" cx="972" cy="396"/><circle r="1" cx="1044" cy="396"/><circle r="1" cx="1116" cy="396"/><circle r="1" cx="1188" cy="396"/><circle r="1" cx="1260" cy="396"/><circle r="1" cx="1332" cy="396"/><circle r="1" cx="1404" cy="396"/>
+    <circle r="1" cx="36" cy="468"/><circle r="1" cx="108" cy="468"/><circle r="1" cx="180" cy="468"/><circle r="1" cx="252" cy="468"/><circle r="1" cx="324" cy="468"/><circle r="1" cx="396" cy="468"/><circle r="1" cx="468" cy="468"/><circle r="1" cx="540" cy="468"/><circle r="1" cx="612" cy="468"/><circle r="1" cx="684" cy="468"/><circle r="1" cx="756" cy="468"/><circle r="1" cx="828" cy="468"/><circle r="1" cx="900" cy="468"/><circle r="1" cx="972" cy="468"/><circle r="1" cx="1044" cy="468"/><circle r="1" cx="1116" cy="468"/><circle r="1" cx="1188" cy="468"/><circle r="1" cx="1260" cy="468"/><circle r="1" cx="1332" cy="468"/><circle r="1" cx="1404" cy="468"/>
+    <circle r="1" cx="36" cy="540"/><circle r="1" cx="108" cy="540"/><circle r="1" cx="180" cy="540"/><circle r="1" cx="252" cy="540"/><circle r="1" cx="324" cy="540"/><circle r="1" cx="396" cy="540"/><circle r="1" cx="468" cy="540"/><circle r="1" cx="540" cy="540"/><circle r="1" cx="612" cy="540"/><circle r="1" cx="684" cy="540"/><circle r="1" cx="756" cy="540"/><circle r="1" cx="828" cy="540"/><circle r="1" cx="900" cy="540"/><circle r="1" cx="972" cy="540"/><circle r="1" cx="1044" cy="540"/><circle r="1" cx="1116" cy="540"/><circle r="1" cx="1188" cy="540"/><circle r="1" cx="1260" cy="540"/><circle r="1" cx="1332" cy="540"/><circle r="1" cx="1404" cy="540"/>
+    <circle r="1" cx="36" cy="612"/><circle r="1" cx="108" cy="612"/><circle r="1" cx="180" cy="612"/><circle r="1" cx="252" cy="612"/><circle r="1" cx="324" cy="612"/><circle r="1" cx="396" cy="612"/><circle r="1" cx="468" cy="612"/><circle r="1" cx="540" cy="612"/><circle r="1" cx="612" cy="612"/><circle r="1" cx="684" cy="612"/><circle r="1" cx="756" cy="612"/><circle r="1" cx="828" cy="612"/><circle r="1" cx="900" cy="612"/><circle r="1" cx="972" cy="612"/><circle r="1" cx="1044" cy="612"/><circle r="1" cx="1116" cy="612"/><circle r="1" cx="1188" cy="612"/><circle r="1" cx="1260" cy="612"/><circle r="1" cx="1332" cy="612"/><circle r="1" cx="1404" cy="612"/>
+    <circle r="1" cx="36" cy="684"/><circle r="1" cx="108" cy="684"/><circle r="1" cx="180" cy="684"/><circle r="1" cx="252" cy="684"/><circle r="1" cx="324" cy="684"/><circle r="1" cx="396" cy="684"/><circle r="1" cx="468" cy="684"/><circle r="1" cx="540" cy="684"/><circle r="1" cx="612" cy="684"/><circle r="1" cx="684" cy="684"/><circle r="1" cx="756" cy="684"/><circle r="1" cx="828" cy="684"/><circle r="1" cx="900" cy="684"/><circle r="1" cx="972" cy="684"/><circle r="1" cx="1044" cy="684"/><circle r="1" cx="1116" cy="684"/><circle r="1" cx="1188" cy="684"/><circle r="1" cx="1260" cy="684"/><circle r="1" cx="1332" cy="684"/><circle r="1" cx="1404" cy="684"/>
+    <circle r="1" cx="36" cy="756"/><circle r="1" cx="108" cy="756"/><circle r="1" cx="180" cy="756"/><circle r="1" cx="252" cy="756"/><circle r="1" cx="324" cy="756"/><circle r="1" cx="396" cy="756"/><circle r="1" cx="468" cy="756"/><circle r="1" cx="540" cy="756"/><circle r="1" cx="612" cy="756"/><circle r="1" cx="684" cy="756"/><circle r="1" cx="756" cy="756"/><circle r="1" cx="828" cy="756"/><circle r="1" cx="900" cy="756"/><circle r="1" cx="972" cy="756"/><circle r="1" cx="1044" cy="756"/><circle r="1" cx="1116" cy="756"/><circle r="1" cx="1188" cy="756"/><circle r="1" cx="1260" cy="756"/><circle r="1" cx="1332" cy="756"/><circle r="1" cx="1404" cy="756"/>
+  </g>
+</svg>
