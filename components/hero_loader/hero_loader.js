@@ -1,47 +1,44 @@
 function setupHeroLoader() {
-  // Remove the veil unconditionally — must happen before any early return
-  // so the page is never permanently hidden if the loader can't initialize.
   document.getElementById('dp-veil')?.remove();
 
   const hero = document.querySelector('main.hero');
   if (!hero) return;
 
-  // ── Build loader DOM ─────────────────────────────────
   const loader = document.createElement('div');
   loader.className = 'hero-loader';
   loader.innerHTML = `
-    <div class="hero-loader-brand">
-      <span class="hero-loader-brand-word">Dreaming</span>
-      <img src="${window.BASE}/assets/app_logo/dreaming_polar.png" alt="" class="hero-loader-brand-icon">
-      <span class="hero-loader-brand-word">Polar</span>
+    <div class="hl-corner hl-corner--tl"></div>
+    <div class="hl-corner hl-corner--tr"></div>
+    <div class="hl-corner hl-corner--bl"></div>
+    <div class="hl-corner hl-corner--br"></div>
+    <div class="hl-scan"></div>
+    <div class="hl-center">
+      <div class="hl-logo-wrap">
+        <img src="${window.BASE}/assets/app_logo/dreaming_polar.png" alt="" class="hero-loader-brand-icon">
+        <div class="hl-logo-ring"></div>
+      </div>
+      <div class="hl-title">
+        <span class="hl-title-main">Dreaming Polar</span>
+        <span class="hl-title-sub">Python · AI · Research Environment</span>
+      </div>
     </div>
-    <p class="hero-loader-text" data-phase="idle">
-      <span class="hl-label"></span>
-      <span class="hl-dots">
-        <span class="hl-dot">.</span><span class="hl-dot">.</span><span class="hl-dot">.</span>
-      </span>
-    </p>
+    <div class="hl-status-bar">
+      <span class="hl-status-label">READY</span>
+      <div class="hl-status-track">
+        <div class="hl-status-fill" id="hl-fill"></div>
+      </div>
+    </div>
   `;
   hero.appendChild(loader);
 
-  const textEl  = loader.querySelector('.hero-loader-text');
-  const labelEl = loader.querySelector('.hl-label');
+  const statusLabel = loader.querySelector('.hl-status-label');
+  const fillEl      = loader.querySelector('#hl-fill');
 
-  // ── Phase transition (fade out → swap → fade in) ─────
-  let _phaseTimer = null;
-  function setPhase(label, phase) {
-    clearTimeout(_phaseTimer);
-    textEl.classList.add('hl-phase-out');
-    _phaseTimer = setTimeout(() => {
-      labelEl.textContent = label;
-      textEl.dataset.phase = phase;
-      textEl.classList.remove('hl-phase-out');
-    }, 180);
+  function setLabel(text) {
+    statusLabel.textContent = text;
   }
 
-  // Hero is now a brand splash — Pyodide loads on-demand after Start Coding click.
-
-  // ── Badge on the </> button ──────────────────────────
+  // ── Badge on the </> button ──────────────────────────────────────────────
   let badge = null;
 
   function addBadge() {
@@ -57,7 +54,7 @@ function setupHeroLoader() {
     badge = null;
   }
 
-  // ── Dismiss ──────────────────────────────────────────
+  // ── Dismiss ──────────────────────────────────────────────────────────────
   let dismissed = false;
 
   function dismiss() {
@@ -66,35 +63,45 @@ function setupHeroLoader() {
     removeBadge();
     loader.classList.add('hero-loader--out');
     loader.addEventListener('transitionend', () => loader.remove(), { once: true });
-    setTimeout(() => loader.remove(), 700);
+    setTimeout(() => loader.remove(), 1000);
   }
 
-  // ── compiler-status → phase transitions ──────────────
+  // ── compiler-status handler ──────────────────────────────────────────────
   let _seenLoading = false;
   let _dismissTimer = null;
 
   document.addEventListener('compiler-status', ({ detail }) => {
     if (dismissed) return;
 
-    if (detail.status === 'loading' && !_seenLoading) {
-      _seenLoading = true;
-      setPhase('Launching', 'loading');
+    if (detail.status === 'loading') {
+      if (!_seenLoading) {
+        _seenLoading = true;
+        setLabel('INITIALIZING');
+      }
+      if (detail.percent != null) {
+        fillEl.style.width = detail.percent + '%';
+      }
+      if (detail.message) {
+        const short = detail.message.replace(/\(.*?\)/g, '').replace(/…$/, '').trim().toUpperCase();
+        setLabel(short.slice(0, 30));
+      }
     }
 
     if (detail.status === 'ready') {
       clearTimeout(_dismissTimer);
-      setPhase('Done', 'done');
+      fillEl.style.width = '100%';
+      setLabel('READY');
+      loader.classList.add('hl-ready');
       _dismissTimer = setTimeout(dismiss, 900);
     }
   });
 
-  // Auto-dismiss: brand splash for 2 s, or immediately when compiler signals ready.
+  // Auto-dismiss: 2 s brand splash if no compiler events fire
   const _fallback = setTimeout(dismiss, 2000);
   document.addEventListener('compiler-status', ({ detail }) => {
     if (detail.status === 'ready') clearTimeout(_fallback);
   }, { once: true });
 
-  // Badge: add once the header button exists
   requestAnimationFrame(() => requestAnimationFrame(addBadge));
 }
 

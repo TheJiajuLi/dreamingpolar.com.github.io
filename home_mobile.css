@@ -50,6 +50,12 @@
     transform: translateX(-50%) !important;
   }
 
+  /* ── Hide maximize / minimize buttons on mobile panels ── */
+  /* These screen-controller actions conflict with mob-visible tab logic */
+  .compiling-screen-header .sc-toolbar,
+  #aic-max-btn,
+  #aic-min-btn { display: none !important; }
+
   /* ── Mobile tab bar ───────────────────────────────────── */
   .mob-tab-bar {
     position: fixed;

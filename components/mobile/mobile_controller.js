@@ -57,6 +57,9 @@ function init() {
     showPanel(idx);
   }
 
+  /* ── Auto-switch to Output tab when code runs ──────── */
+  document.addEventListener('compile-result', () => switchTo(2));
+
   /* ── Tear down if resized to desktop ────────────────── */
   window.matchMedia('(max-width: 768px)').addEventListener('change', e => {
     if (!e.matches) {
