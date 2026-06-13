@@ -14,6 +14,8 @@
   border-bottom: 1px solid var(--border, #d7e1eb);
   background: var(--surface, #ffffff);
   flex-shrink: 0;
+  position: relative;   /* creates stacking context above the position:absolute textarea below */
+  z-index: 1;           /* iOS: prevents textarea's touch hit-area from bleeding into toolbar */
 }
 
 .run-btn {
