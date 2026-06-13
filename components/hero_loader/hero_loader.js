@@ -1,4 +1,8 @@
 function setupHeroLoader() {
+  // Remove the veil unconditionally — must happen before any early return
+  // so the page is never permanently hidden if the loader can't initialize.
+  document.getElementById('dp-veil')?.remove();
+
   const hero = document.querySelector('main.hero');
   if (!hero) return;
 
@@ -19,7 +23,6 @@ function setupHeroLoader() {
     </p>
   `;
   hero.appendChild(loader);
-  document.getElementById('dp-veil')?.remove();
 
   const textEl  = loader.querySelector('.hero-loader-text');
   const labelEl = loader.querySelector('.hl-label');
