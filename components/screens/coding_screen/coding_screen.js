@@ -252,6 +252,7 @@ function setupCodingScreen() {
   async function run() {
     const code = editor.value.trim();
     if (!code) return;
+    editor.blur(); // dismiss iOS keyboard before running so the tap registers cleanly
     const mode = getCurrentMode();
 
     if (mode === 'python' && /\binput\s*\(/.test(code)) {

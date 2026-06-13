@@ -7,7 +7,9 @@
 
   /* ── Give room for the tab bar at bottom ──────────────── */
   main.hero {
-    height: calc(100dvh - var(--header-height) - 56px);
+    /* svh = small viewport height: stays fixed when iOS keyboard appears.
+       dvh would shrink with the keyboard, causing the layout to reflow on every keystroke. */
+    height: calc(100svh - var(--header-height) - 56px);
   }
 
   /* ── Panels: only mob-visible is shown ────────────────── */
