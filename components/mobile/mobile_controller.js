@@ -1,12 +1,13 @@
 /* Mobile tab-bar controller
    Runs only on ≤768px screens.
-   Opens all three panels so their internal JS initialises,
+   Opens all panels so their internal JS initialises,
    then uses CSS (mob-visible) to show one at a time. */
 
 const TABS = [
-  { id: 'content',   screenId: 'content-screen',   icon: '◈', label: 'Content' },
-  { id: 'coding',    screenId: 'coding-screen',     icon: '⌨', label: 'Code'    },
+  { id: 'content',   screenId: 'content-screen',   icon: '◈',  label: 'Content' },
+  { id: 'coding',    screenId: 'coding-screen',     icon: '⌨',  label: 'Code'    },
   { id: 'compiling', screenId: 'compiling-screen',  icon: '⚡', label: 'Output'  },
+  { id: 'ai-chat',   screenId: 'ai-chat-screen',    icon: '✦',  label: 'AI'      },
 ];
 
 function isMobile() { return window.innerWidth <= 768; }
@@ -25,6 +26,10 @@ function init() {
       }
     });
     showPanel(0);
+
+    /* ── Intercept header buttons: override desktop open/close with tab switch ── */
+    // Capture phase on document fires before any listener on the buttons themselves
+    document.addEventListener('click', _headerIntercept, true);
   }));
 
   /* ── Build tab bar ──────────────────────────────────── */
@@ -57,12 +62,26 @@ function init() {
     showPanel(idx);
   }
 
+  /* ── Header button intercepts ───────────────────────── */
+  function _headerIntercept(e) {
+    if (e.target.closest('#start-coding-btn')) {
+      e.stopPropagation();   // prevent button's own click handler (open/close coding screen)
+      switchTo(1);
+      return;
+    }
+    if (e.target.closest('#ai-header-btn')) {
+      e.stopPropagation();
+      switchTo(3);
+    }
+  }
+
   /* ── Auto-switch to Output tab when code runs ──────── */
   document.addEventListener('compile-result', () => switchTo(2));
 
   /* ── Tear down if resized to desktop ────────────────── */
   window.matchMedia('(max-width: 768px)').addEventListener('change', e => {
     if (!e.matches) {
+      document.removeEventListener('click', _headerIntercept, true);
       TABS.forEach(({ screenId }) =>
         document.getElementById(screenId)?.classList.remove('mob-visible')
       );

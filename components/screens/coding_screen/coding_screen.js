@@ -258,9 +258,19 @@ function setupCodingScreen() {
     }
 
     runBtn.disabled = true;
-    const outputs = await compile(code, mode);
-    runBtn.disabled = false;
-    document.dispatchEvent(new CustomEvent('compile-result', { detail: { outputs, sourceCode: code, sourceLang: mode } }));
+    try {
+      const outputs = await compile(code, mode);
+      document.dispatchEvent(new CustomEvent('compile-result', { detail: { outputs, sourceCode: code, sourceLang: mode } }));
+    } catch (err) {
+      const errText = err instanceof Error ? err.message : String(err);
+      document.dispatchEvent(new CustomEvent('compile-result', { detail: {
+        outputs: [{ type: 'error', text: errText }],
+        sourceCode: code,
+        sourceLang: mode,
+      }}));
+    } finally {
+      runBtn.disabled = false;
+    }
   }
 
   runBtn.addEventListener('click', run);

@@ -27,9 +27,9 @@
     display: flex !important;
   }
 
-  /* ── Terminal: compact on mobile ──────────────────────── */
+  /* ── Terminal: taller on mobile (can't drag-resize) ────── */
   #terminal-panel {
-    max-height: 38vh;
+    max-height: 52vh;
     flex-shrink: 0;
   }
 
@@ -51,8 +51,11 @@
   }
 
   /* ── Hide maximize / minimize buttons on mobile panels ── */
-  /* These screen-controller actions conflict with mob-visible tab logic */
+  /* Screen-controller open/close conflicts with mob-visible tab logic.
+     The AI tab in the bottom bar replaces these controls. */
   .compiling-screen-header .sc-toolbar,
+  #cds-max-btn,
+  #cds-min-btn,
   #aic-max-btn,
   #aic-min-btn { display: none !important; }
 
@@ -117,6 +120,12 @@
   [data-theme="dark"]   .mob-tab.active { color: #3fb950; }
   [data-theme="grey"]   .mob-tab.active { color: #57ab5a; }
   [data-theme="aurora"] .mob-tab.active { color: #c084fc; }
+
+  /* AI tab: purple accent in all themes */
+  .mob-tab:nth-child(4).active { color: #8b5cf6; }
+  [data-theme="dark"]   .mob-tab:nth-child(4).active { color: #a78bfa; }
+  [data-theme="grey"]   .mob-tab:nth-child(4).active { color: #a78bfa; }
+  [data-theme="aurora"] .mob-tab:nth-child(4).active { color: #c084fc; }
 
   /* ── Content body: tighter padding on mobile ──────────── */
   .content-screen-body {
