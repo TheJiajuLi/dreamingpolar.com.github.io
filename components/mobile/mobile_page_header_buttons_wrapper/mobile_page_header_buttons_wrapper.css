@@ -191,15 +191,14 @@
 
   /* ── Light — sky blue ─────────────────────────────────────────── */
   [data-theme="light"] .mob-hdr-btns-trigger {
-    border-color: rgba(56, 189, 248, 0.45);
-    background: rgba(235, 248, 255, 0.75);
-    color: rgba(14, 165, 233, 0.85);
+    border: none;
+    background: transparent;
+    color: #3d4451;
   }
   [data-theme="light"] .mob-hdr-btns-wrapper.open .mob-hdr-btns-trigger {
-    background: rgba(56, 189, 248, 0.10);
-    border-color: rgba(14, 165, 233, 0.75);
-    color: #0ea5e9;
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.28);
+    background: rgba(16, 32, 64, 0.07);
+    color: #1e2733;
+    box-shadow: none;
   }
   [data-theme="light"] .mob-hdr-btns-dropdown {
     background: rgba(5, 12, 26, 0.97);
