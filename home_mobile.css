@@ -73,7 +73,8 @@
   /* iOS zooms in whenever a focused input has font-size < 16px.
      Setting exactly 16px stops the zoom without disabling user pinch-zoom. */
   .code-editor,
-  .ai-header-input {
+  .ai-header-input,
+  .nb-editor {
     font-size: 16px;
   }
 
