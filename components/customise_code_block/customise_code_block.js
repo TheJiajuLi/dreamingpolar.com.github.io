@@ -328,9 +328,14 @@ export function init(container, externalTopbar) {
 
   container.appendChild(nb);
 
-  requestIdleCallback
-    ? requestIdleCallback(preloadPython)
-    : setTimeout(preloadPython, 2000);
+  // Skip Pyodide preload on mobile — 45 MB WASM keeps the browser loading
+  // spinner alive for minutes and exhausts iOS Safari's memory, making all
+  // buttons unresponsive. Python loads on demand when the user first runs code.
+  if (window.innerWidth > 768) {
+    requestIdleCallback
+      ? requestIdleCallback(preloadPython)
+      : setTimeout(preloadPython, 2000);
+  }
 }
 
 export function getCellOrder() {

@@ -278,31 +278,6 @@ function setupCodingScreen() {
 
   runBtn.addEventListener('click', run);
 
-  // iOS: touchstart fires before text-selection logic; preventDefault blocks the
-  // textarea from stealing the touch and showing the selection callout.
-  runBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    run();
-  }, { passive: false });
-
-  // iOS touch-router: when the textarea's hit-area bleeds into the toolbar row,
-  // touchstart lands on the editor instead of the button. Intercept at singleView,
-  // temporarily hide pointer-events on the editor, find the real target, click it.
-  if ('ontouchstart' in window) {
-    singleView.addEventListener('touchstart', e => {
-      const touch = e.touches[0];
-      const tRect = toolbar.getBoundingClientRect();
-      if (touch.clientY >= tRect.top && touch.clientY <= tRect.bottom &&
-          (e.target === editor || e.target.closest?.('.code-editor-area'))) {
-        e.preventDefault();
-        editor.style.pointerEvents = 'none';
-        const real = document.elementFromPoint(touch.clientX, touch.clientY);
-        editor.style.pointerEvents = '';
-        real?.click?.();
-      }
-    }, { passive: false });
-  }
-
   editor.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
   });
