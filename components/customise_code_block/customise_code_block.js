@@ -1,4 +1,4 @@
-import { compile, preloadPython } from '../compiler/compiler.js';
+import { compile } from '../compiler/compiler.js';
 import { attachCellHooks, attachAddBtnHook, attachNotebookHooks } from './customise_code_block_hooks.js';
 import { isEnabled as icmEnabled, onChange as icmOnChange, mount as mountICM } from '../screens/coding_screen/intelligent_coding_mode/intelligent_coding_mode.js';
 import { create as createSyntaxHL } from '../screens/coding_screen/coding_screen_python/python_syntax_highlight/python_syntax_highlight.js';
@@ -328,14 +328,6 @@ export function init(container, externalTopbar) {
 
   container.appendChild(nb);
 
-  // Skip Pyodide preload on mobile — 45 MB WASM keeps the browser loading
-  // spinner alive for minutes and exhausts iOS Safari's memory, making all
-  // buttons unresponsive. Python loads on demand when the user first runs code.
-  if (window.innerWidth > 768) {
-    requestIdleCallback
-      ? requestIdleCallback(preloadPython)
-      : setTimeout(preloadPython, 2000);
-  }
 }
 
 export function getCellOrder() {
