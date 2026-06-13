@@ -299,3 +299,40 @@ body.dp-fullscreen .dp-fullscreen-btn:hover {
   color: #fff !important;
   transform: translateX(-50%) scale(1.1);
 }
+
+/* ── Fullscreen exit — touch devices (no hover, no Esc key) ─── */
+@media (pointer: coarse) {
+  body.dp-fullscreen .dp-fullscreen-btn {
+    top: auto;
+    bottom: 24px;
+    right: 16px;
+    left: auto;
+    transform: none;
+    opacity: 1;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  }
+  body.dp-fullscreen .dp-fullscreen-btn:hover {
+    transform: none;
+  }
+  /* Toast appears near the button on touch */
+  .dp-fs-toast {
+    top: auto;
+    bottom: 84px;
+    right: 10px;
+    left: auto;
+    transform: none;
+  }
+  @keyframes dp-toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes dp-toast-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(4px); }
+  }
+}

@@ -13,13 +13,17 @@ let _btn      = null;
 let _toastOut = null;   // setTimeout handle for removing toast
 
 // ── Toast hint ───────────────────────────────────────────
+const _isTouch = () => window.matchMedia('(pointer: coarse)').matches;
+
 function showToast() {
   clearTimeout(_toastOut);
   document.querySelector('.dp-fs-toast')?.remove();
 
   const toast = document.createElement('div');
   toast.className = 'dp-fs-toast';
-  toast.innerHTML = `Press <kbd>Esc</kbd> to exit fullscreen`;
+  toast.innerHTML = _isTouch()
+    ? `Tap <kbd>⛶</kbd> to exit fullscreen`
+    : `Press <kbd>Esc</kbd> to exit fullscreen`;
   document.body.appendChild(toast);
 
   // Trigger fade-out after 2.4 s, remove after 2.8 s
