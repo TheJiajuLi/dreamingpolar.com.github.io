@@ -1,6 +1,8 @@
 // ── Dreaming Polar terminal command registry ───────────────
 // Handlers may be async. executeCommand awaits them so async commands work.
 
+import { runAiPrompt } from './terminal_ai.js';
+
 const _registry = new Map();
 
 export function registerCommand(name, handler) {
@@ -38,12 +40,12 @@ export function commandList() {
 
 registerCommand('help', (args, print) => {
   const cmds = commandList();
-  print('Polar Bear (小梦) — Dreaming Polar terminal');
+  print('我是助手小梦 — 您正处于Dreaming Polar的终端');
   print('');
   print('Available commands:');
   for (const name of cmds) print(`  › ${name}`);
   print('');
-  print("Tip: type 'ai' then Enter, or 'ai <task>' — 小梦 writes and runs the code for you.");
+  print("Tip: type 'ai' then Enter, or 'ai <task>' — I will writes and runs the code for you.");
 });
 
 registerCommand('clear', () => {
@@ -53,61 +55,27 @@ registerCommand('clear', () => {
 // ── AI command ─────────────────────────────────────────────
 //  Usage:
 //    ai                          → show prompt hint
-//    ai <description>            → generate + run code
+//    ai <description>            → auto-routes: text reply in terminal or code in panel
 //    ai<description>             → same, angle-bracket style
 
-let _aiPendingPrompt = false;  // true after bare 'ai' Enter
+let _aiPendingPrompt = false;
 
 registerCommand('ai', async (args, print) => {
   if (!args.length) {
-    // Bare "ai" — prime the terminal to accept the next line as the prompt
     _aiPendingPrompt = true;
-    print('\x1b[36m小梦 engineering mode — type your task and press Enter:\x1b[0m');
+    print('\x1b[36m小梦 — type your task and press Enter:\x1b[0m');
     return;
   }
 
   _aiPendingPrompt = false;
-  const prompt = args.join(' ');
-  await _runAiPrompt(prompt, print);
+  await runAiPrompt(args.join(' '), print);
 });
 
 export function consumeAiPending(line, print) {
   if (!_aiPendingPrompt) return false;
   _aiPendingPrompt = false;
-  _runAiPrompt(line.trim(), print);
+  runAiPrompt(line.trim(), print);
   return true;
-}
-
-async function _runAiPrompt(prompt, print) {
-  if (!prompt) { print('No prompt given.'); return; }
-
-  print(`\x1b[2m⚙  ${prompt}\x1b[0m`);
-
-  try {
-    const { ask, SYSTEM_BY_MODE, SYSTEM_TERMINAL } = await import('../ai/ai_client.js');
-    const { detectLang }  = await import('../ai/input_filter/input_filter.js');
-    const { setMode }     = await import('../compiler/compiler_mode_switcher/compiler_mode_switcher.js');
-
-    // Route by content — same logic as ai_header.js
-    // If nothing code-like is detected (ai_chat), fall back to Python task
-    const detected = detectLang(prompt);
-    const lang     = detected === 'ai_chat' ? 'python' : detected;
-    const system   = SYSTEM_BY_MODE[lang] ?? SYSTEM_TERMINAL;
-
-    const code = await ask(prompt, system);
-
-    print('');
-    print('\x1b[32m# 小梦:\x1b[0m');
-    for (const line of code.split('\n')) print(line);
-    print('');
-
-    setMode(lang);
-    document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code, lang } }));
-    print(`\x1b[2m✓ ${lang} → Code panel.\x1b[0m`);
-
-  } catch (e) {
-    print(`\x1b[31m⚠ ${e.message}\x1b[0m`);
-  }
 }
 
 // ── Screen commands ────────────────────────────────────────

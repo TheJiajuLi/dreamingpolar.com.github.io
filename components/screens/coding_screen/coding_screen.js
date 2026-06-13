@@ -125,7 +125,29 @@ function setupCodingScreen() {
   icmSlot.className = 'cds-icm-slot';
   mountICM(icmSlot);
 
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'lus-copy-btn cds-copy-btn';
+  copyBtn.title     = 'Copy source';
+  copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  copyBtn.addEventListener('click', () => {
+    const code = editor.value;
+    if (!code) return;
+    navigator.clipboard?.writeText(code).then(() => {
+      copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      copyBtn.classList.add('lus-copy-btn--done');
+      setTimeout(() => {
+        copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+        copyBtn.classList.remove('lus-copy-btn--done');
+      }, 1600);
+    });
+  });
+
+  const toolbarClearBtn = createClearCellsBtn();
+  toolbarClearBtn.id = 'cds-toolbar-clear-btn';
+
   toolbar.appendChild(icmSlot);
+  toolbar.appendChild(copyBtn);
+  toolbar.appendChild(toolbarClearBtn);
   toolbar.appendChild(runBtn);
 
   const editorWrap = document.createElement('div');
@@ -241,6 +263,15 @@ function setupCodingScreen() {
   runBtn.addEventListener('click', run);
   editor.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
+  });
+
+  // Clear single-cell editor when clear-active-code fires in a non-notebook mode
+  document.addEventListener('clear-active-code', () => {
+    const m = getCurrentMode();
+    if (m === 'customise' || m === 'ai_chat') return;
+    editor.value = '';
+    editor.dispatchEvent(new Event('input'));
+    localStorage.removeItem(CODE_KEY);
   });
 
   // Handle ai-insert-and-run for single-cell modes only

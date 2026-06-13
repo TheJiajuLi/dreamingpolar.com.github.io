@@ -17,10 +17,10 @@ function measureWeight(text) {
 }
 
 const MAX_TOKENS = {
-  micro:    80,
-  brief:    180,
-  normal:   400,
-  detailed: 800,
+  micro:    400,
+  brief:    800,
+  normal:   1200,
+  detailed: 3000,
 };
 
 // ── Directives ────────────────────────────────────────────────────────────────

@@ -5,7 +5,7 @@ export function createClearCellsBtn() {
   btn.title     = 'Clear all cells';
   btn.textContent = '⊘';
   btn.addEventListener('click', () =>
-    document.dispatchEvent(new CustomEvent('notebook-clear-cells'))
+    document.dispatchEvent(new CustomEvent('clear-active-code'))
   );
   return btn;
 }

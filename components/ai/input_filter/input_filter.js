@@ -18,10 +18,16 @@
 export function detectLang(prompt, currentMode = 'python') {
   const low = prompt.toLowerCase();
 
-  if (/\blatex\b/.test(low))                                        return 'latex';
-  if (/\bmathjax\b|公式|formula|方程式|equation|数学表达式/.test(low)) return 'mathjax';
-  if (/\bmarkdown\b|readme/.test(low))                              return 'markdown';
-  if (/python|plot\b|图表|图像|画图|代码|程序|编程/.test(low))          return 'python';
+  if (/\blatex\b/.test(low))                                          return 'latex';
+  if (/\bmathjax\b|公式|formula|方程式|equation|数学表达式/.test(low))   return 'mathjax';
+  if (/\bmarkdown\b|readme/.test(low))                                return 'markdown';
+
+  // Python / code — explicit language or engineering action verbs
+  if (/python|图表|图像|画图|代码|程序|编程/.test(low))                   return 'python';
+  if (/\b(plot|draw|graph|chart|visuali[sz]e?|animate|render)\b/.test(low)) return 'python';
+  if (/\b(sin|cos|tan|sine|cosine|exp|log|sqrt|matrix|vector|signal|wave)\b/.test(low)) return 'python';
+  if (/\b(simulate|calculate|compute|solve|optimi[sz]e?|regression|algorithm)\b/.test(low)) return 'python';
+  if (/\b(function|class|script|loop|array|sort|parse|implement|generate)\b/.test(low)) return 'python';
 
   // No engineering signal detected → conversational
   return 'ai_chat';

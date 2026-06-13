@@ -1,4 +1,5 @@
 import { compile } from '../compiler/compiler.js';
+import { getCurrentMode } from '../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
 
 // ── Per-cell hooks ─────────────────────────────────────────
 // Called once per cell after all DOM elements are created.
@@ -120,8 +121,13 @@ export function attachNotebookHooks({ runAllBtn, statusBar, runAll, getCells, au
       : detail.message;
   });
 
-  document.addEventListener('notebook-clear-cells', () => {
-    getCells().forEach(c => { c.editor.value = ''; autoResize(c.editor); });
+  document.addEventListener('clear-active-code', () => {
+    if (getCurrentMode() !== 'customise') return;
+    getCells().forEach(c => {
+      c.editor.value = '';
+      c.editor.dispatchEvent(new Event('input'));
+      autoResize(c.editor);
+    });
     saveAll();
   });
 }

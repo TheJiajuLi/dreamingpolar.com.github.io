@@ -1,12 +1,14 @@
 import { executeCommand, consumeAiPending } from './terminal_commands.js';
+import { consumeAiChat, isAiChatActive, exitAiChat, setConfirmFn } from './terminal_ai.js';
 
 const ICON_TERMINAL = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`;
 const ICON_CLEAR    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4h8v2"/></svg>`;
 const ICON_CLOSE    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
 
-let _toggleBtn = null;
-let _output    = null;
-let _input     = null;
+let _toggleBtn     = null;
+let _output        = null;
+let _input         = null;
+let _pendingConfirm = null; // set while waiting for y/n from user
 
 export function openTerminal()  { window.screenController?.open('terminal'); }
 export function closeTerminal() { window.screenController?.close('terminal'); }
@@ -62,18 +64,27 @@ async function handleEnter() {
   const line = raw.trim();
   if (!line) return;
 
-  if (_history[_history.length - 1] !== line) _history.push(line);
-  _histIdx = -1;
-  _draft   = '';
-
   const echo = document.createElement('div');
   echo.className = 'term-line term-echo';
   echo.innerHTML = `<span class="term-prompt-inline">›</span> ${line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}`;
   _output?.appendChild(echo);
 
+  // y/n confirmation gate — resolve and return without touching history
+  if (_pendingConfirm) {
+    const resolve = _pendingConfirm;
+    _pendingConfirm = null;
+    resolve(line.toLowerCase() === 'y');
+    _output && (_output.scrollTop = _output.scrollHeight);
+    return;
+  }
+
+  if (_history[_history.length - 1] !== line) _history.push(line);
+  _histIdx = -1;
+  _draft   = '';
+
   dotSet('running');
   try {
-    if (!consumeAiPending(line, printLine)) {
+    if (!await consumeAiChat(line, printLine) && !consumeAiPending(line, printLine)) {
       await executeCommand(line, printLine);
     }
   } catch (e) {
@@ -162,6 +173,15 @@ function setup() {
   _output = document.getElementById('terminal-output');
   _input  = document.getElementById('terminal-input');
 
+  setConfirmFn((question, print) => new Promise(resolve => {
+    print(question);
+    if (_input) _input.placeholder = 'y / n';
+    _pendingConfirm = (confirmed) => {
+      if (_input) _input.placeholder = isAiChatActive() ? '和小梦聊… (Esc 退出)' : 'type a command…';
+      resolve(confirmed);
+    };
+  }));
+
   if (!document.documentElement.style.getPropertyValue('--terminal-h')) {
     document.documentElement.style.setProperty('--terminal-h', Math.round(window.innerHeight * 0.15) + 'px');
   }
@@ -179,8 +199,18 @@ function setup() {
   printLine("\x1b[2mType 'help' for available commands.\x1b[0m");
   printLine('');
 
+  document.addEventListener('terminal-ai-mode', ({ detail: { active } }) => {
+    if (_input) _input.placeholder = active ? '和小梦聊… (Esc 退出)' : 'type a command…';
+  });
+
   _input?.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); handleEnter(); return; }
+
+    if (e.key === 'Escape' && isAiChatActive()) {
+      e.preventDefault();
+      exitAiChat(printLine);
+      return;
+    }
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();

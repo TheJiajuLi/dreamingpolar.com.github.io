@@ -331,7 +331,21 @@ function _runLatex(code) {
 }
 
 function _runMathJax(code) {
-  const normalized = _normalizeLatexMath(code);
+  const trimmed = code.trim();
+  // Raw HTML passthrough: if input is a full HTML document or starts with block-level tags
+  if (/^<!DOCTYPE\s+html/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) {
+    // Extract <body> content if present, otherwise use full code
+    const bodyMatch = trimmed.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const content = bodyMatch ? bodyMatch[1].trim() : trimmed;
+    return [{ type: 'html', content }];
+  }
+  // Fragment of HTML tags (not LaTeX) — render as-is inside a container
+  const tagCount = (trimmed.match(/<[a-z][^>]*>/gi) || []).length;
+  if (tagCount >= 3 && !trimmed.includes('\\[') && !trimmed.includes('$$')) {
+    return [{ type: 'html', content: `<div class="mathjax-html-block">${trimmed}</div>` }];
+  }
+  // Pure LaTeX / math — paragraph-wrap as before
+  const normalized = _normalizeLatexMath(trimmed);
   const html = normalized
     .split(/\n\n+/)
     .filter(p => p.trim())
