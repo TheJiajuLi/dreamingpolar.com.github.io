@@ -1,5 +1,6 @@
 /* Status indicator used by coding_screen */
 .compiler-status-bar {
+  position: relative;
   padding: 3px 10px;
   font-size: 0.7rem;
   color: var(--text-muted, #425366);
@@ -9,12 +10,40 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
+}
+
+/* Thin progress track along the bottom */
+.compiler-status-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  width: var(--pct, 0%);
+  background: currentColor;
+  opacity: 0.45;
+  transition: width 0.35s ease-out;
+  border-radius: 0 1px 1px 0;
+  pointer-events: none;
+}
+.compiler-status-bar.ready::after {
+  width: 100%;
+  opacity: 0;
+  transition: width 0.2s ease-out, opacity 0.5s ease 0.2s;
 }
 
 .compiler-status-bar.loading { color: #2563eb; }
 .compiler-status-bar.running { color: #d97706; }
 .compiler-status-bar.ready   { color: #16a34a; }
 .compiler-status-bar.error   { color: #dc2626; }
+
+/* Right-aligned percentage label */
+.status-pct {
+  margin-left: auto;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
 
 .status-spinner {
   display: inline-flex;

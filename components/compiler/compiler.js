@@ -16,8 +16,8 @@ let _loading = null;
 
 // ── Utilities ─────────────────────────────────────────────
 
-function _dispatch(status, message) {
-  document.dispatchEvent(new CustomEvent('compiler-status', { detail: { status, message } }));
+function _dispatch(status, message, percent) {
+  document.dispatchEvent(new CustomEvent('compiler-status', { detail: { status, message, percent } }));
 }
 
 function _loadScript(src) {
@@ -38,17 +38,42 @@ async function _getPyodide() {
   if (_loading)  return _loading;
 
   _loading = (async () => {
-    _dispatch('loading', 'Loading Python runtime…');
+    _dispatch('loading', 'Fetching Python runtime…', 3);
     await _loadScript(PYODIDE_INDEX + 'pyodide.js');
 
-    const py = await window.loadPyodide({ indexURL: PYODIDE_INDEX });
+    _dispatch('loading', 'Starting interpreter…', 12);
+    const py = await window.loadPyodide({ indexURL: PYODIDE_INDEX, messageCallback: () => {} });
 
-    _dispatch('loading', `Loading packages: ${PACKAGES.join(', ')}…`);
-    await py.loadPackage(PACKAGES, { messageCallback: () => {} });
+    // ── Per-package progress (25 % → 85 %) ───────────────
+    const total = PACKAGES.length;
+    let done = 0;
+    const _pkgPct = () => Math.round(25 + (done / total) * 60);
 
+    _dispatch('loading', `Loading ${PACKAGES[0]} (1/${total})…`, 25);
+
+    await py.loadPackage(PACKAGES, {
+      messageCallback: msg => {
+        if (!/loaded/i.test(msg)) return;
+        // One message may report several packages ("Loaded numpy, pandas")
+        const newly = PACKAGES.filter(
+          pkg => new RegExp(`\\b${pkg}\\b`, 'i').test(msg)
+        );
+        if (!newly.length) return;
+        done = Math.min(done + newly.length, total);
+        const pct  = _pkgPct();
+        const next = PACKAGES[done];
+        const label = next
+          ? `Loading ${next} (${done + 1}/${total})…`
+          : 'Finalizing packages…';
+        _dispatch('loading', label, pct);
+      },
+    });
+
+    _dispatch('loading', 'Configuring matplotlib…', 88);
     await py.runPythonAsync(`import matplotlib; matplotlib.use('agg')`);
 
     // Load a CJK font via JS fetch → Pyodide FS so matplotlib can render Chinese text
+    _dispatch('loading', 'Loading CJK font…', 93);
     try {
       const fontResp = await fetch(`${window.BASE || ''}/assets/fonts/NotoSansSC-Regular.ttf`);
       if (fontResp.ok) {
@@ -63,7 +88,7 @@ _mpl.rcParams['font.family'] = 'Noto Sans SC'
       }
     } catch (_) {}
 
-    _dispatch('ready', 'Python ready');
+    _dispatch('ready', 'Python ready', 100);
     _pyodide = py;
     document.body.classList.add('dp-ready');
     document.body.dispatchEvent(new Event('dp-ready-event'));

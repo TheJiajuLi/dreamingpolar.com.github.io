@@ -39,9 +39,7 @@ function setupHeroLoader() {
     }, 180);
   }
 
-  // Show status immediately — don't wait for compiler events.
-  // On mobile, Pyodide can take 30-60 s to signal; users need feedback now.
-  setPhase('Loading', 'loading');
+  // Hero is now a brand splash — Pyodide loads on-demand after Start Coding click.
 
   // ── Badge on the </> button ──────────────────────────
   let badge = null;
@@ -90,11 +88,8 @@ function setupHeroLoader() {
     }
   });
 
-  // Fallback: dismiss if compiler never signals ready.
-  // Touch devices get a shorter cap — Pyodide may not load at all on some mobile browsers.
-  const _isTouch   = window.matchMedia('(pointer: coarse)').matches;
-  const _fallbackMs = _isTouch ? 12_000 : 45_000;
-  const _fallback   = setTimeout(dismiss, _fallbackMs);
+  // Auto-dismiss: brand splash for 2 s, or immediately when compiler signals ready.
+  const _fallback = setTimeout(dismiss, 2000);
   document.addEventListener('compiler-status', ({ detail }) => {
     if (detail.status === 'ready') clearTimeout(_fallback);
   }, { once: true });

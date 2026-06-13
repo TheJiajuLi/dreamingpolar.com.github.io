@@ -1,6 +1,6 @@
 import { mountModeSwitcher, getCurrentMode } from '../../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
 import { init as initNotebook } from '../../customise_code_block/customise_code_block.js';
-import { compile, preloadPython } from '../../compiler/compiler.js';
+import { compile } from '../../compiler/compiler.js';
 import { createClearCellsBtn } from './coding_screen_utility.js';
 import { isEnabled as icmEnabled, onChange as icmOnChange, mount as mountICM } from './intelligent_coding_mode/intelligent_coding_mode.js';
 import * as SyntaxHL from './coding_screen_python/python_syntax_highlight/python_syntax_highlight.js';
@@ -239,8 +239,11 @@ function setupCodingScreen() {
     if (getCurrentMode() === 'customise') return;
     const spinning = detail.status === 'loading' || detail.status === 'running';
     statusBar.className = `compiler-status-bar ${detail.status}`;
+    if (detail.percent != null) statusBar.style.setProperty('--pct', `${detail.percent}%`);
+    const pctLabel = (detail.percent != null && detail.status === 'loading')
+      ? `<span class="status-pct">${detail.percent}%</span>` : '';
     statusBar.innerHTML = spinning
-      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}`
+      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}${pctLabel}`
       : detail.message;
   });
 
@@ -293,9 +296,6 @@ function setupCodingScreen() {
     editor.dispatchEvent(new Event('input'));
   });
 
-  requestIdleCallback
-    ? requestIdleCallback(preloadPython)
-    : setTimeout(preloadPython, 2000);
 }
 
 if (document.readyState === 'loading') {

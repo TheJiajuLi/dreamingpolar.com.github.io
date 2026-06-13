@@ -1,4 +1,4 @@
-import { compile, preloadPython } from '../../../compiler/compiler.js';
+import { compile } from '../../../compiler/compiler.js';
 import { mountModeSwitcher, getCurrentMode } from '../../../compiler/compiler_mode_switcher/compiler_mode_switcher.js';
 import { loadCode, saveCode } from './coding_screen_python_hooks.js';
 
@@ -71,8 +71,11 @@ export function init() {
   document.addEventListener('compiler-status', ({ detail }) => {
     const spinning = detail.status === 'loading' || detail.status === 'running';
     statusBar.className = `compiler-status-bar ${detail.status}`;
+    if (detail.percent != null) statusBar.style.setProperty('--pct', `${detail.percent}%`);
+    const pctLabel = (detail.percent != null && detail.status === 'loading')
+      ? `<span class="status-pct">${detail.percent}%</span>` : '';
     statusBar.innerHTML = spinning
-      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}`
+      ? `<span class="status-spinner"><i></i><i></i><i></i></span>${detail.message}${pctLabel}`
       : detail.message;
   });
 
@@ -92,8 +95,4 @@ export function init() {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
   });
 
-  // Warm up Pyodide in the background once the page is idle
-  requestIdleCallback
-    ? requestIdleCallback(preloadPython)
-    : setTimeout(preloadPython, 2000);
 }

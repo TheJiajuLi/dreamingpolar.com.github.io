@@ -1,3 +1,5 @@
+import { preloadPython } from '../compiler/compiler.js';
+
 function setupStartCodingBtn() {
   const header = document.querySelector('header.page-header');
   if (!header) return;
@@ -36,6 +38,7 @@ function setupStartCodingBtn() {
   btn.addEventListener('click', () => {
     const state = window.screenController?.getState('coding');
     if (!state || state === 'closed') {
+      preloadPython();               // start loading in background on first open
       window.screenController?.open('coding');
     } else {
       window.screenController?.close('coding');
