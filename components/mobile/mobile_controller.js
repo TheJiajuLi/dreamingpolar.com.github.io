@@ -63,12 +63,8 @@ function init() {
   }
 
   /* ── Header button intercepts ───────────────────────── */
+  /* start-coding btn is hidden on mobile via CSS; only AI btn needs routing */
   function _headerIntercept(e) {
-    if (e.target.closest('#start-coding-btn')) {
-      e.stopPropagation();   // prevent button's own click handler (open/close coding screen)
-      switchTo(1);
-      return;
-    }
     if (e.target.closest('#ai-header-btn')) {
       e.stopPropagation();
       switchTo(3);

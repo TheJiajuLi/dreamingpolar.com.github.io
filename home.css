@@ -29,8 +29,9 @@ body {
 }
 
 .app-logo {
-  height: 36px;
+  height: 38px;
   width: auto;
+  max-width: 200px;
   object-fit: contain;
   user-select: none;
   transition: filter 0.3s ease;
@@ -268,6 +269,8 @@ body.dp-fullscreen .page-header {
   border: none;
   overflow: hidden;
   pointer-events: none;
+  backdrop-filter: none;           /* iOS Safari: backdrop-filter traps position:fixed children inside this container */
+  -webkit-backdrop-filter: none;   /* removing it lets the floating exit button escape to the viewport */
 }
 body.dp-fullscreen .nav-sidebar {
   width: 0 !important;

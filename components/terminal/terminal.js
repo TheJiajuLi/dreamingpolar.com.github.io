@@ -156,6 +156,7 @@ function setup() {
         Terminal
       </span>
       <div class="sc-toolbar">
+        <button class="sc-btn term-max-btn" title="Expand terminal">⤢</button>
         <button class="sc-btn term-clear-btn" title="Clear">${ICON_CLEAR}</button>
         <button class="sc-btn term-close-btn" title="Close">${ICON_CLOSE}</button>
       </div>
@@ -247,6 +248,13 @@ function setup() {
 
   panel.querySelector('.term-clear-btn')?.addEventListener('click', clearOutput);
   panel.querySelector('.term-close-btn')?.addEventListener('click', closeTerminal);
+
+  const termMaxBtn = panel.querySelector('.term-max-btn');
+  termMaxBtn?.addEventListener('click', () => {
+    const isMax = panel.classList.toggle('terminal--max');
+    if (termMaxBtn) termMaxBtn.textContent = isMax ? '⤡' : '⤢';
+    if (isMax) requestAnimationFrame(() => _input?.focus());
+  });
 
   document.addEventListener('screen-opened', ({ detail }) => {
     if (detail.id === 'terminal') { syncToggleBtn(true); requestAnimationFrame(() => _input?.focus()); }

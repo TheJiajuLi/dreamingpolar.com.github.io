@@ -169,6 +169,31 @@
   opacity: 0.5;
 }
 
+/* ── Terminal maximize state ─────────────────────────────── */
+/* #terminal-panel is a sibling of .hero-screens-row (both direct children of main.hero).
+   Collapsing the row to 0 lets the terminal take the full hero height. */
+#terminal-panel.terminal--max {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  max-height: none !important;  /* overrides both desktop 45vh and mobile 52vh */
+}
+
+body:has(#terminal-panel.terminal--max) .hero-screens-row {
+  flex: 0 0 0 !important;
+  overflow: hidden !important;
+}
+
+/* Resize handle: not draggable on touch; hide it on mobile */
+@media (max-width: 768px) {
+  .terminal-resize-handle { display: none; }
+  .terminal-header .sc-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+}
+
 /* ── Terminal toggle button (page-header) ────────────────── */
 .dp-terminal-btn {
   width: 32px;

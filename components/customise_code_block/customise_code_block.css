@@ -274,7 +274,7 @@
   letter-spacing: 0.07em;
   color: #22c55e;
   padding: 0 8px 0 12px;
-  min-height: 28px;
+  height: 30px;
   box-sizing: border-box;
   background: var(--bg, #f3f5f8);
   border-bottom: 1.5px solid currentColor;

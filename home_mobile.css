@@ -14,13 +14,17 @@
   .hero-screens-row {
     position: relative;
     overflow: hidden;
+    height: 100%;        /* explicit height so position:absolute children get a real hit-test area */
+    flex: 1;
   }
 
   .hero-screen {
     position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
+    height: 100% !important;  /* reinforces inset:0 on iOS hit-testing */
     display: none !important;
+    cursor: pointer;           /* iOS requires interactive hint to propagate touch through the element */
   }
 
   .hero-screen.mob-visible {
@@ -39,7 +43,7 @@
     gap: 6px;
   }
 
-  .app-logo { height: 26px; }
+  .app-logo { height: 30px; max-width: 160px; }
 
   /* ── AI dialog: full-width, anchored below header ─────── */
   .ai-header-dialog {
@@ -50,14 +54,27 @@
     transform: translateX(-50%) !important;
   }
 
-  /* ── Hide maximize / minimize buttons on mobile panels ── */
-  /* Screen-controller open/close conflicts with mob-visible tab logic.
-     The AI tab in the bottom bar replaces these controls. */
+  /* ── Hide desktop-only header controls on mobile ─────── */
+  /* start-coding btn: navigation is via the 4 bottom tabs */
+  /* max/min btns: conflict with mob-visible tab logic */
+  #start-coding-btn,
+  .content-screen-header .sc-toolbar,
   .compiling-screen-header .sc-toolbar,
   #cds-max-btn,
   #cds-min-btn,
   #aic-max-btn,
   #aic-min-btn { display: none !important; }
+
+  /* ── Make coding toolbar touch-friendly on iOS ─────────── */
+  /* touch-action prevents 300ms delay; cursor:pointer is required
+     by iOS Safari to propagate touch events through overflow:hidden ancestors */
+  .coding-toolbar,
+  .coding-toolbar button,
+  .coding-toolbar .run-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
 
   /* ── Mobile tab bar ───────────────────────────────────── */
   .mob-tab-bar {
@@ -139,4 +156,10 @@
 /* ── Desktop: never show tab bar ──────────────────────────── */
 @media (min-width: 769px) {
   .mob-tab-bar { display: none !important; }
+}
+
+/* ── Mobile fullscreen: hide tab bar, fill viewport ──────── */
+@media (max-width: 768px) {
+  body.dp-fullscreen .mob-tab-bar { display: none !important; }
+  body.dp-fullscreen main.hero    { height: 100dvh; }
 }
