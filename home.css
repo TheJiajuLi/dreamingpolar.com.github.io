@@ -194,7 +194,7 @@ p {
 /* ── Fullscreen toggle button ─────────────────────────── */
 /* ── Fullscreen toggle button (lives in .page-header) ─── */
 .dp-fullscreen-btn {
-  margin-left: auto;       /* absorbs the gap, pushes theme-ctrl right */
+  margin-left: 4px;
   flex-shrink: 0;
   width: 32px;
   height: 32px;
