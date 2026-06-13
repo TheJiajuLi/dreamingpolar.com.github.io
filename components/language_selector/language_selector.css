@@ -14,11 +14,11 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: inherit;
+  color: var(--hdr-btn-fg, #3d4451);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 400;
   font-family: inherit;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   cursor: pointer;
   user-select: none;
   transition: background 0.15s, transform 0.1s;

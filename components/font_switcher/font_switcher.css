@@ -8,9 +8,9 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: inherit;
+  color: var(--hdr-btn-fg, #3d4451);
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 400;
   font-family: inherit;
   cursor: pointer;
   user-select: none;

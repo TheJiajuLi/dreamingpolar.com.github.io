@@ -203,13 +203,12 @@ p {
   border: none;
   border-radius: 20px;
   background: transparent;
-  color: var(--text-muted, #94a3b8);
+  color: var(--hdr-btn-fg, #3d4451);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 .dp-fullscreen-btn:hover  { background: rgba(0,0,0,0.055); color: var(--text, #102040); transform: scale(1.08); }
 
-/* theme-controller no longer needs its own auto-margin once the sibling is present */
 .dp-fullscreen-btn ~ .theme-controller { margin-left: 0; }
 
 /* ── Fullscreen exit hint toast ───────────────────────── */
