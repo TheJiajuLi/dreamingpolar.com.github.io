@@ -60,6 +60,7 @@
 }
 
 #cds-single-view {
+  display: flex;       /* visible by default (Python/LaTeX/etc. modes) */
   flex: 1;
   flex-direction: column;
   min-height: 0;
@@ -67,6 +68,7 @@
 }
 
 #cds-notebook-view {
+  display: none;       /* hidden by default; JS sets display:flex in Customise mode */
   flex: 1;
   flex-direction: column;
   min-height: 0;

@@ -2,7 +2,8 @@
 .nb-notebook {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;             /* fills parent flex container — works in Safari unlike height:100% */
+  min-height: 0;
   overflow: hidden;
 }
 
