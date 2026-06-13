@@ -70,6 +70,7 @@ function init() {
     if (idx === active) return;
     active = idx;
     showPanel(idx);
+    document.dispatchEvent(new CustomEvent('mob-close-nav'));
   }
 
   /* ── Header button intercepts ───────────────────────── */

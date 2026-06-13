@@ -156,6 +156,7 @@ function setupNavigationScreen() {
   menuBtn.addEventListener('click', () => (isOpen ? close() : open()));
   sidebar.querySelector('.nav-close-btn').addEventListener('click', close);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) close(); });
+  document.addEventListener('mob-close-nav', () => { if (isOpen) close(); });
 
   // click on blank content area closes nav
   document.querySelector('main.hero')?.addEventListener('click', () => {
