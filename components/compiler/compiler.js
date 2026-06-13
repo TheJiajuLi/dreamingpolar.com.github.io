@@ -339,9 +339,13 @@ function _runMathJax(code) {
     const content = bodyMatch ? bodyMatch[1].trim() : trimmed;
     return [{ type: 'html', content }];
   }
-  // Fragment of HTML tags (not LaTeX) — render as-is inside a container
+  // Any img/iframe → always treat as HTML passthrough (even a single tag)
+  if (/<(img|iframe)\b/i.test(trimmed)) {
+    return [{ type: 'html', content: `<div class="mathjax-html-block">${trimmed}</div>` }];
+  }
+  // General HTML fragment (≥2 block tags, no LaTeX math) — render as-is
   const tagCount = (trimmed.match(/<[a-z][^>]*>/gi) || []).length;
-  if (tagCount >= 3 && !trimmed.includes('\\[') && !trimmed.includes('$$')) {
+  if (tagCount >= 2 && !trimmed.includes('\\[') && !trimmed.includes('$$')) {
     return [{ type: 'html', content: `<div class="mathjax-html-block">${trimmed}</div>` }];
   }
   // Pure LaTeX / math — paragraph-wrap as before

@@ -123,15 +123,29 @@ const TERMINAL_PLATFORM_CONTEXT = `
 - 输出富文本说明；适合带标题、列表、表格的解释性内容。
 
 **HTML / 网络内容引用** — \`\`\`mathjax（HTML 模式）
-- MathJax 模式是完整 HTML 渲染器，支持任意 HTML 标签。
-- 可嵌入视频（YouTube/Bilibili）：<iframe src="https://www.youtube.com/embed/VIDEO_ID" width="100%" height="400" frameborder="0" allowfullscreen></iframe>
-- 可嵌入图片——但必须使用真实可访问的 URL，不能编造。规则：
-  ① 用户自己提供了 URL → 直接嵌入。
-  ② 如果你确定某张图的真实地址（如 Wikimedia Commons 的规范路径）→ 可以嵌入。
-  ③ 不确定 URL → 不要猜测，改用 Python matplotlib 生成示意图或用文字描述。
-- 如果用户说"给我看一张X的图"但没提供 URL，默认用 Python 画示意图，而不是编造图片链接。
+- MathJax 模式是完整 HTML 渲染器，支持任意 HTML 标签和外部资源。
 
-规则：数学公式 → mathjax（LaTeX）；已知真实 URL 的图片/视频 → mathjax（HTML）；图表/计算/示意图 → python；排版文档 → latex；说明性文本 → markdown 或直接回答。`;
+图片 — 优先使用以下可靠来源，无需用户提供 URL：
+  LoremFlickr 关键词图（最推荐，始终有效，来自 Flickr 真实照片库）：
+    格式：<img src="https://loremflickr.com/1200/800/arctic,iceberg" style="max-width:100%;border-radius:8px">
+    关键词用英文逗号分隔，URL 路径末尾直接跟关键词，无需参数符号。
+    示例：arctic → /1200/800/arctic,landscape；熊猫 → /1200/800/panda,bamboo
+  注意：不要使用 source.unsplash.com（已停止服务，图片无法加载）。
+  Wikimedia Commons（仅当你有把握知道准确路径时使用）
+  用户自己提供的任意 URL → 直接嵌入
+
+视频 — YouTube / Bilibili embed：
+  格式：<iframe src="https://www.youtube.com/embed/VIDEO_ID" width="100%" height="400" frameborder="0" allowfullscreen></iframe>
+  如果用户要看某主题视频，用你知道的真实 VIDEO_ID，或告知用户搜索关键词。
+
+决策树：
+  用户想看图片 → 用 Unsplash 关键词 URL 嵌入真实照片（mathjax HTML 代码块）
+  用户想看图表/数据可视化 → python matplotlib
+  用户想看公式 → mathjax LaTeX
+  用户想看视频 → mathjax iframe（给出 YouTube embed 或搜索建议）
+  用户想看文档/笔记 → markdown 或 latex
+
+规则：绝对不要编造随机 URL；Unsplash 关键词 URL 是安全的，随时可用。`;
 
 function _stripMd(text) {
   return text
@@ -184,9 +198,17 @@ function _extractCodeBlock(reply) {
     return { lang: 'mathjax', code: reply.trim(), text: '' };
   }
 
-  // 4. Unfenced HTML: reply contains ≥4 block-level HTML tags
-  const blockTags = (reply.match(/<\s*(div|figure|img|iframe|section|article|table|ul|ol|video|audio|embed)[^>]*>/gi) || []).length;
-  if (blockTags >= 4) {
+  // 4. Inline img/iframe anywhere in the reply — extract tags, strip from text
+  const embedTags = [...reply.matchAll(/<(img|iframe)\b[^>]*(?:\/>|>(?:[\s\S]*?<\/(?:img|iframe)>)?)/gi)];
+  if (embedTags.length > 0) {
+    const code = embedTags.map(m => m[0]).join('\n');
+    const text = reply.replace(/<(img|iframe)\b[^>]*(?:\/>|>(?:[\s\S]*?<\/(?:img|iframe)>)?)/gi, '').trim();
+    return { lang: 'mathjax', code, text };
+  }
+
+  // 5. Unfenced HTML block: reply is dominated by block-level HTML tags
+  const blockTags = (reply.match(/<\s*(div|figure|section|article|table|ul|ol|video|audio|embed)[^>]*>/gi) || []).length;
+  if (blockTags >= 3) {
     return { lang: 'mathjax', code: reply.trim(), text: '' };
   }
 
@@ -196,7 +218,11 @@ function _extractCodeBlock(reply) {
 // Single point for confirmation + code-panel dispatch — used by both paths.
 async function _dispatchCode(lang, code, print) {
   if (_confirmFn) {
-    const ok = await _confirmFn('\x1b[33m⚠ 即将覆盖代码编辑器中的内容，确认继续？(y/n)\x1b[0m', print);
+    const isMedia = lang === 'mathjax' && /<(img|iframe)\b/i.test(code);
+    const question = isMedia
+      ? '\x1b[33m▶ 是否在内容区显示此内容？(y/n)\x1b[0m'
+      : '\x1b[33m⚠ 即将覆盖代码编辑器中的内容，确认继续？(y/n)\x1b[0m';
+    const ok = await _confirmFn(question, print);
     if (!ok) { print('\x1b[2m✕ 已取消\x1b[0m'); return false; }
   }
   const { setMode } = await import('../compiler/compiler_mode_switcher/compiler_mode_switcher.js');
