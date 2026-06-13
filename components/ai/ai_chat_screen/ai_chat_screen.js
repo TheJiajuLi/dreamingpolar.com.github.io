@@ -60,7 +60,6 @@ function setupAiChatScreen() {
             >
           </div>
           <button class="ai-header-submit" id="aic-send">go</button>
-          <button class="ai-header-cancel" id="aic-cancel-input">✕</button>
         </div>
       </div>
     </div>
@@ -69,7 +68,6 @@ function setupAiChatScreen() {
   const messagesEl    = document.getElementById('aic-messages');
   const inputEl       = document.getElementById('aic-input');
   const sendBtn       = document.getElementById('aic-send');
-  const cancelInputBtn = document.getElementById('aic-cancel-input');
   const clearBtn      = document.getElementById('aic-clear-btn');
   const maxBtn      = document.getElementById('aic-max-btn');
   const minBtn      = document.getElementById('aic-min-btn');
@@ -198,7 +196,6 @@ function setupAiChatScreen() {
   }
 
   sendBtn.addEventListener('click', () => doSend(inputEl.value));
-  cancelInputBtn.addEventListener('click', () => { inputEl.value = ''; inputEl.focus(); });
   inputEl.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); doSend(inputEl.value); }
   });
