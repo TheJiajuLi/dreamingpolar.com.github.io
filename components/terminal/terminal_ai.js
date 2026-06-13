@@ -3,23 +3,35 @@
 //  Imported by both terminal_commands.js (for runAiPrompt) and
 //  terminal.js (for chat-mode state: isAiChatActive / exitAiChat / consumeAiChat).
 //  Lives here to avoid a circular dependency between those two files.
+//
+//  Low-level text utilities live in terminal_ai_utils.js.
 
-// ── Confirm callback (injected by terminal.js to avoid circular import) ────────
+import {
+  stripMd,
+  extractCodeBlock,
+  trimHistory,
+  compressLastAssistant,
+  tokenBudget,
+} from './terminal_ai_utils.js';
 
-let _confirmFn = null;
+// ── Injected callbacks (set by terminal.js at setup time) ─────────────────────
 
-export function setConfirmFn(fn) { _confirmFn = fn; }
+let _confirmFn    = null; // (question, print) => Promise<boolean>
+let _streamLineFn = null; // () => { update(text), finalize() }
+
+export function setConfirmFn(fn)    { _confirmFn    = fn; }
+export function setStreamLineFn(fn) { _streamLineFn = fn; }
 
 // ── Chat-mode state + conversation history ─────────────────────────────────────
 
 let _aiChatActive = false;
-let _history = []; // [{role:'user'|'assistant', content}]
+let _history      = []; // [{ role:'user'|'assistant', content }]
 
 export function isAiChatActive() { return _aiChatActive; }
 
 export function exitAiChat(print) {
   _aiChatActive = false;
-  _history = [];
+  _history      = [];
   document.dispatchEvent(new CustomEvent('terminal-ai-mode', { detail: { active: false } }));
   print?.('\x1b[2m← 已退出 AI 对话\x1b[0m');
 }
@@ -31,21 +43,56 @@ export async function consumeAiChat(line, print) {
   return true;
 }
 
-// ── Public entry (called by terminal_commands.js 'ai' handler) ─────────────────
+// ── Streaming helper ──────────────────────────────────────────────────────────
+//
+//  Uses streamChat() when a stream-line factory is available (injected by
+//  terminal.js). Falls back to chat() otherwise.
+//  Returns { reply: string, update: fn|null } where update() lets callers
+//  patch the already-streamed text (e.g. strip the raw code fence after dispatch).
 
-// Max history turns kept (user+assistant pairs) to avoid token overflow
-const MAX_HISTORY_PAIRS = 8;
-
-function _trimHistory() {
-  // Keep at most MAX_HISTORY_PAIRS * 2 messages (one pair = user + assistant)
-  const max = MAX_HISTORY_PAIRS * 2;
-  if (_history.length > max) _history.splice(0, _history.length - max);
+async function _stream(messages, system, maxTokens) {
+  if (_streamLineFn) {
+    const line = _streamLineFn();
+    let reply = '';
+    const { streamChat } = await import('../ai/ai_client.js');
+    for await (const chunk of streamChat(messages, system, maxTokens)) {
+      reply += chunk;
+      line.update(stripMd(reply));
+    }
+    return { reply, update: (text) => line.update(stripMd(text)) };
+  }
+  const { chat } = await import('../ai/ai_client.js');
+  const reply = await chat(messages, system, maxTokens);
+  return { reply, update: null };
 }
+
+// ── Code/media panel dispatch (shared by all paths) ───────────────────────────
+
+async function _dispatchCode(lang, code, print) {
+  if (_confirmFn) {
+    const isMedia = lang === 'mathjax' && /<(img|iframe)\b/i.test(code);
+    const question = isMedia
+      ? '\x1b[33m▶ 是否在内容区显示此内容？(y/n)\x1b[0m'
+      : '\x1b[33m⚠ 即将覆盖代码编辑器中的内容，确认继续？(y/n)\x1b[0m';
+    const ok = await _confirmFn(question, print);
+    if (!ok) { print('\x1b[2m✕ 已取消\x1b[0m'); return false; }
+  }
+  const { setMode } = await import('../compiler/compiler_mode_switcher/compiler_mode_switcher.js');
+  setMode(lang);
+  document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code, lang } }));
+  print(`\x1b[2m✓ ${lang} → Code panel.\x1b[0m`);
+  // History compression: replace bulky response with a compact receipt so
+  // the next request doesn't pay full token cost for already-dispatched content.
+  compressLastAssistant(_history, lang, code.split('\n').length);
+  return true;
+}
+
+// ── Public entry (called by terminal_commands.js 'ai' handler) ─────────────────
 
 export async function runAiPrompt(prompt, print) {
   if (!prompt) { print('No prompt given.'); return; }
 
-  // Fresh ai <prompt> invocation outside chat mode → start a new conversation
+  // Fresh invocation outside chat mode → start clean conversation
   if (!_aiChatActive) _history = [];
 
   const { detectLang } = await import('../ai/input_filter/input_filter.js');
@@ -59,35 +106,41 @@ export async function runAiPrompt(prompt, print) {
   print(`\x1b[2m⚙  ${prompt}\x1b[0m`);
 
   try {
-    const { chat, SYSTEM_BY_MODE, SYSTEM_TERMINAL } = await import('../ai/ai_client.js');
+    const { SYSTEM_BY_MODE, SYSTEM_TERMINAL } = await import('../ai/ai_client.js');
     const { getActivePersona } = await import('../ai/ai_persona_switch.js');
 
     const lang       = detected;
     const persona    = getActivePersona();
     const modeSystem = SYSTEM_BY_MODE[lang] ?? SYSTEM_TERMINAL;
     const system     = `${persona.buildSystemPrompt()}\n\n${modeSystem}${TERMINAL_PLATFORM_CONTEXT}`;
+
     _history.push({ role: 'user', content: prompt });
-    _trimHistory();
-    const response   = await chat(_history, system, 4000);
-    _history.push({ role: 'assistant', content: response });
-    const extracted  = _extractCodeBlock(response);
+    trimHistory(_history);
+
+    // Stream or wait — either way we get the full reply at the end
+    print('');
+    print('\x1b[36m小梦:\x1b[0m');
+    const { reply, update } = await _stream(_history, system, tokenBudget(lang));
+    _history.push({ role: 'assistant', content: reply });
+
+    const extracted = extractCodeBlock(reply);
 
     if (extracted) {
-      // AI included a proper code block — print explanation, dispatch code
-      const textLines = _stripMd(extracted.text).split('\n').filter(l => l.trim());
-      if (textLines.length) {
-        print('');
-        print('\x1b[36m小梦:\x1b[0m');
-        for (const ln of textLines) print(ln);
+      // If streaming, patch the div to show clean explanation (no raw fence)
+      if (update) {
+        update(extracted.text || '');
+      } else {
+        const lines = stripMd(extracted.text).split('\n').filter(l => l.trim());
+        for (const ln of lines) print(ln);
       }
       print('');
       await _dispatchCode(extracted.lang || lang, extracted.code, print);
     } else {
-      // AI returned pure text — print in terminal, don't touch code panel
-      print('');
-      print('\x1b[36m小梦:\x1b[0m');
-      for (const ln of _stripMd(response).split('\n')) print(ln);
-      print('');
+      // Pure text reply — already streamed or print now
+      if (!update) {
+        for (const ln of stripMd(reply).split('\n')) print(ln);
+        print('');
+      }
       if (!_aiChatActive) {
         _aiChatActive = true;
         document.dispatchEvent(new CustomEvent('terminal-ai-mode', { detail: { active: true } }));
@@ -100,7 +153,55 @@ export async function runAiPrompt(prompt, print) {
   }
 }
 
-// ── Private helpers ────────────────────────────────────────────────────────────
+// ── Private: text/chat reply path ─────────────────────────────────────────────
+
+async function _runAiTextReply(prompt, print) {
+  print(`\x1b[2m⚙  ${prompt}\x1b[0m`);
+
+  try {
+    const { getActivePersona } = await import('../ai/ai_persona_switch.js');
+
+    const persona = getActivePersona();
+    const system  = persona.buildSystemPrompt() + TERMINAL_PLATFORM_CONTEXT;
+
+    _history.push({ role: 'user', content: prompt });
+    trimHistory(_history);
+
+    print('');
+    print('\x1b[36m小梦:\x1b[0m');
+    // Chat path uses smaller token budget — saves quota on conversational replies
+    const { reply, update } = await _stream(_history, system, tokenBudget('ai_chat'));
+    _history.push({ role: 'assistant', content: reply });
+
+    const extracted = extractCodeBlock(reply);
+    if (extracted) {
+      if (update) {
+        update(extracted.text || '');
+      } else {
+        const lines = stripMd(extracted.text).split('\n').filter(l => l.trim());
+        for (const ln of lines) print(ln);
+      }
+      print('');
+      await _dispatchCode(extracted.lang, extracted.code, print);
+    } else {
+      if (!update) {
+        for (const ln of stripMd(reply).split('\n')) print(ln);
+        print('');
+      }
+    }
+
+    if (!_aiChatActive) {
+      _aiChatActive = true;
+      document.dispatchEvent(new CustomEvent('terminal-ai-mode', { detail: { active: true } }));
+      print('\x1b[2m— 已进入 AI 对话 · 按 Esc 退出 —\x1b[0m');
+    }
+
+  } catch (e) {
+    print(`\x1b[31m⚠ ${e.message}\x1b[0m`);
+  }
+}
+
+// ── Platform context (appended to every system prompt in terminal mode) ────────
 
 const TERMINAL_PLATFORM_CONTEXT = `
 
@@ -134,143 +235,26 @@ const TERMINAL_PLATFORM_CONTEXT = `
   Wikimedia Commons（仅当你有把握知道准确路径时使用）
   用户自己提供的任意 URL → 直接嵌入
 
-视频 — YouTube / Bilibili embed：
-  格式：<iframe src="https://www.youtube.com/embed/VIDEO_ID" width="100%" height="400" frameborder="0" allowfullscreen></iframe>
-  如果用户要看某主题视频，用你知道的真实 VIDEO_ID，或告知用户搜索关键词。
+视频 / 音乐 — 不要猜测 YouTube VIDEO_ID（猜错会显示"Video unavailable"）。
+  正确做法：生成一张可点击的搜索卡片，用户点击后直接跳转 YouTube 搜索结果。
+  卡片模板（mathjax HTML）：
+    <a href="https://www.youtube.com/results?search_query=ENCODED_QUERY" target="_blank"
+       style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:12px;
+              background:#1a1a2e;color:#eee;text-decoration:none;font-family:sans-serif;
+              border:1px solid #333;max-width:480px;margin:8px 0">
+      <img src="https://loremflickr.com/80/80/music,concert" style="border-radius:8px;flex-shrink:0">
+      <div>
+        <div style="font-size:1.1em;font-weight:600">🎵 曲目名称</div>
+        <div style="color:#aaa;font-size:0.85em;margin-top:4px">点击在 YouTube 搜索</div>
+      </div>
+    </a>
+  ENCODED_QUERY：将搜索词用 + 连接英文单词，例如 Octopath+Traveler+Fate+of+Ophilia。
 
 决策树：
-  用户想看图片 → 用 Unsplash 关键词 URL 嵌入真实照片（mathjax HTML 代码块）
+  用户想看图片 → 用 LoremFlickr 关键词 URL 嵌入真实照片（mathjax HTML 代码块）
   用户想看图表/数据可视化 → python matplotlib
   用户想看公式 → mathjax LaTeX
-  用户想看视频 → mathjax iframe（给出 YouTube embed 或搜索建议）
+  用户想听/看视频 → mathjax 搜索卡片（绝不猜测 VIDEO_ID）
   用户想看文档/笔记 → markdown 或 latex
 
-规则：绝对不要编造随机 URL；Unsplash 关键词 URL 是安全的，随时可用。`;
-
-function _stripMd(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1');
-}
-
-const KNOWN_LANGS = new Set(['python', 'mathjax', 'latex', 'markdown', 'javascript', 'js', 'html', 'css']);
-
-// html → mathjax because our mathjax panel is a full HTML renderer
-const LANG_ALIASES = { js: 'javascript', html: 'mathjax', htm: 'mathjax' };
-
-function _normaliseLang(tag) {
-  const t = (tag || '').toLowerCase().trim();
-  if (!t) return 'python';
-  return LANG_ALIASES[t] ?? (KNOWN_LANGS.has(t) ? t : 'python');
-}
-
-// Priority order when multiple blocks appear in one reply
-const LANG_PRIORITY = ['mathjax', 'latex', 'markdown', 'python', 'javascript', 'css'];
-
-function _extractCodeBlock(reply) {
-  // 1. Collect ALL closed fenced blocks
-  const all = [...reply.matchAll(/```(\w*)[^\n]*\n([\s\S]*?)```/g)].map(m => ({
-    lang: _normaliseLang(m[1]),
-    code: m[2].trim(),
-  }));
-
-  if (all.length > 0) {
-    // Pick the highest-priority block; tie-break by first occurrence
-    const primary = LANG_PRIORITY.reduce((best, p) => best ?? all.find(b => b.lang === p), null) ?? all[0];
-    const text = reply.replace(/```[^\n]*\n[\s\S]*?```/g, '').trim();
-    return { lang: primary.lang, code: primary.code, text };
-  }
-
-  // 2. Truncated response — opening fence with no closing fence yet
-  const open = reply.match(/```(\w*)[^\n]*\n([\s\S]+)$/);
-  if (open) {
-    return {
-      lang: _normaliseLang(open[1]),
-      code: open[2].trim(),
-      text: reply.slice(0, reply.indexOf('```')).trim(),
-    };
-  }
-
-  // 3. Unfenced display math: \[...\] or $$...$$ that dominates the reply
-  const mathMatch = reply.match(/(\\\[[\s\S]+?\\\]|\$\$[\s\S]+?\$\$)/);
-  if (mathMatch && mathMatch[0].length / reply.length > 0.25) {
-    return { lang: 'mathjax', code: reply.trim(), text: '' };
-  }
-
-  // 4. Inline img/iframe anywhere in the reply — extract tags, strip from text
-  const embedTags = [...reply.matchAll(/<(img|iframe)\b[^>]*(?:\/>|>(?:[\s\S]*?<\/(?:img|iframe)>)?)/gi)];
-  if (embedTags.length > 0) {
-    const code = embedTags.map(m => m[0]).join('\n');
-    const text = reply.replace(/<(img|iframe)\b[^>]*(?:\/>|>(?:[\s\S]*?<\/(?:img|iframe)>)?)/gi, '').trim();
-    return { lang: 'mathjax', code, text };
-  }
-
-  // 5. Unfenced HTML block: reply is dominated by block-level HTML tags
-  const blockTags = (reply.match(/<\s*(div|figure|section|article|table|ul|ol|video|audio|embed)[^>]*>/gi) || []).length;
-  if (blockTags >= 3) {
-    return { lang: 'mathjax', code: reply.trim(), text: '' };
-  }
-
-  return null;
-}
-
-// Single point for confirmation + code-panel dispatch — used by both paths.
-async function _dispatchCode(lang, code, print) {
-  if (_confirmFn) {
-    const isMedia = lang === 'mathjax' && /<(img|iframe)\b/i.test(code);
-    const question = isMedia
-      ? '\x1b[33m▶ 是否在内容区显示此内容？(y/n)\x1b[0m'
-      : '\x1b[33m⚠ 即将覆盖代码编辑器中的内容，确认继续？(y/n)\x1b[0m';
-    const ok = await _confirmFn(question, print);
-    if (!ok) { print('\x1b[2m✕ 已取消\x1b[0m'); return false; }
-  }
-  const { setMode } = await import('../compiler/compiler_mode_switcher/compiler_mode_switcher.js');
-  setMode(lang);
-  document.dispatchEvent(new CustomEvent('ai-insert-and-run', { detail: { code, lang } }));
-  print(`\x1b[2m✓ ${lang} → Code panel.\x1b[0m`);
-  return true;
-}
-
-async function _runAiTextReply(prompt, print) {
-  print(`\x1b[2m⚙  ${prompt}\x1b[0m`);
-
-  try {
-    const { chat }             = await import('../ai/ai_client.js');
-    const { getActivePersona } = await import('../ai/ai_persona_switch.js');
-
-    const persona   = getActivePersona();
-    const system    = persona.buildSystemPrompt() + TERMINAL_PLATFORM_CONTEXT;
-    _history.push({ role: 'user', content: prompt });
-    _trimHistory();
-    const reply     = await chat(_history, system, 4000);
-    _history.push({ role: 'assistant', content: reply });
-    const extracted = _extractCodeBlock(reply);
-
-    if (extracted) {
-      const textLines = _stripMd(extracted.text).split('\n').filter(l => l.trim());
-      if (textLines.length) {
-        print('');
-        print('\x1b[36m小梦:\x1b[0m');
-        for (const ln of textLines) print(ln);
-      }
-      print('');
-
-      await _dispatchCode(extracted.lang, extracted.code, print);
-    } else {
-      print('');
-      print('\x1b[36m小梦:\x1b[0m');
-      for (const ln of _stripMd(reply).split('\n')) print(ln);
-      print('');
-    }
-
-    if (!_aiChatActive) {
-      _aiChatActive = true;
-      document.dispatchEvent(new CustomEvent('terminal-ai-mode', { detail: { active: true } }));
-      print('\x1b[2m— 已进入 AI 对话 · 按 Esc 退出 —\x1b[0m');
-    }
-
-  } catch (e) {
-    print(`\x1b[31m⚠ ${e.message}\x1b[0m`);
-  }
-}
+规则：绝对不要编造随机 URL；LoremFlickr 关键词 URL 是安全的，随时可用。`;

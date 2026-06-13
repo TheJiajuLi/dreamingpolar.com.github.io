@@ -1,5 +1,5 @@
 import { executeCommand, consumeAiPending } from './terminal_commands.js';
-import { consumeAiChat, isAiChatActive, exitAiChat, setConfirmFn } from './terminal_ai.js';
+import { consumeAiChat, isAiChatActive, exitAiChat, setConfirmFn, setStreamLineFn } from './terminal_ai.js';
 
 const ICON_TERMINAL = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`;
 const ICON_CLEAR    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4h8v2"/></svg>`;
@@ -172,6 +172,19 @@ function setup() {
 
   _output = document.getElementById('terminal-output');
   _input  = document.getElementById('terminal-input');
+
+  setStreamLineFn(() => {
+    const div = document.createElement('div');
+    div.className = 'term-line';
+    _output?.appendChild(div);
+    if (_output) _output.scrollTop = _output.scrollHeight;
+    return {
+      update(text) {
+        div.innerHTML = ansiToHtml(text);
+        if (_output) _output.scrollTop = _output.scrollHeight;
+      },
+    };
+  });
 
   setConfirmFn((question, print) => new Promise(resolve => {
     print(question);

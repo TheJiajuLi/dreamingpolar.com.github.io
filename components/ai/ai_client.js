@@ -1,6 +1,6 @@
 const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3001/api/ai'
-  : 'https://dreamingpolar-com.onrender.com/api/ai';
+  : 'https://dp-ai-proxy.onrender.com/api/ai'; // rename Render service to match
 
 // All personas live in ai_without_personalities.js — edit there for prompt engineering.
 export {
