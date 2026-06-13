@@ -24,7 +24,7 @@ export { getHistory, clearHistory, getRemainingTokens, canSend };
  */
 export async function sendMessage(userText, { onChunk } = {}) {
   if (!canSend()) {
-    throw new Error('今日对话额度已用完，明天再来找小梦吧~ 🐻');
+    throw new Error('今日对话额度已用完，明天再来找小梦吧~');
   }
   appendMessage('user', userText);
 

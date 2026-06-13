@@ -132,7 +132,9 @@ export async function* streamChat(messages, systemPrompt = SYSTEM_DEFAULT, maxTo
       if (raw === '[DONE]') return;
       try {
         const json  = JSON.parse(raw);
-        const delta = json.choices?.[0]?.delta?.content;
+        const d     = json.choices?.[0]?.delta ?? {};
+        // deepseek-reasoner streams reasoning_content before content — yield content only
+        const delta = d.content ?? null;
         if (delta) yield delta;
       } catch { /* partial JSON — skip */ }
     }
