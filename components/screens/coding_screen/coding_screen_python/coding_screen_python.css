@@ -14,8 +14,11 @@
   border-bottom: 1px solid var(--border, #d7e1eb);
   background: var(--surface, #ffffff);
   flex-shrink: 0;
-  position: relative;   /* creates stacking context above the position:absolute textarea below */
-  z-index: 1;           /* iOS: prevents textarea's touch hit-area from bleeding into toolbar */
+  position: relative;
+  z-index: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .run-btn {
@@ -35,6 +38,8 @@
   flex-shrink: 0;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .run-btn:hover    { background: var(--surface, #ffffff); border-color: var(--text-muted, #94a3b8); }

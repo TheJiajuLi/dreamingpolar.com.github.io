@@ -63,13 +63,8 @@ function init() {
   }
 
   /* ── Header button intercepts ───────────────────────── */
-  /* start-coding btn is hidden on mobile via CSS; only AI btn needs routing */
-  function _headerIntercept(e) {
-    if (e.target.closest('#ai-header-btn')) {
-      e.stopPropagation();
-      switchTo(3);
-    }
-  }
+  /* All header nav btns are hidden on mobile via CSS — intercept is a no-op kept for safety */
+  function _headerIntercept(e) { }
 
   /* ── Auto-switch to Output tab when code runs ──────── */
   document.addEventListener('compile-result', () => switchTo(2));

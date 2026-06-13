@@ -57,7 +57,7 @@ function compact(history) {
     .join('\n');
   return [
     { role: 'user',      content: `[Earlier context — auto-compacted]\n${lines}` },
-    { role: 'assistant', content: '好的，波比我记下了~' },
+    { role: 'assistant', content: '好的，小梦记下了~' },
     ...recent,
   ];
 }

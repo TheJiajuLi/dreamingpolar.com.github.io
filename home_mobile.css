@@ -58,6 +58,8 @@
   /* start-coding btn: navigation is via the 4 bottom tabs */
   /* max/min btns: conflict with mob-visible tab logic */
   #start-coding-btn,
+  #ai-header-btn,
+  .dp-fullscreen-btn,
   .content-screen-header .sc-toolbar,
   .compiling-screen-header .sc-toolbar,
   #cds-max-btn,
