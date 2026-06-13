@@ -173,12 +173,12 @@
     top: var(--header-height);
     left: 0;
     z-index: 50;
-    height: calc(100dvh - var(--header-height));
+    height: calc(100dvh - var(--header-height) - 56px); /* stop above tab bar */
   }
 
   .nav-sidebar.open {
-    width: min(280px, 82vw) !important;
-    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.18);
+    width: 100vw !important;
+    box-shadow: none;
   }
 }
 
