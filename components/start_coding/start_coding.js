@@ -24,8 +24,11 @@ function setupStartCodingBtn() {
   if (fsBtn) {
     header.insertBefore(btn, fsBtn);
   } else {
-    const themeController = header.querySelector('.theme-controller');
-    themeController ? header.insertBefore(btn, themeController) : header.appendChild(btn);
+    // .mob-hdr-btns-wrapper groups the theme/lang/font buttons and is a direct
+    // child of header; fall back to .theme-controller for environments without it.
+    const anchor = header.querySelector('.mob-hdr-btns-wrapper')
+                ?? header.querySelector('.theme-controller');
+    anchor ? header.insertBefore(btn, anchor) : header.appendChild(btn);
   }
 
   function syncActiveState() {
