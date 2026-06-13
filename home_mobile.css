@@ -60,7 +60,7 @@
   /* start-coding btn: navigation is via the 4 bottom tabs */
   /* max/min btns: conflict with mob-visible tab logic */
   #start-coding-btn,
-  #ai-header-btn,
+  .page-header #ai-header-btn,
   .dp-fullscreen-btn,
   .content-screen-header .sc-toolbar,
   .compiling-screen-header .sc-toolbar,
@@ -142,11 +142,17 @@
   [data-theme="grey"]   .mob-tab.active { color: #57ab5a; }
   [data-theme="aurora"] .mob-tab.active { color: #c084fc; }
 
-  /* AI tab: purple accent in all themes */
-  .mob-tab:nth-child(4).active { color: #8b5cf6; }
-  [data-theme="dark"]   .mob-tab:nth-child(4).active { color: #a78bfa; }
-  [data-theme="grey"]   .mob-tab:nth-child(4).active { color: #a78bfa; }
-  [data-theme="aurora"] .mob-tab:nth-child(4).active { color: #c084fc; }
+  /* ── AI button in tab bar: stretch to fill the slot ──────── */
+  .mob-tab-bar .ai-header-btn {
+    flex: 1;
+    width: auto;
+    height: 100%;
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 
   /* ── Content body: tighter padding on mobile ──────────── */
   .content-screen-body {

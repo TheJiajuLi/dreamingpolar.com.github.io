@@ -36,11 +36,21 @@ function init() {
   const bar = document.createElement('div');
   bar.className = 'mob-tab-bar';
 
-  const tabEls = TABS.map(({ icon, label }, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'mob-tab' + (i === 0 ? ' active' : '');
-    btn.setAttribute('aria-label', label);
-    btn.innerHTML = `<span class="mob-tab-icon">${icon}</span><span>${label}</span>`;
+  const tabEls = TABS.map(({ id, icon, label }, i) => {
+    let btn;
+    if (id === 'ai-chat') {
+      btn = document.createElement('button');
+      btn.className = 'ai-header-btn';
+      btn.id        = 'ai-header-btn';
+      btn.title     = 'Open AI chat';
+      btn.setAttribute('aria-label', 'Toggle AI chat');
+      btn.innerHTML = `<img src="/assets/buttons/ai.png" alt="AI" class="ai-header-icon">`;
+    } else {
+      btn = document.createElement('button');
+      btn.className = 'mob-tab' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', label);
+      btn.innerHTML = `<span class="mob-tab-icon">${icon}</span><span>${label}</span>`;
+    }
     btn.addEventListener('click', () => switchTo(i));
     bar.appendChild(btn);
     return btn;
